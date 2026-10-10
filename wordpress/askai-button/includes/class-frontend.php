@@ -240,32 +240,51 @@ final class Askai_Button_Frontend {
 		$pagenow = isset( $GLOBALS['pagenow'] ) ? $GLOBALS['pagenow'] : '';
 
 		$view = array(
-			'is_admin'     => is_admin(),
-			'is_feed'      => is_feed() || is_robots() || is_favicon() || is_trackback(),
-			'is_rest'      => defined( 'REST_REQUEST' ) && REST_REQUEST,
-			'is_ajax'      => wp_doing_ajax(),
-			'is_cron'      => wp_doing_cron(),
-			'is_embed'     => is_embed(),
-			'is_login'     => 'wp-login.php' === $pagenow || ( function_exists( 'is_login' ) && is_login() ),
-			'is_preview'   => is_preview() || is_customize_preview(),
-			'is_404'       => is_404(),
-			'is_singular'  => is_singular(),
-			'has_post'     => false,
-			'post_status'  => '',
-			'post_type'    => '',
-			'has_password' => false,
-			'disabled'     => false,
+			'is_admin'      => is_admin(),
+			'is_feed'       => is_feed() || is_robots() || is_favicon() || is_trackback(),
+			'is_rest'       => defined( 'REST_REQUEST' ) && REST_REQUEST,
+			'is_ajax'       => wp_doing_ajax(),
+			'is_cron'       => wp_doing_cron(),
+			'is_embed'      => is_embed(),
+			'is_login'      => 'wp-login.php' === $pagenow || ( function_exists( 'is_login' ) && is_login() ),
+			'is_preview'    => is_preview() || is_customize_preview(),
+			'is_404'        => is_404(),
+			'is_attachment' => is_attachment(),
+			'is_singular'   => is_singular(),
+			'has_post'      => false,
+			'post_status'   => '',
+			'post_type'     => '',
+			'has_password'  => false,
+			'disabled'      => false,
 		);
 
 		$post = $view['is_singular'] ? get_queried_object() : null;
 		if ( $post instanceof WP_Post ) {
 			$view['has_post']     = true;
-			$view['post_status']  = (string) get_post_status( $post );
+			$view['post_status']  = self::own_status( $post->post_status, get_post_status( $post ) );
 			$view['post_type']    = (string) $post->post_type;
 			$view['has_password'] = '' !== (string) $post->post_password;
 			$view['disabled']     = Askai_Button_Settings::to_bool( get_post_meta( $post->ID, self::META_DISABLED, true ), false );
 		}
 		return $view;
+	}
+
+	/**
+	 * Status of a post, as far as it can be trusted.
+	 *
+	 * The status stored with the post decides. get_post_status() alone is not
+	 * enough: for an attachment it reports the status of the parent post, so
+	 * the attachment page of a published post would look published. When the
+	 * two values disagree for any reason, the status counts as unknown.
+	 *
+	 * Pure: depends only on its arguments.
+	 *
+	 * @param mixed $own      The `post_status` property of the post.
+	 * @param mixed $reported Result of get_post_status() for the same post.
+	 * @return string The status, or an empty string if it is unknown.
+	 */
+	public static function own_status( $own, $reported ) {
+		return is_string( $own ) && $own === $reported ? $own : '';
 	}
 
 	/**
@@ -281,7 +300,7 @@ final class Askai_Button_Frontend {
 		if ( empty( $settings['enabled'] ) || true !== $settings['enabled'] ) {
 			return true;
 		}
-		foreach ( array( 'is_admin', 'is_feed', 'is_rest', 'is_ajax', 'is_cron', 'is_embed', 'is_login', 'is_preview', 'is_404' ) as $flag ) {
+		foreach ( array( 'is_admin', 'is_feed', 'is_rest', 'is_ajax', 'is_cron', 'is_embed', 'is_login', 'is_preview', 'is_404', 'is_attachment' ) as $flag ) {
 			// A missing fact counts as a reason not to show.
 			if ( ! array_key_exists( $flag, $view ) || false !== $view[ $flag ] ) {
 				return true;
@@ -298,6 +317,10 @@ final class Askai_Button_Frontend {
 			return true;
 		}
 		if ( ! isset( $view['post_status'] ) || 'publish' !== $view['post_status'] ) {
+			return true;
+		}
+		// Attachment pages, also when the query did not flag the view as one.
+		if ( ! isset( $view['post_type'] ) || ! is_string( $view['post_type'] ) || '' === $view['post_type'] || 'attachment' === $view['post_type'] ) {
 			return true;
 		}
 		if ( ! array_key_exists( 'has_password', $view ) || false !== $view['has_password'] ) {

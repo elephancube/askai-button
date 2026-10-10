@@ -83,21 +83,22 @@ function askai_true( $actual, $label = '' ) {
 function askai_view( array $overrides = array() ) {
 	return array_merge(
 		array(
-			'is_admin'     => false,
-			'is_feed'      => false,
-			'is_rest'      => false,
-			'is_ajax'      => false,
-			'is_cron'      => false,
-			'is_embed'     => false,
-			'is_login'     => false,
-			'is_preview'   => false,
-			'is_404'       => false,
-			'is_singular'  => true,
-			'has_post'     => true,
-			'post_status'  => 'publish',
-			'post_type'    => 'post',
-			'has_password' => false,
-			'disabled'     => false,
+			'is_admin'      => false,
+			'is_feed'       => false,
+			'is_rest'       => false,
+			'is_ajax'       => false,
+			'is_cron'       => false,
+			'is_embed'      => false,
+			'is_login'      => false,
+			'is_preview'    => false,
+			'is_404'        => false,
+			'is_attachment' => false,
+			'is_singular'   => true,
+			'has_post'      => true,
+			'post_status'   => 'publish',
+			'post_type'     => 'post',
+			'has_password'  => false,
+			'disabled'      => false,
 		),
 		$overrides
 	);
@@ -364,7 +365,7 @@ askai_test(
 			)
 		);
 		askai_same( 'Ask the AI', $clean['labels']['button_label'] );
-		askai_same( 'Title bold', $clean['labels']['panel_title'] );
+		askai_same( 'alert(1)Title bold', $clean['labels']['panel_title'] );
 		askai_same( '', $clean['labels']['panel_subtitle'] );
 		askai_same( str_repeat( 'あ', 200 ), $clean['labels']['placeholder'] );
 		askai_same( '{provider} reads "it" & more', $clean['labels']['note'] );
@@ -390,7 +391,7 @@ askai_test(
 			'20 presets'
 		);
 		askai_same(
-			array( 'One', 'Two words', 'Three', '7' ),
+			array( 'One', 'Two words', 'x', 'Three', '7' ),
 			Askai_Button_Settings::sanitize( array( 'presets' => array( '  One ', '', '   ', "Two\nwords", null, array( 'x' ), '<script>x</script>', '<b>Three</b>', 7, true, new stdClass() ) ) )['presets'],
 			'trimmed, empties and wrong types dropped'
 		);
@@ -612,13 +613,198 @@ askai_test(
 			Askai_Button_Settings::sanitize( array( 'query_template' => "  {question}\n\nSee {site_url}\n" ) )['query_template']
 		);
 		askai_same(
-			"{question}\nbold",
+			"{question}alert(1)\nbold",
 			Askai_Button_Settings::sanitize( array( 'query_template' => "{question}<script>alert(1)</script>\n<b>bold</b>" ) )['query_template']
 		);
 		askai_same( 2000, mb_strlen( Askai_Button_Settings::sanitize( array( 'query_template' => str_repeat( 'あ', 5000 ) ) )['query_template'] ) );
 		foreach ( array( null, 5, true, array( '{question}' ), new stdClass() ) as $value ) {
 			askai_same( '', Askai_Button_Settings::sanitize( array( 'query_template' => $value ) )['query_template'] );
 		}
+	}
+);
+
+askai_test(
+	'plain text: <, >, & and quotes are kept as typed',
+	function () {
+		$kept = array(
+			'5 < 6',
+			'5 < 6 & "7" > 3',
+			'x > y < z',
+			'a < b',
+			'a <',
+			'<',
+			'>',
+			'< b >',
+			'1<2',
+			'<3',
+			'<-- arrow',
+			'&amp;',
+			'&lt;script&gt;',
+			'&#60;b&#62;',
+			"it's \"quoted\" & `ticked`",
+			'100%41 50% %zz',
+			'{provider} → 日本語　全角スペース',
+			'C:\\path\\file',
+		);
+		foreach ( $kept as $text ) {
+			askai_same( $text, Askai_Button_Settings::clean_text( $text ), 'single line: ' . $text );
+			askai_same( $text, Askai_Button_Settings::sanitize_query_template( $text ), 'multi-line: ' . $text );
+			askai_same( $text, Askai_Button_Settings::sanitize( array( 'labels' => array( 'note' => $text ) ) )['labels']['note'], 'label: ' . $text );
+			askai_same( array( $text ), Askai_Button_Settings::sanitize( array( 'presets' => array( $text ) ) )['presets'], 'preset: ' . $text );
+		}
+	}
+);
+
+askai_test(
+	'plain text: tags, control characters and invalid UTF-8 are removed',
+	function () {
+		$cases = array(
+			array( '<script>alert(1)</script>', 'alert(1)' ),
+			array( '</script><script>alert(1)</script>', 'alert(1)' ),
+			array( '<b>x</b>', 'x' ),
+			array( 'a <b> c', 'a c' ),
+			array( 'a<br/>b', 'ab' ),
+			array( '<a href="https://example.com/?a=1&b=2" onclick=\'x()\'>link</a>', 'link' ),
+			array( '<IMG SRC=x onerror=alert(1)>', '' ),
+			array( '<img src="a>b">', 'b">' ),
+			array( '<<script>script>', '' ),
+			array( '<scr<script>ipt>alert(1)</scr</script>ipt>', 'alert(1)' ),
+			array( '<<b>b>x<</b>/b>', 'x' ),
+			array( 'a<!-- comment -->b', 'ab' ),
+			array( 'a<!-- <b> -->b', 'ab' ),
+			array( '<!DOCTYPE html>x', 'x' ),
+			array( '<?php echo 1; ?>x', 'x' ),
+			array( '<my-element attr>x</my-element>', 'x' ),
+			array( "<\x00b>x", 'x' ),
+			array( "<\x01script\x02>x", 'x' ),
+			array( "a\x00b\x07c\x1Bd\x7Fe", 'abcde' ),
+			array( "a\xC2\x85b\xC2\x9Fc", 'abc' ),
+			array( "  a \t b\r\n c  ", 'a b c' ),
+			array( "a\xE2\x80\xA8b\xE2\x80\xA9c", 'a b c' ),
+			array( 'a <b>  </b> c', 'a c' ),
+			array( "\xff\xfe", '' ),
+			array( "ok \xC3\x28 broken", '' ),
+			array( '', '' ),
+			array( '   ', '' ),
+			array( '<b></b>', '' ),
+		);
+		foreach ( $cases as $index => $case ) {
+			askai_same( $case[1], Askai_Button_Settings::clean_text( $case[0] ), 'case #' . $index );
+		}
+		// Unfinished markup is text: it is kept, and the JSON encoder makes it harmless.
+		askai_same( '<script', Askai_Button_Settings::clean_text( '<script' ) );
+		askai_same( '<!-- open', Askai_Button_Settings::clean_text( '<!-- open' ) );
+		askai_same( 'a <b c', Askai_Button_Settings::clean_text( 'a <b c' ) );
+	}
+);
+
+askai_test(
+	'plain text: line breaks',
+	function () {
+		askai_same( "a\nb\n\nc\td", Askai_Button_Settings::sanitize_query_template( " a\r\nb\r\rc\td \n" ), 'kept and normalised in the query template' );
+		askai_same( "a\nb\nc", Askai_Button_Settings::sanitize_query_template( "a\xE2\x80\xA8b\xE2\x80\xA9c" ), 'Unicode line separators' );
+		askai_same( "a\nb", Askai_Button_Settings::sanitize_query_template( "a\x0B\n\x0Cb\x00" ), 'other control characters' );
+		askai_same( "{question}\n5 < 6 & more", Askai_Button_Settings::sanitize_query_template( "<p>{question}</p>\n5 < 6 &<br> more" ) );
+		askai_same( 'a b', Askai_Button_Settings::clean_text( "a\nb" ), 'single line' );
+	}
+);
+
+askai_test(
+	'plain text: length limits are counted in characters',
+	function () {
+		askai_same( str_repeat( 'あ', 200 ), Askai_Button_Settings::clean_text( str_repeat( 'あ', 201 ) ) );
+		askai_same( str_repeat( '<', 200 ), Askai_Button_Settings::clean_text( str_repeat( '<', 300 ) ) );
+		askai_same( 199, mb_strlen( Askai_Button_Settings::clean_text( str_repeat( 'a', 199 ) . ' b' ) ), 'no space left at the cut' );
+		askai_same( 2000, mb_strlen( Askai_Button_Settings::sanitize_query_template( str_repeat( "あ\n", 3000 ) . 'x' ) ) + 1, 'cut at a line break, then trimmed' );
+		askai_same( str_repeat( 'a', 200 ), Askai_Button_Settings::clean_text( str_repeat( '<b>', 500 ) . str_repeat( 'a', 300 ) ), 'tags do not count' );
+	}
+);
+
+askai_test(
+	'plain text: cleaning twice changes nothing',
+	function () {
+		$inputs = array(
+			'5 < 6',
+			'a <b> c',
+			'&lt;script&gt;',
+			'&amp;',
+			'x > y < z',
+			'<<script>script>',
+			'text <',
+			'<',
+			'< <b> >',
+			'<scr<script>ipt>alert(1)</scr</script>ipt>',
+			'<<<b>>>',
+			'<b<b>>',
+			'<!--<!-- x -->-->',
+			'<!-<!-- x -->- y -->',
+			"<\x00b>",
+			"<\nb>",
+			"< \t b >",
+			"a\x01 \x02 b",
+			" \x00 a \x00 ",
+			"a <b>\n</b> c",
+			"a\r\n\r\n<b>\r\n</b>\r\nb",
+			'<b> a </b>',
+			'a<b> </b><i> </i>b',
+			str_repeat( 'a', 199 ) . ' <b>bc',
+			str_repeat( 'a', 198 ) . '< b>cd',
+			str_repeat( '<b', 150 ) . '>',
+			str_repeat( 'あ', 199 ) . " \n x",
+			"\xE2\x80\xA8<b>\xE2\x80\xA9",
+			'&lt;b&gt; <b> &amp;lt;',
+			'%3Cscript%3E',
+			'"><svg/onload=alert(1)>',
+			'\'"><img src=x onerror=alert(1)>//',
+			'</textarea><script>alert(1)</script>',
+		);
+		foreach ( $inputs as $index => $input ) {
+			foreach ( array( false, true ) as $multiline ) {
+				$once  = Askai_Button_Settings::clean_plain( $input, $multiline, 200 );
+				$twice = Askai_Button_Settings::clean_plain( $once, $multiline, 200 );
+				askai_same( $once, $twice, 'input #' . $index . ( $multiline ? ' multi-line' : ' single line' ) );
+				askai_same( 0, preg_match( '~</?[A-Za-z][^<>]*>~', $once ), 'no tag left, input #' . $index );
+			}
+		}
+		askai_same( '5 < 6', Askai_Button_Settings::clean_text( Askai_Button_Settings::clean_text( '5 < 6' ) ) );
+		askai_same( 'a c', Askai_Button_Settings::clean_text( Askai_Button_Settings::clean_text( 'a <b> c' ) ) );
+		askai_same( '', Askai_Button_Settings::clean_text( '<<script>script>' ) );
+		askai_same( 'text <', Askai_Button_Settings::clean_text( Askai_Button_Settings::clean_text( 'text <' ) ) );
+
+		$settings = Askai_Button_Settings::sanitize(
+			array(
+				'labels'         => array(
+					'button_label' => '5 < 6 & "7" > 3',
+					'note'         => 'a <b> c &amp; <<script>script>',
+				),
+				'presets'        => array( 'a < b', 'x > y < z', '&lt;script&gt;', 'end <' ),
+				'query_template' => "{question} < more\n<b>{site_url}</b> &amp;",
+			)
+		);
+		askai_same( $settings, Askai_Button_Settings::sanitize( $settings ), 'whole settings array' );
+		askai_same( $settings, Askai_Button_Settings::sanitize( Askai_Button_Settings::sanitize( $settings ) ) );
+		askai_same( '5 < 6 & "7" > 3', $settings['labels']['button_label'] );
+		askai_same( 'a c &amp;', $settings['labels']['note'] );
+		askai_same( array( 'a < b', 'x > y < z', '&lt;script&gt;', 'end <' ), $settings['presets'] );
+		askai_same( "{question} < more\n{site_url} &amp;", $settings['query_template'] );
+	}
+);
+
+askai_test(
+	'plain text: the page JSON gives back the same characters',
+	function () {
+		$settings = Askai_Button_Settings::sanitize(
+			array(
+				'labels'  => array( 'button_label' => '5 < 6 & "7" > 3' ),
+				'presets' => array( 'a < b' ),
+			)
+		);
+		$json     = Askai_Button_Frontend::encode_options( Askai_Button_Frontend::build_options( $settings ) );
+		$decoded  = json_decode( $json, true );
+		askai_same( '5 < 6 & "7" > 3', $decoded['labels']['buttonLabel'] );
+		askai_same( array( 'a < b' ), $decoded['presets'] );
+		askai_same( 0, preg_match( '/[<>&\']/', $json ), $json );
+		askai_same( false, strpos( $json, '&lt;' ), 'no entities' );
 	}
 );
 
@@ -688,7 +874,7 @@ askai_test(
 	'display: blocked wherever the button must not appear',
 	function () {
 		$settings = Askai_Button_Settings::defaults();
-		foreach ( array( 'is_admin', 'is_feed', 'is_rest', 'is_ajax', 'is_cron', 'is_embed', 'is_login', 'is_preview', 'is_404' ) as $flag ) {
+		foreach ( array( 'is_admin', 'is_feed', 'is_rest', 'is_ajax', 'is_cron', 'is_embed', 'is_login', 'is_preview', 'is_404', 'is_attachment' ) as $flag ) {
 			askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( $flag => true ) ) ), $flag );
 			askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( $flag => 1 ) ) ), $flag . ' truthy' );
 			askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( $flag => null ) ) ), $flag . ' unknown' );
@@ -707,6 +893,56 @@ askai_test(
 		$settings['enabled'] = false;
 		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view() ), 'switched off' );
 		askai_same( true, Askai_Button_Frontend::is_blocked( array(), askai_view() ), 'no settings' );
+	}
+);
+
+askai_test(
+	'display: attachment pages are always blocked',
+	function () {
+		$settings = Askai_Button_Settings::defaults();
+
+		// What WordPress reports for an attachment whose parent is published.
+		$status = Askai_Button_Frontend::own_status( 'inherit', 'publish' );
+		askai_same( '', $status, 'own status and reported status disagree' );
+		$attachment = askai_view(
+			array(
+				'is_attachment' => true,
+				'post_type'     => 'attachment',
+				'post_status'   => $status,
+			)
+		);
+		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, $attachment ), 'attachment of a published post' );
+
+		// Each of the three signals is enough on its own.
+		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( 'is_attachment' => true ) ) ), 'flag only' );
+		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( 'post_type' => 'attachment' ) ) ), 'post type only' );
+		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( 'post_status' => $status ) ) ), 'status only' );
+		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( 'post_status' => 'inherit' ) ) ), 'own status' );
+
+		// Listing the post type in the settings does not bring it back.
+		$settings['post_types'] = array( 'attachment' );
+		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, $attachment ), 'listed post type' );
+
+		foreach ( array( '', null, 5, array( 'post' ) ) as $index => $type ) {
+			askai_same( true, Askai_Button_Frontend::is_blocked( $settings, askai_view( array( 'post_type' => $type ) ) ), 'unknown post type #' . $index );
+		}
+		$view = askai_view();
+		unset( $view['post_type'] );
+		askai_same( true, Askai_Button_Frontend::is_blocked( $settings, $view ), 'post type missing' );
+	}
+);
+
+askai_test(
+	'display: the status of the post itself decides',
+	function () {
+		askai_same( 'publish', Askai_Button_Frontend::own_status( 'publish', 'publish' ) );
+		askai_same( 'draft', Askai_Button_Frontend::own_status( 'draft', 'draft' ) );
+		askai_same( '', Askai_Button_Frontend::own_status( 'inherit', 'publish' ), 'attachment or revision of a published post' );
+		askai_same( '', Askai_Button_Frontend::own_status( 'publish', 'private' ), 'reported status changed by a filter' );
+		askai_same( '', Askai_Button_Frontend::own_status( 'publish', false ), 'no reported status' );
+		askai_same( '', Askai_Button_Frontend::own_status( null, 'publish' ), 'no own status' );
+		askai_same( '', Askai_Button_Frontend::own_status( '', '' ) );
+		askai_same( '', Askai_Button_Frontend::own_status( array( 'publish' ), array( 'publish' ) ) );
 	}
 );
 
@@ -1089,7 +1325,7 @@ askai_test(
 		$settings = Askai_Button_Settings::sanitize( array( 'query_template' => 'Stored {question}' ) );
 		askai_same( 'Stored {question}', Askai_Button_Frontend::build_options( $settings )['queryTemplate'] );
 		askai_same(
-			"{question}\n{site_url}",
+			"{question}\n{site_url}x",
 			Askai_Button_Frontend::build_options( $settings, array( 'query_template' => " <b>{question}</b>\n{site_url}<script>x</script> " ) )['queryTemplate']
 		);
 		foreach ( array( '', '   ', null, 5, false, array( '{question}' ), new stdClass() ) as $index => $value ) {

@@ -338,8 +338,7 @@ final class Askai_Button_Settings {
 		if ( ! is_string( $value ) ) {
 			return '';
 		}
-		$value = sanitize_textarea_field( $value );
-		return trim( mb_substr( $value, 0, self::MAX_TEMPLATE_LENGTH ) );
+		return self::clean_plain( $value, true, self::MAX_TEMPLATE_LENGTH );
 	}
 
 	/**
@@ -369,8 +368,60 @@ final class Askai_Button_Settings {
 		if ( ! is_string( $value ) ) {
 			return '';
 		}
-		$value = sanitize_text_field( $value );
-		return trim( mb_substr( $value, 0, self::MAX_TEXT_LENGTH ) );
+		return self::clean_plain( $value, false, self::MAX_TEXT_LENGTH );
+	}
+
+	/**
+	 * Cleans plain text: a label, a preset question or the query template.
+	 *
+	 * These values are text, never markup. They reach the page as JSON and are
+	 * shown by the script as text, so `<`, `>`, `&` and quotes are kept exactly
+	 * as typed and entities such as `&amp;` are neither decoded nor encoded.
+	 * `sanitize_text_field()` is not used because it turns a lone `<` into `&lt;`.
+	 *
+	 * What is removed:
+	 * - everything, if the text is not valid UTF-8;
+	 * - control characters;
+	 * - HTML tags, comments and declarations. The text between an opening and
+	 *   a closing tag stays. Anything of the form `<` + letter ... `>` counts as
+	 *   a tag, so `a <b> c` becomes `a c`, while `5 < 6`, `x > y < z` and a `<`
+	 *   at the end are left alone. Removal is repeated until nothing changes,
+	 *   so that no tag can be assembled from the pieces of another;
+	 * - surrounding whitespace, and whatever exceeds the length limit.
+	 *
+	 * Single-line text has every run of spaces, tabs and line breaks replaced
+	 * by one space. Multi-line text keeps its line breaks, written as `\n`.
+	 *
+	 * Cleaning the result again gives the same result.
+	 *
+	 * @param string $value         Raw text.
+	 * @param bool   $keep_newlines Whether the text may have several lines.
+	 * @param int    $max_length    Largest length, in characters.
+	 * @return string
+	 */
+	public static function clean_plain( $value, $keep_newlines, $max_length ) {
+		if ( ! is_string( $value ) || '' === $value || 1 !== preg_match( '//u', $value ) ) {
+			return '';
+		}
+
+		// Line breaks in one form; the Unicode line and paragraph separators count as line breaks.
+		$value = preg_replace( '/\r\n?|\x{2028}|\x{2029}/u', "\n", $value );
+		if ( ! $keep_newlines ) {
+			$value = preg_replace( '/[ \t\n\x0B\x0C]+/', ' ', $value );
+		}
+		// Control characters, before tags are looked for: `<\0b>` must not survive as `<b>`.
+		$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\x{80}-\x{9F}]/u', '', $value );
+
+		do {
+			$before = $value;
+			$value  = preg_replace( '~<!--.*?-->|</?[A-Za-z][^<>]*>|<[!?][^<>]*>~su', '', $value );
+		} while ( $before !== $value );
+
+		if ( ! $keep_newlines ) {
+			$value = preg_replace( '/ {2,}/', ' ', $value );
+		}
+		$value = trim( $value, " \t\n" );
+		return trim( mb_substr( $value, 0, (int) $max_length ), " \t\n" );
 	}
 
 	/**
