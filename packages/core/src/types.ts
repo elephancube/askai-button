@@ -14,8 +14,8 @@ export interface ProviderDef {
   /** Must start with `https://` and contain `{query}`. */
   urlTemplate: string;
   method?: SendMethod;
-  /** Short text shown instead of a logo. Defaults to the first two letters of the name. */
-  badge?: string;
+  /** Colour of the selected choice and of the send link. Choose one dark enough for white text. */
+  color?: string;
 }
 
 export interface SendEvent {
@@ -32,7 +32,7 @@ export interface Options {
   /** Distance from the viewport edges, in px. */
   offset?: number;
   zIndex?: number;
-  /** Colour of the launcher and send buttons. */
+  /** Colour of the launcher button. */
   accentColor?: string;
   /** Provider ids, or full definitions that override the registered ones. */
   providers?: Array<string | ProviderDef>;

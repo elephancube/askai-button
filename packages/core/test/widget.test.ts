@@ -165,7 +165,7 @@ describe('panel markup', () => {
     expect(input().hasAttribute('maxlength')).toBe(false);
     expect($('.chips').getAttribute('role')).toBe('group');
     expect($$('.chip').map((chip) => chip.textContent)).toEqual(['料金は？', '納期は？']);
-    expect($$('.ai').map((label) => label.textContent)).toEqual(['GPChatGPT', 'CLClaude', 'AIGoogle AIモード']);
+    expect($$('.ai').map((label) => label.textContent)).toEqual(['ChatGPT', 'Claude', 'Google AIモード']);
     expect($$('.ai.on').length).toBe(1);
     expect($('.ai.on input').getAttribute('value')).toBe('chatgpt');
     expect($('.note').textContent).toBe(
@@ -998,5 +998,85 @@ describe('source hygiene', () => {
     const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8');
     expect(source).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
     expect(source).not.toMatch(/fetch\(|XMLHttpRequest|sendBeacon|WebSocket|EventSource/);
+  });
+});
+
+describe('provider colours', () => {
+  // happy-dom's CSS.supports accepts anything; the hex-only fallback is stricter.
+  beforeEach(() => vi.stubGlobal('CSS', undefined));
+  const open = (options: Options = {}) => {
+    mount(options).open();
+    type(QUESTION);
+  };
+  const labelOf = (id: string) => $(`input[value="${id}"]`).parentElement!;
+
+  it('has no badge element', () => {
+    open();
+    expect($$('.badge')).toHaveLength(0);
+    expect(labelOf('claude').textContent).toBe('Claude');
+  });
+
+  it('gives each label and the send link the colour of its provider', () => {
+    open();
+    expect(labelOf('chatgpt').style.getPropertyValue('--c')).toBe('#0d7d61');
+    expect(labelOf('claude').style.getPropertyValue('--c')).toBe('#b3542f');
+    expect(labelOf('googleai').style.getPropertyValue('--c')).toBe('#1a73e8');
+    pick('claude');
+    expect(labelOf('claude').classList.contains('on')).toBe(true);
+    expect(send().style.getPropertyValue('--c')).toBe('#b3542f');
+    pick('googleai');
+    expect(labelOf('claude').classList.contains('on')).toBe(false);
+    expect(send().style.getPropertyValue('--c')).toBe('#1a73e8');
+  });
+
+  it('writes no custom property for a provider without a colour or with an invalid one', () => {
+    open({
+      providers: [
+        { id: 'plain', name: 'Plain', urlTemplate: 'https://x.example/?q={query}' },
+        { id: 'bad', name: 'Bad', urlTemplate: 'https://y.example/?q={query}', color: 'url(https://x/y.gif)' },
+      ],
+    });
+    ['plain', 'bad'].forEach((id) => {
+      pick(id);
+      expect(labelOf(id).getAttribute('style') || '').toBe('');
+      expect(send().getAttribute('style') || '').toBe('');
+    });
+  });
+
+  it('takes an overridden colour from the options', () => {
+    open({ providers: [{ id: 'claude', color: '#000' } as never] });
+    expect(labelOf('claude').style.getPropertyValue('--c')).toBe('#000');
+    expect(send().style.getPropertyValue('--c')).toBe('#000');
+  });
+
+  it('keeps the send colour in sync when the state is restored', () => {
+    mount({}, { open: true, question: QUESTION, provider: 'googleai' });
+    expect($<HTMLInputElement>('input[value="googleai"]').checked).toBe(true);
+    expect(send().style.getPropertyValue('--c')).toBe('#1a73e8');
+  });
+
+  it('ignores a badge in an old definition', () => {
+    expect(() =>
+      open({ providers: [{ id: 'old', name: 'Old', badge: 'OL', urlTemplate: 'https://x.example/?q={query}' } as never] }),
+    ).not.toThrow();
+    expect(labelOf('old').textContent).toBe('Old');
+  });
+});
+
+describe('launcher icon', () => {
+  it('has one decorative svg and keeps the label as its text', () => {
+    mount();
+    const svgs = launcher().querySelectorAll('svg');
+    expect(svgs).toHaveLength(1);
+    expect(svgs[0].getAttribute('aria-hidden')).toBe('true');
+    expect(svgs[0].getAttribute('focusable')).toBe('false');
+    expect(svgs[0].getAttribute('viewBox')).toBe('0 0 24 24');
+    expect(launcher().textContent).toBe('AIに質問');
+    expect(launcher().firstElementChild).toBe(svgs[0]);
+  });
+
+  it('is only on the launcher', () => {
+    mount().open();
+    expect($$('svg')).toHaveLength(1);
   });
 });

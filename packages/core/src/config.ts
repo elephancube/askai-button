@@ -1,7 +1,10 @@
+import { isColor } from './color';
 import { buildDict, isString, pickLocalized, resolveLang, type LangSources, type ResolvedLang } from './i18n';
 import { resolveProviders, type ResolvedProvider } from './providers';
 import { DEFAULT_MAX_URL_LENGTH } from './query';
 import type { Dict, Options, SendEvent } from './types';
+
+export { isColor };
 
 export const MAX_PRESETS = 6;
 
@@ -34,14 +37,6 @@ const positive = (value: unknown, fallback: number): number =>
   finite(value) && Math.floor(value) >= 1 ? Math.floor(value) : fallback;
 
 const text = (value: unknown): string | undefined => (isString(value) && value ? value : undefined);
-
-/** True for a CSS colour. Anything else, such as `url(...)`, must not reach the stylesheet. */
-export function isColor(value: unknown): value is string {
-  if (!isString(value) || !value.trim()) return false;
-  return typeof CSS !== 'undefined' && CSS.supports
-    ? CSS.supports('color', value)
-    : /^#([\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i.test(value.trim());
-}
 
 /** Fills in defaults and picks the language-specific values. */
 export function resolveOptions(raw: Options, env: Pick<LangSources, 'htmlLang' | 'navLang'>): Resolved {

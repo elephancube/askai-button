@@ -12,10 +12,10 @@ beforeEach(async () => {
 const asDef = (v: unknown): ProviderDef => v as ProviderDef;
 
 describe('default providers', () => {
-  it('lists chatgpt, claude, googleai with badges and the url method', () => {
+  it('lists chatgpt, claude, googleai with colours and the url method', () => {
     const list = p.resolveProviders(undefined, 'en');
     expect(list.map((x) => x.id)).toEqual(['chatgpt', 'claude', 'googleai']);
-    expect(list.map((x) => x.badge)).toEqual(['GP', 'CL', 'AI']);
+    expect(list.map((x) => x.color)).toEqual(['#0d7d61', '#b3542f', '#1a73e8']);
     expect(list.every((x) => x.method === 'url')).toBe(true);
     expect(list.every((x) => /^https:\/\//.test(x.urlTemplate) && x.urlTemplate.includes('{query}'))).toBe(true);
   });
@@ -51,7 +51,7 @@ describe('resolveProviders', () => {
     expect(claude.method).toBe('copy_and_open');
     expect(claude.urlTemplate).toBe('https://claude.ai/new?q={query}');
     expect(claude.name).toBe('Claude');
-    expect(claude.badge).toBe('CL');
+    expect(claude.color).toBe('#b3542f');
   });
 
   it('lets an object entry replace the urlTemplate', () => {
@@ -64,14 +64,13 @@ describe('resolveProviders', () => {
     expect(p.resolveProviders(['claude'], 'en')[0].method).toBe('url');
   });
 
-  it('accepts a brand new definition with a derived badge', () => {
+  it('accepts a brand new definition without a colour', () => {
     const [x] = p.resolveProviders([{ id: 'foo', name: 'Foo', urlTemplate: 'https://foo.example/?q={query}' }], 'en');
     expect(x).toEqual({
       id: 'foo',
       name: 'Foo',
       urlTemplate: 'https://foo.example/?q={query}',
       method: 'url',
-      badge: 'FO',
     });
   });
 
@@ -105,17 +104,38 @@ describe('resolveProviders', () => {
     const urlTemplate = 'https://x.example/?q={query}';
     const [a] = p.resolveProviders([{ id: 'mine', name: { ja: 'わたしのAI' }, urlTemplate }], 'fr');
     expect(a.name).toBe('mine');
-    expect(a.badge).toBe('MI');
     const [b] = p.resolveProviders([{ id: 'mine', name: { ja: 'わたしのAI', en: 'My AI' }, urlTemplate }], 'fr');
     expect(b.name).toBe('My AI');
-    const [c] = p.resolveProviders([asDef({ id: 'mine', name: 5, badge: 7, urlTemplate })], 'en');
+    const [c] = p.resolveProviders([asDef({ id: 'mine', name: 5, urlTemplate })], 'en');
     expect(c.name).toBe('mine');
-    expect(c.badge).toBe('MI');
   });
 
   it('uses the default list when the option is not an array', () => {
     expect(p.resolveProviders('claude' as never, 'en').map((x) => x.id)).toEqual(['chatgpt', 'claude', 'googleai']);
     expect(p.resolveProviders({ claude: true } as never, 'en')).toHaveLength(3);
+  });
+
+  it('drops invalid colours and trims valid ones', () => {
+    ['url(https://x/y.gif)', 'red; position:fixed', 7, ''].forEach((color) => {
+      const [c] = p.resolveProviders([asDef({ id: 'claude', color })], 'en');
+      expect(c.color, String(color)).toBeUndefined();
+      expect('color' in c).toBe(false);
+    });
+    expect(p.resolveProviders([asDef({ id: 'claude', color: ' #000 ' })], 'en')[0].color).toBe('#000');
+  });
+
+  it('overrides colours through the option and through registerProvider', () => {
+    expect(p.resolveProviders([{ id: 'claude', color: '#000' } as ProviderDef], 'en')[0].color).toBe('#000');
+    p.registerProvider({ id: 'mine', name: 'Mine', urlTemplate: 'https://x.example/?q={query}', color: '#001f5b' });
+    p.registerProvider({ id: 'plain', name: 'Plain', urlTemplate: 'https://x.example/?q={query}' });
+    const list = p.resolveProviders(['mine', 'plain'], 'en');
+    expect(list[0].color).toBe('#001f5b');
+    expect(list[1].color).toBeUndefined();
+  });
+
+  it('ignores a badge from an old definition', () => {
+    const [c] = p.resolveProviders([asDef({ id: 'old', name: 'Old', badge: 'OL', urlTemplate: 'https://x.example/?q={query}' })], 'en');
+    expect('badge' in c).toBe(false);
   });
 
   it('normalises an unknown method to url', () => {

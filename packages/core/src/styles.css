@@ -69,8 +69,23 @@ label,
   font-weight: 600;
 }
 
+/* The send link takes the colour of the chosen AI; `--c` is set per element and falls back to --select. */
+.send {
+  --accent: var(--c, var(--select));
+  --accent-text: #fff;
+}
+
 .launcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.launcher svg {
+  flex: none;
+  inline-size: 18px;
+  block-size: 18px;
 }
 
 .panel {
@@ -195,14 +210,21 @@ textarea::placeholder {
 .chip,
 .ai,
 .copy {
-  min-block-size: 40px;
   border: 1px solid #707070;
   border-radius: 3px;
   background: transparent;
 }
 
+.ai,
+.copy {
+  min-block-size: 40px;
+}
+
+/* Chips insert text, so they are pills; the AI choices stay near-rectangular. */
 .chip {
-  padding: 6px 12px;
+  min-block-size: 32px;
+  padding: 4px 14px;
+  border-radius: 16px;
   font-size: 13px;
   text-align: start;
 }
@@ -218,9 +240,8 @@ textarea::placeholder {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding-block: 6px;
-  padding-inline: 8px 12px;
+  padding: 6px 14px;
+  background: #fff;
   font-weight: 500;
 }
 
@@ -233,28 +254,10 @@ textarea::placeholder {
 }
 
 .ai.on {
-  border-color: var(--select);
-  box-shadow: inset 0 0 0 1px var(--select);
-  color: #000;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-inline-size: 28px;
-  block-size: 24px;
-  padding-inline: 4px;
-  border-radius: 2px;
-  background: #e5e5e5;
-  color: #292c2d;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.ai.on .badge {
-  background: var(--select);
+  border-color: var(--c, var(--select));
+  background: var(--c, var(--select));
   color: #fff;
+  font-weight: 600;
 }
 
 .fallback {

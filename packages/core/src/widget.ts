@@ -84,6 +84,24 @@ function button(className: string, text: string, parent: Node, onClick: () => vo
   return node;
 }
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/** A decorative sparkle: a large four-pointed star with concave sides and a small one at its upper end. */
+function sparkle(): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'currentColor');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute(
+    'd',
+    'M10 5Q11.5 12.5 19 14Q11.5 15.5 10 23Q8.5 15.5 1 14Q8.5 12.5 10 5ZM19 1Q19.7 4.3 23 5Q19.7 5.7 19 9Q18.3 5.7 15 5Q18.3 4.3 19 1Z',
+  );
+  svg.appendChild(path);
+  return svg;
+}
+
 function absoluteUrl(value: string): string {
   try {
     return new URL(value, location.href).href;
@@ -149,6 +167,7 @@ export class Widget {
     root.addEventListener('keydown', (event) => this.trapFocus(event));
 
     this.launcher = button('launcher', r.dict.buttonLabel, root, () => (this.isOpen ? this.hide(false) : this.open()));
+    this.launcher.insertBefore(sparkle(), this.launcher.firstChild);
     this.launcher.setAttribute('aria-haspopup', 'dialog');
     this.launcher.setAttribute('aria-expanded', 'false');
 
@@ -307,7 +326,7 @@ export class Widget {
         store(p.id);
         this.refresh();
       });
-      el('span', 'badge', p.badge, label).setAttribute('aria-hidden', 'true');
+      if (p.color) label.style.setProperty('--c', p.color);
       label.appendChild(document.createTextNode(p.name));
       return radio;
     });
@@ -416,6 +435,8 @@ export class Widget {
     this.href = empty || tooLong ? '' : href;
 
     const send = ui.send;
+    if (p.color) send.style.setProperty('--c', p.color);
+    else send.style.removeProperty('--c');
     send.textContent = format(d.send, name);
     if (this.href) {
       send.href = this.href;

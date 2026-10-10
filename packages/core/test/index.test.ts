@@ -371,3 +371,17 @@ describe('auto-init', () => {
     fresh.destroy();
   });
 });
+
+describe('provider colour and launcher icon through the API', () => {
+  it('shows one icon after update() with new labels and recolours via registerProvider', () => {
+    api.init();
+    api.update({ labels: { ja: { buttonLabel: '質問する' } } });
+    expect($$('.launcher svg')).toHaveLength(1);
+    expect($('.launcher').textContent).toBe('質問する');
+    api.open();
+    api.registerProvider({ id: 'claude', name: 'Claude', urlTemplate: 'https://claude.ai/new?q={query}', color: '#123456' });
+    const label = $<HTMLInputElement>('input[value="claude"]').parentElement!;
+    expect(label.style.getPropertyValue('--c')).toBe('#123456');
+    expect($$('.launcher svg')).toHaveLength(1);
+  });
+});

@@ -35,6 +35,17 @@ The button follows the language of the page (`<html lang>`). Japanese and Englis
 
 For the options and complete example pages, see the repository README.
 
+## Colours
+
+| Option | Applies to | Notes |
+| --- | --- | --- |
+| `accentColor` | The launcher button only. | Default `#222`. |
+| `color` (on a provider definition) | The selected AI choice and the send link. | Built-in defaults: ChatGPT `#0d7d61`, Claude `#b3542f`, Google AI Mode `#1a73e8`. A provider without a colour uses `#27455c`. Text is always white, so choose a colour dark enough for white text. |
+
+```js
+AskAIButton.init({ providers: [{ id: 'claude', color: '#000' }] });
+```
+
 ## Notes
 
 - The `q` URL parameters used to hand the question to each AI service are undocumented and may change or stop working at any time. Every URL template can be replaced through the options.

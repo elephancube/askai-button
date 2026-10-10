@@ -1,3 +1,4 @@
+import { isColor } from './color';
 import { isString, pickLocalized } from './i18n';
 import type { ProviderDef, SendMethod } from './types';
 
@@ -6,7 +7,8 @@ export interface ResolvedProvider {
   name: string;
   urlTemplate: string;
   method: SendMethod;
-  badge: string;
+  /** A validated CSS colour, or absent (the stylesheet then falls back to its own). */
+  color?: string;
 }
 
 // The `q` parameter is not documented by any of these services and may change.
@@ -14,13 +16,13 @@ export interface ResolvedProvider {
 const registry = new Map<string, ProviderDef>(
   (
     [
-      { id: 'chatgpt', name: 'ChatGPT', urlTemplate: 'https://chatgpt.com/?q={query}', badge: 'GP' },
-      { id: 'claude', name: 'Claude', urlTemplate: 'https://claude.ai/new?q={query}', badge: 'CL' },
+      { id: 'chatgpt', name: 'ChatGPT', urlTemplate: 'https://chatgpt.com/?q={query}', color: '#0d7d61' },
+      { id: 'claude', name: 'Claude', urlTemplate: 'https://claude.ai/new?q={query}', color: '#b3542f' },
       {
         id: 'googleai',
         name: { en: 'Google AI Mode', ja: 'Google AIモード' },
         urlTemplate: 'https://www.google.com/search?udm=50&q={query}',
-        badge: 'AI',
+        color: '#1a73e8',
       },
     ] as ProviderDef[]
   ).map((def) => [def.id, def]),
@@ -59,13 +61,14 @@ export function resolveProviders(list: Array<string | ProviderDef> | null | unde
     if (!isValidProvider(def) || seen[def.id]) return;
     seen[def.id] = true;
     const name = pickLocalized(def.name, lang, isString) || def.id;
-    out.push({
+    const provider: ResolvedProvider = {
       id: def.id,
       name,
       urlTemplate: def.urlTemplate,
       method: def.method === 'copy_and_open' ? 'copy_and_open' : 'url',
-      badge: (isString(def.badge) && def.badge) || Array.from(name).slice(0, 2).join('').toUpperCase(),
-    });
+    };
+    if (isColor(def.color)) provider.color = def.color.trim();
+    out.push(provider);
   });
   return out;
 }
