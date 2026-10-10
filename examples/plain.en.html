@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>askai-button example</title>
+  </head>
+  <body>
+    <h1>askai-button example</h1>
+    <p>Press the button in the bottom corner to open the question box.</p>
+    <p>Run <code>npm run build</code> in the repository root before opening this page.</p>
+    <p>The URL handed to the AI is taken from the page when it is served over http(s). When you open the file directly, set the site URL with <code>data-site-url</code>, as this example does.</p>
+
+    <script
+      src="../packages/core/dist/askai-button.min.js"
+      data-askai
+      data-site-url="https://example.com/"
+      data-presets="What can I do on this site?|How much does it cost?"
+    ></script>
+  </body>
+</html>

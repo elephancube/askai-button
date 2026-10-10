@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>askai-button の導入例</title>
+  </head>
+  <body>
+    <h1>askai-button の導入例</h1>
+    <p>右下のボタンを押すと、質問の入力欄が開きます。</p>
+    <p>このページを開く前に、リポジトリのルートで <code>npm run build</code> を実行してください。</p>
+    <p>AIに渡すURLは、http(s) で配信しているページのものが自動で使われます。ファイルを直接開く場合は、この例のように <code>data-site-url</code> でサイトのURLを指定してください。</p>
+
+    <script
+      src="../packages/core/dist/askai-button.min.js"
+      data-askai
+      data-site-url="https://example.com/"
+      data-presets="このサイトでは何ができますか？|料金を教えてください"
+    ></script>
+  </body>
+</html>

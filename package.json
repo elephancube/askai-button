@@ -1,0 +1,19 @@
+{
+  "name": "askai-button-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w askai-button",
+    "test": "npm test -w askai-button",
+    "typecheck": "npm run typecheck -w askai-button"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^5.0.3"
+  }
+}
