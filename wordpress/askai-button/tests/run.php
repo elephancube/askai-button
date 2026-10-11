@@ -157,8 +157,6 @@ askai_test(
 				'query_template'   => '',
 				'max_length'       => 500,
 				'lang_home_url'    => false,
-				'use_md_url'       => false,
-				'tracking'         => false,
 			),
 			Askai_Button_Settings::defaults()
 		);
@@ -170,6 +168,33 @@ askai_test(
 	function () {
 		askai_same( Askai_Button_Settings::defaults(), Askai_Button_Settings::sanitize( Askai_Button_Settings::defaults() ) );
 		askai_same( Askai_Button_Settings::defaults(), Askai_Button_Settings::sanitize( array() ) );
+	}
+);
+
+askai_test(
+	'keys that are not settings are dropped, also from a stored option',
+	function () {
+		$old = array_merge(
+			Askai_Button_Settings::defaults(),
+			array(
+				'offset'     => 40,
+				'use_md_url' => true,
+				'tracking'   => true,
+				'unknown'    => array( 'x' ),
+			)
+		);
+
+		$clean = Askai_Button_Settings::sanitize( $old );
+		askai_same( array_keys( Askai_Button_Settings::defaults() ), array_keys( $clean ), 'exactly the keys of the defaults' );
+		askai_same( 40, $clean['offset'], 'the known values are kept' );
+		foreach ( array( 'use_md_url', 'tracking', 'unknown' ) as $key ) {
+			askai_same( false, array_key_exists( $key, $clean ), $key . ' is gone' );
+			askai_same( false, array_key_exists( $key, Askai_Button_Settings::defaults() ), $key . ' is not a default' );
+		}
+
+		$GLOBALS['askai_test_options']['askai_settings'] = $old;
+		askai_same( $clean, Askai_Button_Settings::get(), 'get() on a stored option with such keys' );
+		unset( $GLOBALS['askai_test_options']['askai_settings'] );
 	}
 );
 
@@ -221,7 +246,7 @@ askai_test(
 askai_test(
 	'booleans',
 	function () {
-		foreach ( array( 'enabled', 'lang_home_url', 'use_md_url', 'tracking' ) as $key ) {
+		foreach ( array( 'enabled', 'lang_home_url' ) as $key ) {
 			$fallback = Askai_Button_Settings::defaults()[ $key ];
 			foreach ( array( true, 1, '1', 'on', 'yes', 'true', ' TRUE ' ) as $value ) {
 				askai_same( true, Askai_Button_Settings::sanitize( array( $key => $value ) )[ $key ], $key . ' ' . var_export( $value, true ) );
@@ -1021,8 +1046,6 @@ askai_test(
 				'default_provider' => 'claude',
 				'query_template'   => "{question}\n{url}",
 				'max_length'       => 300,
-				'use_md_url'       => true,
-				'tracking'         => true,
 			)
 		);
 		askai_same(
@@ -1658,8 +1681,6 @@ askai_test(
 			'default_provider' => 'claude',
 			'query_template'   => "  {question}\r\n\r\nSee {site_url}\r\n",
 			'max_length'       => '300',
-			'use_md_url'       => '0',
-			'tracking'         => '0',
 		);
 		askai_same( array(), $changes( $form ), 'a complete form' );
 

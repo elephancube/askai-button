@@ -13,7 +13,7 @@ msgstr ""
 msgid "Adds a floating \"Ask AI\" button. The visitor's question and your site URL are handed to ChatGPT, Claude or Google AI Mode in a new tab. No API, no server-side processing, no tracking."
 msgstr ""
 
-#: includes/class-admin.php:79 includes/class-admin.php:80 includes/class-admin.php:976
+#: includes/class-admin.php:79 includes/class-admin.php:80 includes/class-admin.php:973
 msgid "Ask AI"
 msgstr ""
 
@@ -109,40 +109,40 @@ msgstr ""
 msgid "%1$s: HTML tags and control characters are not allowed, and the text can have up to %2$d characters. It was saved as plain text."
 msgstr ""
 
-#: includes/class-admin.php:462 includes/class-admin.php:632
+#: includes/class-admin.php:462 includes/class-admin.php:629
 msgid "Distance from the edges"
 msgstr ""
 
-#: includes/class-admin.php:464 includes/class-admin.php:639
+#: includes/class-admin.php:464 includes/class-admin.php:636
 msgid "Stacking order (z-index)"
 msgstr ""
 
-#: includes/class-admin.php:466 includes/class-admin.php:927
+#: includes/class-admin.php:466 includes/class-admin.php:924
 msgid "Maximum question length"
 msgstr ""
 
-#: includes/class-admin.php:468 includes/class-admin.php:616 includes/class-admin.php:619
+#: includes/class-admin.php:468 includes/class-admin.php:613 includes/class-admin.php:616
 msgid "Position"
 msgstr ""
 
-#: includes/class-admin.php:470 includes/class-admin.php:769 includes/class-admin.php:772
+#: includes/class-admin.php:470 includes/class-admin.php:766 includes/class-admin.php:769
 msgid "When a question is tapped"
 msgstr ""
 
-#: includes/class-admin.php:472 includes/class-admin.php:879
+#: includes/class-admin.php:472 includes/class-admin.php:876
 msgid "Selected by default"
 msgstr ""
 
-#: includes/class-admin.php:474 includes/class-admin.php:646
+#: includes/class-admin.php:474 includes/class-admin.php:643
 msgid "Launcher colour"
 msgstr ""
 
-#: includes/class-admin.php:476 includes/class-admin.php:917
+#: includes/class-admin.php:476 includes/class-admin.php:914
 msgid "Query template"
 msgstr ""
 
 #. translators: %d: number of the question.
-#: includes/class-admin.php:482 includes/class-admin.php:813
+#: includes/class-admin.php:482 includes/class-admin.php:810
 msgid "Question %d"
 msgstr ""
 
@@ -167,231 +167,231 @@ msgid "Hand-over of %s"
 msgstr ""
 
 #. translators: %s: name of a post type.
-#: includes/class-admin.php:584
+#: includes/class-admin.php:581
 msgid "%s (not registered at the moment)"
 msgstr ""
 
-#: includes/class-admin.php:588
+#: includes/class-admin.php:585
 msgid "Display"
 msgstr ""
 
-#: includes/class-admin.php:591
+#: includes/class-admin.php:588
 msgid "Button"
 msgstr ""
 
-#: includes/class-admin.php:596
+#: includes/class-admin.php:593
 msgid "Show the button on the site"
 msgstr ""
 
-#: includes/class-admin.php:601 includes/class-admin.php:604
+#: includes/class-admin.php:598 includes/class-admin.php:601
 msgid "Post types"
 msgstr ""
 
-#: includes/class-admin.php:611
+#: includes/class-admin.php:608
 msgid "With none ticked, the button is shown on every post type. This limits the pages of single posts and pages only: lists such as the home page and archives always show the button."
 msgstr ""
 
-#: includes/class-admin.php:622
+#: includes/class-admin.php:619
 msgid "Bottom right"
 msgstr ""
 
-#: includes/class-admin.php:626
+#: includes/class-admin.php:623
 msgid "Bottom left"
 msgstr ""
 
-#: includes/class-admin.php:635
+#: includes/class-admin.php:632
 msgid "px"
 msgstr ""
 
-#: includes/class-admin.php:642
+#: includes/class-admin.php:639
 msgid "Raise this number if another element of your theme covers the button."
 msgstr ""
 
-#: includes/class-admin.php:649
+#: includes/class-admin.php:646
 msgid "A colour such as #1a73e8. Leave empty to use the built-in colour. The text on the button is white, so choose a dark colour."
 msgstr ""
 
-#: includes/class-admin.php:654
+#: includes/class-admin.php:651
 msgid "Site URL passed to the AI"
 msgstr ""
 
-#: includes/class-admin.php:659
+#: includes/class-admin.php:656
 msgid "On multilingual sites, pass the front page of the language being viewed"
 msgstr ""
 
-#: includes/class-admin.php:661
+#: includes/class-admin.php:658
 msgid "Unticked, the top URL of the site (the front page of the default language) is passed on every page, whatever its language. Ticked, each page passes the front page of its own language: an English page passes, for example, https://example.com/en/. The preview on this screen always shows the top URL of the site."
 msgstr ""
 
-#: includes/class-admin.php:700
+#: includes/class-admin.php:697
 msgid "Texts"
 msgstr ""
 
-#: includes/class-admin.php:701
+#: includes/class-admin.php:698
 msgid "Leave a field empty to use the built-in wording, which follows the language of the page. The grey text in an empty field shows that wording in your language."
 msgstr ""
 
-#: includes/class-admin.php:710
+#: includes/class-admin.php:707
 msgid "Shown under the list of AI services. {provider} is replaced by the name of the selected service."
 msgstr ""
 
 #. translators: 1: name of a multilingual plugin, such as Polylang, 2: name of the group of strings.
-#: includes/class-admin.php:733
+#: includes/class-admin.php:730
 msgid "Type these texts in the main language of the site. After saving, the ones you filled in can be translated into the other languages on the string translation screen of %1$s, in the group \"%2$s\"."
 msgstr ""
 
-#: includes/class-admin.php:736
+#: includes/class-admin.php:733
 msgid "Open the string translations"
 msgstr ""
 
-#: includes/class-admin.php:750
+#: includes/class-admin.php:747
 msgid "Preset questions"
 msgstr ""
 
-#: includes/class-admin.php:754 includes/class-admin.php:757
+#: includes/class-admin.php:751 includes/class-admin.php:754
 msgid "Questions"
 msgstr ""
 
 #. translators: %d: largest number of questions.
-#: includes/class-admin.php:762
+#: includes/class-admin.php:759
 msgid "Shown in the panel as examples a visitor can tap. Up to %d. Empty fields are ignored."
 msgstr ""
 
-#: includes/class-admin.php:775
+#: includes/class-admin.php:772
 msgid "Put it into the question field"
 msgstr ""
 
-#: includes/class-admin.php:779
+#: includes/class-admin.php:776
 msgid "Open the AI service at once"
 msgstr ""
 
 #. translators: %d: number of the question.
-#: includes/class-admin.php:819
+#: includes/class-admin.php:816
 msgid "Move question %d up"
 msgstr ""
 
 #. translators: %d: number of the question.
-#: includes/class-admin.php:821
+#: includes/class-admin.php:818
 msgid "Move question %d down"
 msgstr ""
 
 #. translators: %d: number of the question.
-#: includes/class-admin.php:823
+#: includes/class-admin.php:820
 msgid "Remove question %d"
 msgstr ""
 
 #. translators: %d: number of the question.
-#: includes/class-admin.php:823
+#: includes/class-admin.php:820
 msgid "Remove"
 msgstr ""
 
-#: includes/class-admin.php:829
+#: includes/class-admin.php:826
 msgid "Add a question"
 msgstr ""
 
-#: includes/class-admin.php:847
+#: includes/class-admin.php:844
 msgid "AI services"
 msgstr ""
 
-#: includes/class-admin.php:848
+#: includes/class-admin.php:845
 msgid "The services are offered in the order shown here. If the service selected by default is switched off, the first one in the list is selected. With every service switched off, the button is not shown."
 msgstr ""
 
-#: includes/class-admin.php:849
+#: includes/class-admin.php:846
 msgid "URL templates: the URL formats used to hand over a question are not documented by the services and can change at any time. A template must start with https:// and contain {query}, which is replaced by the text handed to the service. Leave the field empty to use the built-in URL."
 msgstr ""
 
 #. translators: %s: name of the AI service.
-#: includes/class-admin.php:863
+#: includes/class-admin.php:860
 msgid "Move %s up"
 msgstr ""
 
 #. translators: %s: name of the AI service.
-#: includes/class-admin.php:865
+#: includes/class-admin.php:862
 msgid "Move %s down"
 msgstr ""
 
-#: includes/class-admin.php:868
+#: includes/class-admin.php:865
 msgid "Position in the list"
 msgstr ""
 
-#: includes/class-admin.php:875
+#: includes/class-admin.php:872
 msgid "Offer this service"
 msgstr ""
 
-#: includes/class-admin.php:883
+#: includes/class-admin.php:880
 msgid "URL template"
 msgstr ""
 
-#: includes/class-admin.php:887
+#: includes/class-admin.php:884
 msgid "How the question is handed over"
 msgstr ""
 
-#: includes/class-admin.php:889
+#: includes/class-admin.php:886
 msgid "In the URL"
 msgstr ""
 
-#: includes/class-admin.php:890
+#: includes/class-admin.php:887
 msgid "Copied to the clipboard, then the service is opened"
 msgstr ""
 
-#: includes/class-admin.php:894
+#: includes/class-admin.php:891
 msgid "Colour"
 msgstr ""
 
-#: includes/class-admin.php:896
+#: includes/class-admin.php:893
 msgid "Colour of the selected choice and of the send button. Leave empty to use the built-in colour."
 msgstr ""
 
-#: includes/class-admin.php:913
+#: includes/class-admin.php:910
 msgid "Query"
 msgstr ""
 
-#: includes/class-admin.php:921
+#: includes/class-admin.php:918
 msgid "The text handed to the AI service. Leave empty to use the built-in template, which follows the language of the page. Variables:"
 msgstr ""
 
-#: includes/class-admin.php:930
+#: includes/class-admin.php:927
 msgid "characters"
 msgstr ""
 
-#: includes/class-admin.php:945
+#: includes/class-admin.php:942
 msgid "Preview"
 msgstr ""
 
-#: includes/class-admin.php:946
+#: includes/class-admin.php:943
 msgid "Not saved yet. The preview shows the values in the form as they are now."
 msgstr ""
 
-#: includes/class-admin.php:947
+#: includes/class-admin.php:944
 msgid "The button is switched off in this form: visitors would not see it."
 msgstr ""
 
-#: includes/class-admin.php:950
+#: includes/class-admin.php:947
 msgid "Sample question"
 msgstr ""
 
-#: includes/class-admin.php:951
+#: includes/class-admin.php:948
 msgid "What services do you offer?"
 msgstr ""
 
-#: includes/class-admin.php:953
+#: includes/class-admin.php:950
 msgid "URL that would be opened"
 msgstr ""
 
-#: includes/class-admin.php:955
+#: includes/class-admin.php:952
 msgid "The URL is the one of the send button in the preview, for the service selected there. That button is real: pressing it opens the service in a new tab. Texts are cleaned when the settings are saved, so a saved text can differ slightly from the preview."
 msgstr ""
 
-#: includes/class-admin.php:1002
+#: includes/class-admin.php:999
 msgid "Do not show the button on this page"
 msgstr ""
 
-#: includes/class-admin.php:1006
+#: includes/class-admin.php:1003
 msgid "Questions for this page"
 msgstr ""
 
 #. translators: %d: largest number of questions.
-#: includes/class-admin.php:1011
+#: includes/class-admin.php:1008
 msgid "When any are set, they replace the questions of the site on this page. Up to %d. Empty fields are ignored."
 msgstr ""

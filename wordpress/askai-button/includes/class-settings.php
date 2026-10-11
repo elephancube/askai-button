@@ -105,8 +105,6 @@ final class Askai_Button_Settings {
 			'query_template'   => '',
 			'max_length'       => 500,
 			'lang_home_url'    => false,
-			'use_md_url'       => false,
-			'tracking'         => false,
 		);
 	}
 
@@ -128,6 +126,9 @@ final class Askai_Button_Settings {
 	 * A missing or unusable value becomes the default for that key. This also
 	 * applies to the boolean settings: a form has to submit an explicit `0`
 	 * for an unticked checkbox.
+	 *
+	 * The result is built key by key: anything else in the input, such as a
+	 * key of an earlier development version, is dropped.
 	 *
 	 * @param mixed $input Raw settings.
 	 * @return array Settings with every key present and of the right type.
@@ -169,9 +170,6 @@ final class Askai_Button_Settings {
 		$out['max_length']     = self::to_int( self::pick( $input, 'max_length' ), $defaults['max_length'], 1, self::MAX_QUESTION_LENGTH );
 
 		$out['lang_home_url'] = self::to_bool( self::pick( $input, 'lang_home_url' ), $defaults['lang_home_url'] );
-
-		$out['use_md_url'] = self::to_bool( self::pick( $input, 'use_md_url' ), $defaults['use_md_url'] );
-		$out['tracking']   = self::to_bool( self::pick( $input, 'tracking' ), $defaults['tracking'] );
 
 		return $out;
 	}

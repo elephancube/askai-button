@@ -544,9 +544,6 @@ final class Askai_Button_Admin {
 			<div class="askai-layout">
 				<form action="options.php" method="post" id="askai-form" class="askai-form">
 					<?php settings_fields( self::GROUP ); ?>
-					<?php // Not on this screen yet; their stored values travel with the form. ?>
-					<input type="hidden" name="<?php echo esc_attr( self::name( '[use_md_url]' ) ); ?>" value="<?php echo $settings['use_md_url'] ? '1' : '0'; ?>">
-					<input type="hidden" name="<?php echo esc_attr( self::name( '[tracking]' ) ); ?>" value="<?php echo $settings['tracking'] ? '1' : '0'; ?>">
 					<?php if ( ! Askai_Button_Multilingual::admin_info() ) : ?>
 						<?php // Only offered on a multilingual site; elsewhere the stored value is kept. ?>
 						<input type="hidden" name="<?php echo esc_attr( self::name( '[lang_home_url]' ) ); ?>" value="<?php echo $settings['lang_home_url'] ? '1' : '0'; ?>">

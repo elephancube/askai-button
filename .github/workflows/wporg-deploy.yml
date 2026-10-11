@@ -81,6 +81,8 @@ jobs:
         if: steps.guard.outputs.ready == 'true'
         with:
           node-version: 24
+          # No dependency cache in a release build.
+          package-manager-cache: false
 
       - name: Build and stage the plugin
         if: steps.guard.outputs.ready == 'true'
