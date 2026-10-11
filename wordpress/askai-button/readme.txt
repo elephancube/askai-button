@@ -27,7 +27,7 @@ After activation the button appears on the public pages of the site with its def
 
 Everything is set on one screen, Settings > Ask AI:
 
-* Display: switch the button on or off, limit it to some post types, choose the corner, the distance from the edges, the z-index and the colour of the button.
+* Display: switch the button on or off, limit it to some post types, choose the corner, the distance from the edges, the z-index and the colour of the button. On a site run with Polylang or WPML there is one more choice: which front page is passed to the AI service (see "Multilingual sites").
 * Texts: the label of the button and the texts of the panel. A field left empty uses the built-in wording in the language of the page.
 * Preset questions: up to six example questions a visitor can tap, and whether a tap fills in the question or opens the AI service at once.
 * AI services: which services are offered, their order, the one selected by default, and for each service the URL template, the way the question is handed over (in the URL, or copied to the clipboard) and its colour.
@@ -56,7 +56,7 @@ Texts that you type yourself (the five texts, the preset questions of the site a
 Good to know:
 
 * Translations are cleaned in the same way as the texts of the settings screen: HTML is removed and the length is limited.
-* The address of the site handed to the AI service is the front page in the language of the page, for example `https://example.com/en/`.
+* The address of the site handed to the AI service is the top URL of the site on every page, whatever the language of the page: the front page of the default language, for example `https://example.com/`. To pass the front page of the language being viewed instead (an English page then passes, for example, `https://example.com/en/`), tick "On multilingual sites, pass the front page of the language being viewed" under Settings > Ask AI > Display. This setting is shown only while Polylang or WPML is active. Only the address changes: the wording and the language of the button always follow the page.
 * "Questions for this page" and "Do not show the button on this page" belong to one post. Each translation of a post has its own, and they are not copied to the other translations: Polylang neither copies nor synchronises them, also when the synchronisation of custom fields is switched on.
 * Polylang lists a string as long as its text is in use. When you change a question, the new text appears without a translation; the translation of the old text is kept by Polylang and comes back if you restore the old text. It can be removed there with "Clean strings translation database".
 * WPML keeps a string until it is deleted on its own screen. After you remove a question, its entry (for example `preset_3`) stays there unused. WPML identifies the questions by their number, so check the translations after changing the order of the questions.
@@ -91,11 +91,11 @@ The plugin only passes an address. Whether and how a service opens that address 
 
 = Can I change the URL the AI gets? =
 
-Yes. By default it is the address of the front page of your site. The query template under Settings > Ask AI decides what is handed over: use `{url}` for the address of the page the visitor is on instead of `{site_url}`, or write any other text. The variables are `{question}`, `{site_url}`, `{url}`, `{title}` and `{site_name}`. Developers can replace the value of `{site_url}` with the `askai_site_url` filter.
+Yes. By default it is the address of the front page of your site; on a multilingual site that is the front page of the default language, on every page. The query template under Settings > Ask AI decides what is handed over: use `{url}` for the address of the page the visitor is on instead of `{site_url}`, or write any other text. The variables are `{question}`, `{site_url}`, `{url}`, `{title}` and `{site_name}`. On a site run with Polylang or WPML, the setting "On multilingual sites, pass the front page of the language being viewed" makes `{site_url}` the front page of the language of each page. Developers can replace the value of `{site_url}` with the `askai_site_url` filter, which runs last.
 
 = Does it work on a multilingual site? =
 
-Yes. The built-in texts follow the language of each page. With Polylang or WPML, the texts you typed yourself can be translated on the string translation screen of that plugin. Polylang has been checked on a live site; the WPML integration follows the hooks that WPML documents and has not yet been run on a WPML installation. See "Multilingual sites" in the description.
+Yes. The built-in texts follow the language of each page. With Polylang or WPML, the texts you typed yourself can be translated on the string translation screen of that plugin. The address handed to the AI service stays the top URL of the site on pages of every language, unless you choose the front page of each language in the settings. Polylang has been checked on a live site; the WPML integration follows the hooks that WPML documents and has not yet been run on a WPML installation. See "Multilingual sites" in the description.
 
 = Can I hide the button on some pages? =
 

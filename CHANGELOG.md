@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A `<meta name="askai" content="off">` switch to hide the button on a page.
 - WordPress plugin (`wordpress/askai-button`, GPL-2.0-or-later): a settings screen under Settings > Ask AI (display, texts, preset questions, AI services, query template), a live preview, and a per-post box to hide the button or set page-specific questions.
 - Polylang and WPML (String Translation) support for the texts entered on the settings screen.
+- On sites run with Polylang or WPML, the address handed to the AI service is the top URL of the site (the front page of the default language) on every page; a setting switches it to the front page of the language being viewed.
 - Plugin settings screen translated into Japanese; `npm run i18n` to regenerate translation files.
 - Filters `askai_should_display`, `askai_presets`, `askai_providers`, `askai_query_template` and `askai_site_url`.
 - Documentation and demo website (Japanese and English), plain HTML examples, and a script that packs the plugin into a zip.

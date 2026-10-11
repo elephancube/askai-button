@@ -23,7 +23,7 @@ Every option can be left out. A value that cannot be used (wrong type, out of ra
 | `presetAction` | `'fill' \| 'send'` | `'fill'` | What a press on an example question does. `'fill'` only puts it into the question field; `'send'` opens the AI service at once. |
 | `maxLength` | `number` | `500` | Maximum length of a question, in characters. An emoji counts as one character. |
 | `maxUrlLength` | `number` | `8000` | Longest address that may be opened. Beyond it, sending is disabled and "Your question is too long." is shown. |
-| `siteUrl` | `string \| null` | the top of the site | Value of `{site_url}`. When left out: the origin of the current page (`https://example.com/`). |
+| `siteUrl` | `string \| null` | the top of the site | Value of `{site_url}`. When left out: the origin of the current page (`https://example.com/`), whatever the language or the folder of the page. See "[Language](#language)" for sites in several languages. |
 | `url` | `string \| null` | the address of the page | Value of `{url}`. When left out: `<link rel="canonical">`, then `location.href`. The hash and `utm_*` parameters are removed. |
 | `mdUrl` | `string \| null` | same as `{url}` | Value of `{md_url}`. Set it when the page has a Markdown version. |
 | `siteName` | `string \| null` | the name of the site | Value of `{site_name}`. When left out: `<meta property="og:site_name">`, then the host name. |
@@ -260,6 +260,8 @@ The language of the UI follows the page, not the settings of the visitor's brows
 For a language with a region, such as `pt-BR`, a dictionary is looked for under `pt-BR`, then `pt`; without one the UI is in English. The built-in dictionaries are Japanese (`ja`) and English (`en`).
 
 `presets`, `queryTemplate` and the `name` of an AI service, when written per language, are looked up under the language of the page, then its base language, then `en`. Per-language `labels` are used when they match the language of the page; when the UI is shown in English, those under `en` are used as well.
+
+The language does not change the address that is handed to the AI. `{site_url}` is the origin of the page (`https://example.com/`) on pages of every language, also when each language lives in a folder such as `/en/`. To hand over the top page of each language instead, set `data-site-url` (`siteUrl` in `init()`) on the pages of that language, for example `data-site-url="https://example.com/en/"`.
 
 ### Adding a language {#locales}
 

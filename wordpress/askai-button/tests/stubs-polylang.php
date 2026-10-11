@@ -17,7 +17,12 @@ if ( 'cli' !== PHP_SAPI ) {
 $GLOBALS['askai_test_pll'] = array(
 	'registered'   => array(),
 	'translations' => array(),
-	'home'         => 'https://example.com/en/',
+	'homes'        => array(
+		'ja' => 'https://example.com/',
+		'en' => 'https://example.com/en/',
+	),
+	'default'      => 'ja',
+	'current'      => 'en',
 );
 
 /**
@@ -47,10 +52,23 @@ function pll__( $text ) {
 }
 
 /**
- * Front page of the current language.
+ * Front page of a language.
  *
+ * @param string $lang Language code. Empty: the language being viewed.
  * @return string
  */
-function pll_home_url() {
-	return $GLOBALS['askai_test_pll']['home'];
+function pll_home_url( $lang = '' ) {
+	if ( '' === $lang ) {
+		$lang = $GLOBALS['askai_test_pll']['current'];
+	}
+	return isset( $GLOBALS['askai_test_pll']['homes'][ $lang ] ) ? $GLOBALS['askai_test_pll']['homes'][ $lang ] : '';
+}
+
+/**
+ * Code of the default language.
+ *
+ * @return string|false
+ */
+function pll_default_language() {
+	return $GLOBALS['askai_test_pll']['default'];
 }

@@ -104,6 +104,7 @@ final class Askai_Button_Settings {
 			'default_provider' => 'chatgpt',
 			'query_template'   => '',
 			'max_length'       => 500,
+			'lang_home_url'    => false,
 			'use_md_url'       => false,
 			'tracking'         => false,
 		);
@@ -166,6 +167,8 @@ final class Askai_Button_Settings {
 
 		$out['query_template'] = self::sanitize_query_template( self::pick( $input, 'query_template' ) );
 		$out['max_length']     = self::to_int( self::pick( $input, 'max_length' ), $defaults['max_length'], 1, self::MAX_QUESTION_LENGTH );
+
+		$out['lang_home_url'] = self::to_bool( self::pick( $input, 'lang_home_url' ), $defaults['lang_home_url'] );
 
 		$out['use_md_url'] = self::to_bool( self::pick( $input, 'use_md_url' ), $defaults['use_md_url'] );
 		$out['tracking']   = self::to_bool( self::pick( $input, 'tracking' ), $defaults['tracking'] );

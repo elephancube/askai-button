@@ -23,7 +23,7 @@ nav: リファレンス
 | `presetAction` | `'fill' \| 'send'` | `'fill'` | 質問の例を押したときの動作。`'fill'` は入力欄に入れるだけ、`'send'` はすぐにAIサービスを開きます。 |
 | `maxLength` | `number` | `500` | 質問の最大文字数。絵文字も1文字として数えます。 |
 | `maxUrlLength` | `number` | `8000` | 開くURLの長さの上限。超えると送信できず、「質問が長すぎます」と表示します。 |
-| `siteUrl` | `string \| null` | サイトのトップ | `{site_url}` の値。省略時は、表示中のページのオリジン（`https://example.com/`）。 |
+| `siteUrl` | `string \| null` | サイトのトップ | `{site_url}` の値。省略時は、ページの言語や階層にかかわらず、表示中のページのオリジン（`https://example.com/`）。複数の言語があるサイトについては「[言語](#language)」を参照。 |
 | `url` | `string \| null` | ページのURL | `{url}` の値。省略時は `<link rel="canonical">`、なければ `location.href`。ハッシュと `utm_*` パラメータは取り除きます。 |
 | `mdUrl` | `string \| null` | `{url}` と同じ | `{md_url}` の値。ページの Markdown 版のURLがある場合に指定します。 |
 | `siteName` | `string \| null` | サイト名 | `{site_name}` の値。省略時は `<meta property="og:site_name">`、なければホスト名。 |
@@ -260,6 +260,8 @@ UIの言語は、閲覧者のブラウザーの設定ではなく、ページの
 `pt-BR` のような地域付きの言語は、`pt-BR`、`pt` の順に辞書を探し、なければ英語で表示します。同梱している辞書は日本語（`ja`）と英語（`en`）です。
 
 言語別に書いた `presets`、`queryTemplate`、AIサービスの `name` は、ページの言語、その基本の言語、`en` の順に探します。言語別の `labels` は、ページの言語に一致するものを使い、UIが英語で表示されるときは `en` の指定も使います。
+
+言語によって、AIに渡すURLは変わりません。`{site_url}` は、言語ごとに `/en/` のようなフォルダーに分けているサイトでも、どの言語のページでもオリジン（`https://example.com/`）です。言語ごとのトップページを渡したい場合は、その言語のページで `data-site-url`（`init()` では `siteUrl`）を指定します。例：`data-site-url="https://example.com/en/"`。
 
 ### 言語を追加する {#locales}
 

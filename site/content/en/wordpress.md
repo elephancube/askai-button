@@ -29,6 +29,7 @@ Everything is on one screen, "Settings > Ask AI". It can be changed by administr
 | Distance from the edges | 0 to 500px. The default is 24px. |
 | Stacking order (z-index) | Raise this number if another element of your theme covers the button. The default is 9999. |
 | Launcher colour | A colour such as `#1a73e8`. The text is white, so choose a dark colour. Empty means the built-in colour. |
+| On multilingual sites, pass the front page of the language being viewed | Shown only while Polylang or WPML is active. Off by default: the top URL of the site is passed on every page. See "[Multilingual sites](#multilingual)". |
 
 ### Texts
 
@@ -63,7 +64,7 @@ The URL formats are not documented by the services and can change without notice
 | Query template | The text handed to the AI service. Empty means the built-in text in the language of the page. The variables are `{question}`, `{site_url}`, `{url}`, `{title}` and `{site_name}`. |
 | Maximum question length | 1 to 2000. The default is 500. |
 
-`{site_url}` is the address of the front page of the site (`home_url('/')`). To hand over the address of the page the visitor is on, use `{url}` in the template.
+`{site_url}` is the address of the front page of the site (`home_url('/')`). On a site run with Polylang or WPML it is the front page of the default language, on pages of every language, unless the setting "On multilingual sites, pass the front page of the language being viewed" is ticked. To hand over the address of the page the visitor is on, use `{url}` in the template.
 
 ### Preview
 
@@ -167,16 +168,16 @@ add_filter( 'askai_query_template', function ( $query_template ) {
 ### askai_site_url
 
 ```php
-apply_filters( 'askai_site_url', string $site_url )
+apply_filters( 'askai_site_url', string $site_url, bool $lang_home )
 ```
 
-The address of the site handed to the AI service as `{site_url}`. The default is the front page of the site; on a multilingual site it is the front page in the language of the current page. A value that is not an absolute address starting with `http://` or `https://` is ignored, and the origin of the page is used instead.
+The address of the site handed to the AI service as `{site_url}`. `$site_url` is the address the plugin chose: the front page of the site, which on a multilingual site is the front page of the default language or, with the setting ticked, the front page of the language of the current page. `$lang_home` is the value of that setting, "On multilingual sites, pass the front page of the language being viewed". The filter runs last, whatever the setting. The returned value is used only if it is a string holding an absolute address that starts with `http://` or `https://`; anything else is ignored and `$site_url` is used.
 
 ```php
-add_filter( 'askai_site_url', function ( $site_url ) {
-	// Always hand over the root of the site, whatever the language.
-	return 'https://example.com/';
-} );
+add_filter( 'askai_site_url', function ( $site_url, $lang_home ) {
+	// A site that lives below the top of its domain.
+	return 'https://example.com/shop/';
+}, 10, 2 );
 ```
 
 ## Multilingual sites: Polylang and WPML {#multilingual}
@@ -192,11 +193,12 @@ Texts that you type yourself (the five texts, the preset questions of the site a
 Good to know:
 
 - Translations are processed in the same way as the texts of the settings screen: HTML is removed and the length is limited.
-- The address of the site handed to the AI service is the front page in the language of the current page, for example `https://example.com/en/`. Use the `askai_site_url` filter to change it.
+- The address of the site handed to the AI service is the top URL of the site on every page, whatever the language of the page: the front page of the default language, for example `https://example.com/`. When the default language has a prefix of its own, as in `https://example.com/ja/`, that address is passed, not the bare domain, which would only redirect.
+- To pass the front page of the language being viewed instead, tick "On multilingual sites, pass the front page of the language being viewed" under "Settings > Ask AI > Display". An English page then passes, for example, `https://example.com/en/`. The setting is shown only while Polylang or WPML is active and has no effect without them. Only the address changes: the wording and the language of the button always follow the page. The `askai_site_url` filter can replace the address in both cases.
 - "Questions for this page" and "Do not show the button on this page" belong to one post. Each translation of a post has its own, and they are not copied to the other translations. Polylang neither copies nor synchronises them, also when the synchronisation of custom fields is switched on.
 - Polylang lists a string only as long as its text is in use. When you change a question, the new text appears without a translation. The translation of the old text is kept by Polylang and is used again if you restore the old text.
 - WPML keeps a string until it is deleted on WPML's own screen. After you remove a question, its entry (for example `preset_3`) stays there unused. WPML identifies the questions by their number, so check the translations after changing the order of the questions.
-- Polylang has been checked on a live WordPress site. The WPML integration is written against the hooks that WPML documents (`wpml_register_single_string` and `wpml_translate_single_string`) and has not yet been run on a WPML installation.
+- Polylang has been checked on a live WordPress site. The WPML integration is written against the hooks that WPML documents (`wpml_register_single_string` and `wpml_translate_single_string` for the texts, `wpml_default_language` and `wpml_permalink` for the address of the site) and has not yet been run on a WPML installation.
 - Neither plugin is required. Nothing breaks when one is deactivated: the texts are then shown as typed.
 
 ## Uninstall {#uninstall}

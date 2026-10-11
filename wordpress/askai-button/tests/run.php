@@ -156,6 +156,7 @@ askai_test(
 				'default_provider' => 'chatgpt',
 				'query_template'   => '',
 				'max_length'       => 500,
+				'lang_home_url'    => false,
 				'use_md_url'       => false,
 				'tracking'         => false,
 			),
@@ -220,7 +221,7 @@ askai_test(
 askai_test(
 	'booleans',
 	function () {
-		foreach ( array( 'enabled', 'use_md_url', 'tracking' ) as $key ) {
+		foreach ( array( 'enabled', 'lang_home_url', 'use_md_url', 'tracking' ) as $key ) {
 			$fallback = Askai_Button_Settings::defaults()[ $key ];
 			foreach ( array( true, 1, '1', 'on', 'yes', 'true', ' TRUE ' ) as $value ) {
 				askai_same( true, Askai_Button_Settings::sanitize( array( $key => $value ) )[ $key ], $key . ' ' . var_export( $value, true ) );
@@ -1968,7 +1969,9 @@ askai_test(
 		Askai_Button_Multilingual::register_strings( askai_ml_settings(), '' );
 		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'no hook was called' );
 		askai_same( null, Askai_Button_Multilingual::admin_info() );
-		askai_same( 'https://example.com/', Askai_Button_Multilingual::home_url() );
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( false ) );
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( true ), 'the setting has no effect without a multilingual plugin' );
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'still no hook called' );
 
 		// The hooks alone, without WPML itself, are not enough.
 		askai_ml_reset( array( 'wpml_register_single_string', 'wpml_translate_single_string' ) );
@@ -2054,7 +2057,45 @@ askai_test(
 			),
 			Askai_Button_Multilingual::admin_info()
 		);
-		askai_same( 'https://example.com/', Askai_Button_Multilingual::home_url(), 'WPML filters home_url() itself' );
+
+		// Address of the site. home_url() is what WPML made of it: here the test pretends an English page.
+		askai_ml_reset( $hooks );
+		$GLOBALS['askai_test_hooks']['filters']['wpml_default_language'] = function () {
+			return 'ja';
+		};
+		$GLOBALS['askai_test_hooks']['filters']['wpml_permalink']        = function ( $url, $lang ) {
+			return 'ja' === $lang ? 'https://example.com/ja-home/' : $url;
+		};
+		askai_same( 'https://example.com/ja-home/', Askai_Button_Multilingual::site_url( false ), 'off: front page of the default language, through wpml_permalink' );
+		askai_same(
+			array(
+				array( 'filter', 'wpml_default_language', null ),
+				array( 'filter', 'wpml_permalink', 'https://example.com/', 'ja' ),
+			),
+			$GLOBALS['askai_test_hooks']['calls'],
+			'the two documented filters, with these arguments'
+		);
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( true ), 'on: home_url(), which WPML filters itself' );
+
+		foreach ( array( null, false, '', array( 'ja' ) ) as $index => $answer ) {
+			askai_ml_reset( $hooks );
+			$GLOBALS['askai_test_hooks']['filters']['wpml_default_language'] = function () use ( $answer ) {
+				return $answer;
+			};
+			askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( false ), 'no default language #' . $index . ': home_url()' );
+			askai_same( 1, count( $GLOBALS['askai_test_hooks']['calls'] ), 'wpml_permalink is not asked #' . $index );
+		}
+		foreach ( array( null, false, '', '/ja/', 'javascript:alert(1)', array( 'x' ) ) as $index => $answer ) {
+			askai_ml_reset( $hooks );
+			$GLOBALS['askai_test_hooks']['filters']['wpml_default_language'] = function () {
+				return 'ja';
+			};
+			$GLOBALS['askai_test_hooks']['filters']['wpml_permalink']        = function () use ( $answer ) {
+				return $answer;
+			};
+			askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( false ), 'unusable answer of wpml_permalink #' . $index . ': home_url()' );
+		}
+		askai_ml_reset();
 	}
 );
 
@@ -2121,10 +2162,103 @@ askai_test(
 			),
 			Askai_Button_Multilingual::admin_info()
 		);
-		askai_same( 'https://example.com/en/', Askai_Button_Multilingual::home_url(), 'front page of the current language' );
-		$GLOBALS['askai_test_pll']['home'] = '';
-		askai_same( 'https://example.com/', Askai_Button_Multilingual::home_url(), 'no answer from Polylang: front page of the site' );
+
+		// Address of the site. home_url() called by a plugin is the root under Polylang.
+		$pll = &$GLOBALS['askai_test_pll'];
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( false ), 'off, English page: front page of the default language' );
+		askai_same( 'https://example.com/en/', Askai_Button_Multilingual::site_url( true ), 'on, English page: its own front page' );
+		$pll['current'] = 'ja';
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( false ), 'off, page in the default language' );
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( true ), 'on, page in the default language' );
+
+		// The default language has a prefix too: the root only redirects.
+		$pll['homes'] = array(
+			'ja' => 'https://example.com/ja/',
+			'en' => 'https://example.com/en/',
+		);
+		askai_same( 'https://example.com/ja/', Askai_Button_Multilingual::site_url( false ), 'off, prefixed default language, Japanese page' );
+		askai_same( 'https://example.com/ja/', Askai_Button_Multilingual::site_url( true ), 'on, prefixed default language, Japanese page' );
+		$pll['current'] = 'en';
+		askai_same( 'https://example.com/ja/', Askai_Button_Multilingual::site_url( false ), 'off, prefixed default language, English page' );
+		askai_same( 'https://example.com/en/', Askai_Button_Multilingual::site_url( true ), 'on, prefixed default language, English page' );
+
+		// Polylang has no answer: no language yet, or no language for this request.
+		$pll['default'] = false;
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( false ), 'no default language: home_url()' );
+		$pll['default'] = 'ja';
+		$pll['homes']   = array();
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( false ), 'no front page known, off: home_url()' );
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::site_url( true ), 'no front page known, on: home_url()' );
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'the WPML filters are not used' );
+		$pll['homes']   = array(
+			'ja' => 'https://example.com/',
+			'en' => 'https://example.com/en/',
+		);
+		$pll['current'] = 'en';
 		askai_ml_reset();
+	}
+);
+
+askai_test(
+	'site address: chosen from the setting and the multilingual plugin',
+	function () {
+		$facts = array(
+			'api'           => 'polylang',
+			'home'          => 'https://example.com/',
+			'default_home'  => 'https://example.com/ja/',
+			'language_home' => 'https://example.com/en/',
+		);
+		askai_same( 'https://example.com/ja/', Askai_Button_Multilingual::resolve_site_url( false, $facts ), 'off: default language' );
+		askai_same( 'https://example.com/en/', Askai_Button_Multilingual::resolve_site_url( true, $facts ), 'on: language being viewed' );
+		foreach ( array( null, 0, 1, '1', 'true', array() ) as $index => $setting ) {
+			askai_same( 'https://example.com/ja/', Askai_Button_Multilingual::resolve_site_url( $setting, $facts ), 'only true switches it on #' . $index );
+		}
+		askai_same( 'https://example.com/ja/', Askai_Button_Multilingual::resolve_site_url( false, array( 'api' => 'wpml' ) + $facts ), 'WPML, off' );
+		askai_same( 'https://example.com/en/', Askai_Button_Multilingual::resolve_site_url( true, array( 'api' => 'wpml' ) + $facts ), 'WPML, on' );
+		foreach ( array( '', 'other', null ) as $api ) {
+			askai_same( 'https://example.com/', Askai_Button_Multilingual::resolve_site_url( false, array( 'api' => $api ) + $facts ), 'no multilingual plugin, off' );
+			askai_same( 'https://example.com/', Askai_Button_Multilingual::resolve_site_url( true, array( 'api' => $api ) + $facts ), 'no multilingual plugin, on: the setting has no effect' );
+		}
+		foreach ( array( '', null, false, 42, array( 'https://example.com/en/' ), '/en/', '//example.com/en/', 'javascript:alert(1)', 'ftp://example.com/', "https://example.com/\n", 'https://example.com/"><script>' ) as $index => $bad ) {
+			askai_same( 'https://example.com/', Askai_Button_Multilingual::resolve_site_url( true, array( 'language_home' => $bad ) + $facts ), 'unusable language front page #' . $index );
+			askai_same( 'https://example.com/', Askai_Button_Multilingual::resolve_site_url( false, array( 'default_home' => $bad ) + $facts ), 'unusable default front page #' . $index );
+		}
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::resolve_site_url( false, array( 'api' => 'polylang', 'home' => 'https://example.com/' ) ), 'facts missing' );
+		askai_same( '', Askai_Button_Multilingual::resolve_site_url( false, array() ), 'nothing known: empty, and the script uses the origin of the page' );
+	}
+);
+
+askai_test(
+	'site address: the result of the filter is used only if it is an http(s) address',
+	function () {
+		$base = 'https://example.com/';
+		askai_same( 'https://example.com/shop/', Askai_Button_Frontend::checked_site_url( 'https://example.com/shop/', $base ) );
+		askai_same( 'http://other.example/', Askai_Button_Frontend::checked_site_url( 'http://other.example/', $base ) );
+		foreach ( array( '', null, false, true, 0, array( 'https://example.com/shop/' ), new stdClass(), 'javascript:alert(1)', '/shop/', 'example.com', 'https://', 'https://example.com/ shop', 'https://example.com/<b>', "https://example.com/'", 'https://example.com/' . str_repeat( 'a', 2000 ) ) as $index => $junk ) {
+			askai_same( $base, Askai_Button_Frontend::checked_site_url( $junk, $base ), 'junk #' . $index . ': unfiltered address' );
+		}
+		$options = Askai_Button_Frontend::build_options( array(), array( 'site_url' => Askai_Button_Frontend::checked_site_url( 'javascript:alert(1)', $base ) ) );
+		askai_same( $base, $options['siteUrl'] );
+	}
+);
+
+askai_test(
+	'a line break at the end does not slip through the checks of addresses, languages and ids',
+	function () {
+		askai_same( false, Askai_Button_Frontend::is_http_url( "https://example.com/\n" ) );
+		askai_same( true, Askai_Button_Frontend::is_http_url( 'https://example.com/' ) );
+		askai_same( '', Askai_Button_Frontend::normalize_lang( "en_US\n" ) );
+		askai_same( 'en-US', Askai_Button_Frontend::normalize_lang( 'en_US' ) );
+		askai_same( array( 'claude' ), Askai_Button_Frontend::normalize_providers( array( "chatgpt\n", 'claude' ) ) );
+		$options = Askai_Button_Frontend::build_options(
+			array(),
+			array(
+				'site_url' => "https://example.com/\n",
+				'url'      => "https://example.com/a/\n",
+				'lang'     => "ja\n",
+			)
+		);
+		askai_same( false, isset( $options['siteUrl'] ) || isset( $options['url'] ) || isset( $options['lang'] ) );
 	}
 );
 

@@ -160,7 +160,8 @@ final class Askai_Button_Admin {
 			);
 			$deps[]            = Askai_Button_Frontend::HANDLE;
 			$data['script']    = add_query_arg( 'ver', ASKAI_BUTTON_VERSION, ASKAI_BUTTON_URL . 'assets/askai-button.min.js' );
-			$data['siteUrl']   = home_url( '/' );
+			// The preview shows the address used by default: the top of the site.
+			$data['siteUrl']   = Askai_Button_Multilingual::site_url( false );
 			$data['siteName']  = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
 			$data['lang']      = Askai_Button_Frontend::normalize_lang( get_locale() );
 			$data['adminLang'] = Askai_Button_Frontend::normalize_lang( determine_locale() );
@@ -546,6 +547,10 @@ final class Askai_Button_Admin {
 					<?php // Not on this screen yet; their stored values travel with the form. ?>
 					<input type="hidden" name="<?php echo esc_attr( self::name( '[use_md_url]' ) ); ?>" value="<?php echo $settings['use_md_url'] ? '1' : '0'; ?>">
 					<input type="hidden" name="<?php echo esc_attr( self::name( '[tracking]' ) ); ?>" value="<?php echo $settings['tracking'] ? '1' : '0'; ?>">
+					<?php if ( ! Askai_Button_Multilingual::admin_info() ) : ?>
+						<?php // Only offered on a multilingual site; elsewhere the stored value is kept. ?>
+						<input type="hidden" name="<?php echo esc_attr( self::name( '[lang_home_url]' ) ); ?>" value="<?php echo $settings['lang_home_url'] ? '1' : '0'; ?>">
+					<?php endif; ?>
 					<?php
 					self::render_display( $settings );
 					self::render_texts( $settings );
@@ -644,6 +649,19 @@ final class Askai_Button_Admin {
 					<p class="description" id="askai-accent-color-help"><?php esc_html_e( 'A colour such as #1a73e8. Leave empty to use the built-in colour. The text on the button is white, so choose a dark colour.', 'askai-button' ); ?></p>
 				</td>
 			</tr>
+			<?php if ( Askai_Button_Multilingual::admin_info() ) : ?>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Site URL passed to the AI', 'askai-button' ); ?></th>
+					<td>
+						<input type="hidden" name="<?php echo esc_attr( self::name( '[lang_home_url]' ) ); ?>" value="0">
+						<label for="askai-lang-home-url">
+							<input type="checkbox" id="askai-lang-home-url" name="<?php echo esc_attr( self::name( '[lang_home_url]' ) ); ?>" value="1" <?php checked( $settings['lang_home_url'] ); ?> aria-describedby="askai-lang-home-url-help">
+							<?php esc_html_e( 'On multilingual sites, pass the front page of the language being viewed', 'askai-button' ); ?>
+						</label>
+						<p class="description" id="askai-lang-home-url-help"><?php esc_html_e( 'Unticked, the top URL of the site (the front page of the default language) is passed on every page, whatever its language. Ticked, each page passes the front page of its own language: an English page passes, for example, https://example.com/en/. The preview on this screen always shows the top URL of the site.', 'askai-button' ); ?></p>
+					</td>
+				</tr>
+			<?php endif; ?>
 		</table>
 		<?php
 	}

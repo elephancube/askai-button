@@ -287,21 +287,89 @@ final class Askai_Button_Multilingual {
 	}
 
 	/**
-	 * Address of the front page in the language of the current page.
+	 * Address of the site handed to the AI service, before the filter.
 	 *
-	 * WPML makes home_url() return it. Polylang does so for themes only, so
-	 * it is asked directly.
-	 *
+	 * @param mixed $lang_home The "front page of the language being viewed" setting.
 	 * @return string
 	 */
-	public static function home_url() {
-		if ( 'polylang' === self::api() && function_exists( 'pll_home_url' ) ) {
-			$url = pll_home_url();
-			if ( is_string( $url ) && '' !== $url ) {
-				return $url;
+	public static function site_url( $lang_home ) {
+		return self::resolve_site_url( $lang_home, self::site_url_facts() );
+	}
+
+	/**
+	 * Chooses the address of the site from what is known about the request.
+	 *
+	 * Without a multilingual plugin it is the front page of the site. With
+	 * one, it is the front page of the site's default language, on every
+	 * page, unless the setting asks for the front page of the language being
+	 * viewed. An address that is missing or not an absolute http(s) address
+	 * is replaced by the front page of the site.
+	 *
+	 * Pure: depends only on its arguments.
+	 *
+	 * @param mixed $lang_home Only true selects the language being viewed.
+	 * @param array $facts     {
+	 *     See site_url_facts().
+	 *
+	 *     @type string $api           `polylang`, `wpml`, or an empty string.
+	 *     @type string $home          Result of home_url( '/' ).
+	 *     @type mixed  $default_home  Front page of the default language.
+	 *     @type mixed  $language_home Front page of the language being viewed.
+	 * }
+	 * @return string
+	 */
+	public static function resolve_site_url( $lang_home, array $facts ) {
+		$home = isset( $facts['home'] ) && is_string( $facts['home'] ) ? $facts['home'] : '';
+		$api  = isset( $facts['api'] ) ? $facts['api'] : '';
+		if ( 'polylang' !== $api && 'wpml' !== $api ) {
+			return $home;
+		}
+		$key = true === $lang_home ? 'language_home' : 'default_home';
+		if ( isset( $facts[ $key ] ) && Askai_Button_Frontend::is_http_url( $facts[ $key ] ) ) {
+			return $facts[ $key ];
+		}
+		return $home;
+	}
+
+	/**
+	 * What the multilingual plugin says about the front pages.
+	 *
+	 * Polylang: home_url() called by a plugin is the root of the site, in
+	 * every language. When the default language has a prefix of its own
+	 * (`/ja/`), the root only redirects, so both front pages are asked for
+	 * by language.
+	 *
+	 * WPML: home_url() is the front page of the language being viewed. The
+	 * one of the default language is obtained by converting that address
+	 * with the documented `wpml_permalink` filter.
+	 *
+	 * @return array See resolve_site_url().
+	 */
+	public static function site_url_facts() {
+		$api   = self::api();
+		$facts = array(
+			'api'           => $api,
+			'home'          => home_url( '/' ),
+			'default_home'  => '',
+			'language_home' => '',
+		);
+
+		if ( 'polylang' === $api && function_exists( 'pll_home_url' ) ) {
+			$facts['language_home'] = pll_home_url();
+			$default                = function_exists( 'pll_default_language' ) ? pll_default_language() : '';
+			if ( is_string( $default ) && '' !== $default ) {
+				$facts['default_home'] = pll_home_url( $default );
+			}
+		} elseif ( 'wpml' === $api ) {
+			$facts['language_home'] = $facts['home'];
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Hook of WPML.
+			$default = apply_filters( 'wpml_default_language', null );
+			if ( is_string( $default ) && '' !== $default ) {
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Hook of WPML.
+				$facts['default_home'] = apply_filters( 'wpml_permalink', $facts['home'], $default );
 			}
 		}
-		return home_url( '/' );
+		return $facts;
 	}
 
 	/**

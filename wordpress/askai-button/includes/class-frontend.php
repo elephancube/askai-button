@@ -192,19 +192,25 @@ final class Askai_Button_Frontend {
 		 */
 		$query_template = apply_filters( 'askai_query_template', $settings['query_template'] );
 
+		$site_url = Askai_Button_Multilingual::site_url( $settings['lang_home_url'] );
+
 		/**
 		 * Filters the address of the site handed to the AI service as `{site_url}`.
 		 *
-		 * The default is the front page of the site. On a multilingual site it
-		 * is the front page in the language of the current page. A value that
-		 * is not an absolute http(s) address is ignored, and the script then
-		 * uses the origin of the page.
+		 * The default is the front page of the site. On a site run with
+		 * Polylang or WPML that is the front page of the default language,
+		 * on every page; with the setting "On multilingual sites, pass the
+		 * front page of the language being viewed" it is the front page of
+		 * the language of the current page. The filter runs last, in both
+		 * cases. A result that is not a string holding an absolute http(s)
+		 * address is ignored and the unfiltered address is used.
 		 *
 		 * @since 0.1.0
 		 *
-		 * @param string $site_url Address of the front page.
+		 * @param string $site_url  Address chosen by the plugin.
+		 * @param bool   $lang_home Whether the setting asks for the front page of the language being viewed.
 		 */
-		$site_url = apply_filters( 'askai_site_url', Askai_Button_Multilingual::home_url() );
+		$site_url = self::checked_site_url( apply_filters( 'askai_site_url', $site_url, $settings['lang_home_url'] ), $site_url );
 
 		$canonical = $post ? wp_get_canonical_url( $post ) : false;
 
@@ -450,7 +456,7 @@ final class Askai_Button_Frontend {
 				continue;
 			}
 			$id = $item['id'];
-			if ( 1 !== preg_match( '/^[A-Za-z0-9_-]{1,40}$/', $id ) || isset( $seen[ $id ] ) ) {
+			if ( 1 !== preg_match( '/^[A-Za-z0-9_-]{1,40}$/D', $id ) || isset( $seen[ $id ] ) ) {
 				continue;
 			}
 
@@ -516,7 +522,7 @@ final class Askai_Button_Frontend {
 	 * @return string Empty if it does not look like a locale.
 	 */
 	public static function normalize_lang( $locale ) {
-		if ( ! is_string( $locale ) || 1 !== preg_match( '/^[A-Za-z]{2,8}(?:[_-][A-Za-z0-9]{1,8})*$/', $locale ) ) {
+		if ( ! is_string( $locale ) || 1 !== preg_match( '/^[A-Za-z]{2,8}(?:[_-][A-Za-z0-9]{1,8})*$/D', $locale ) ) {
 			return '';
 		}
 		return str_replace( '_', '-', $locale );
@@ -669,12 +675,25 @@ final class Askai_Button_Frontend {
 	}
 
 	/**
+	 * The filtered address of the site if it is usable, otherwise the unfiltered one.
+	 *
+	 * Pure: depends only on its arguments.
+	 *
+	 * @param mixed  $filtered   Result of the `askai_site_url` filter.
+	 * @param string $unfiltered Address the filter was given.
+	 * @return string
+	 */
+	public static function checked_site_url( $filtered, $unfiltered ) {
+		return self::is_http_url( $filtered ) ? $filtered : $unfiltered;
+	}
+
+	/**
 	 * True for an absolute http(s) address without characters that do not belong in one.
 	 *
 	 * @param mixed $value Value to check.
 	 * @return bool
 	 */
-	private static function is_http_url( $value ) {
-		return is_string( $value ) && strlen( $value ) <= 2000 && 1 === preg_match( '#^https?://[^\s<>"\'`\\\\]+$#i', $value );
+	public static function is_http_url( $value ) {
+		return is_string( $value ) && strlen( $value ) <= 2000 && 1 === preg_match( '#^https?://[^\s<>"\'`\\\\]+$#iD', $value );
 	}
 }
