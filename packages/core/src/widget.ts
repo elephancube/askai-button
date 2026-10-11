@@ -86,8 +86,12 @@ function button(className: string, text: string, parent: Node, onClick: () => vo
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-/** A decorative sparkle: a large four-pointed star with concave sides and a small one at its upper end. */
-function sparkle(): SVGSVGElement {
+/**
+ * A decorative robot head: rounded head, side ears, an open visor with two eyes, and an antenna.
+ * One filled path with the default nonzero rule. Every shape runs clockwise except the visor,
+ * which runs counter-clockwise to cut a hole that the eyes then fill back in.
+ */
+function robot(): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('fill', 'currentColor');
@@ -96,7 +100,7 @@ function sparkle(): SVGSVGElement {
   const path = document.createElementNS(SVG_NS, 'path');
   path.setAttribute(
     'd',
-    'M10 5Q11.5 12.5 19 14Q11.5 15.5 10 23Q8.5 15.5 1 14Q8.5 12.5 10 5ZM19 1Q19.7 4.3 23 5Q19.7 5.7 19 9Q18.3 5.7 15 5Q18.3 4.3 19 1Z',
+    'M7 8.6h10a3.5 3.5 0 0 1 3.5 3.5v6a3.5 3.5 0 0 1-3.5 3.5H7a3.5 3.5 0 0 1-3.5-3.5v-6A3.5 3.5 0 0 1 7 8.6zM20.5 12.1H22a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.5zM3.5 17.1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1.5zM9 11.2a3.4 3.4 0 0 0 0 6.8h6a3.4 3.4 0 0 0 0-6.8zM7.9 14.6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 1 1-3 0zM13.1 14.6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 1 1-3 0zM10.3 3.8a1.7 1.7 0 1 1 3.4 0 1.7 1.7 0 1 1-3.4 0zM11 5h2v4h-2z',
   );
   svg.appendChild(path);
   return svg;
@@ -167,7 +171,7 @@ export class Widget {
     root.addEventListener('keydown', (event) => this.trapFocus(event));
 
     this.launcher = button('launcher', r.dict.buttonLabel, root, () => (this.isOpen ? this.hide(false) : this.open()));
-    this.launcher.insertBefore(sparkle(), this.launcher.firstChild);
+    this.launcher.insertBefore(robot(), this.launcher.firstChild);
     this.launcher.setAttribute('aria-haspopup', 'dialog');
     this.launcher.setAttribute('aria-expanded', 'false');
 

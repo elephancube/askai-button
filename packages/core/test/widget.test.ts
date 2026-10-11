@@ -1075,6 +1075,15 @@ describe('launcher icon', () => {
     expect(launcher().firstElementChild).toBe(svgs[0]);
   });
 
+  it('is fill-only: no stroke attribute on the svg or its shapes', () => {
+    mount();
+    const svg = launcher().querySelector('svg') as SVGElement;
+    expect(svg.getAttribute('fill')).toBe('currentColor');
+    for (const node of [svg, ...Array.from(svg.querySelectorAll('*'))]) {
+      expect(node.hasAttribute('stroke')).toBe(false);
+    }
+  });
+
   it('is only on the launcher', () => {
     mount().open();
     expect($$('svg')).toHaveLength(1);
