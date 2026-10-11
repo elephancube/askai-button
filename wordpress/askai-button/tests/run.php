@@ -157,6 +157,7 @@ askai_test(
 				'query_template'   => '',
 				'max_length'       => 500,
 				'lang_home_url'    => false,
+				'count_usage'      => false,
 			),
 			Askai_Button_Settings::defaults()
 		);
@@ -246,7 +247,7 @@ askai_test(
 askai_test(
 	'booleans',
 	function () {
-		foreach ( array( 'enabled', 'lang_home_url' ) as $key ) {
+		foreach ( array( 'enabled', 'lang_home_url', 'count_usage' ) as $key ) {
 			$fallback = Askai_Button_Settings::defaults()[ $key ];
 			foreach ( array( true, 1, '1', 'on', 'yes', 'true', ' TRUE ' ) as $value ) {
 				askai_same( true, Askai_Button_Settings::sanitize( array( $key => $value ) )[ $key ], $key . ' ' . var_export( $value, true ) );
@@ -2280,6 +2281,296 @@ askai_test(
 			)
 		);
 		askai_same( false, isset( $options['siteUrl'] ) || isset( $options['url'] ) || isset( $options['lang'] ) );
+	}
+);
+
+/*
+ * Usage counts.
+ */
+
+askai_test(
+	'counts: off by default, and the setting is a boolean like the others',
+	function () {
+		askai_same( false, Askai_Button_Settings::defaults()['count_usage'] );
+		askai_same( false, Askai_Button_Settings::sanitize( array() )['count_usage'] );
+		askai_same( true, Askai_Button_Settings::sanitize( array( 'count_usage' => '1' ) )['count_usage'] );
+		askai_same( false, Askai_Button_Settings::sanitize( array( 'count_usage' => '0' ) )['count_usage'] );
+		askai_same( false, Askai_Button_Settings::sanitize( array( 'count_usage' => array( '1' ) ) )['count_usage'], 'not a boolean: the default' );
+	}
+);
+
+askai_test(
+	'counts: the script is loaded only with counting on, and never for people who can edit',
+	function () {
+		$on  = Askai_Button_Settings::sanitize( array( 'count_usage' => true ) );
+		$off = Askai_Button_Settings::defaults();
+		askai_same( true, Askai_Button_Counter::should_load( $on, false ) );
+		askai_same( false, Askai_Button_Counter::should_load( $on, true ), 'someone who can edit posts' );
+		askai_same( false, Askai_Button_Counter::should_load( $off, false ), 'counting off' );
+		askai_same( false, Askai_Button_Counter::should_load( $off, true ) );
+		askai_same( false, Askai_Button_Counter::should_load( $on, null ), 'unknown capability counts as a reason not to load' );
+		askai_same( false, Askai_Button_Counter::should_load( array( 'count_usage' => '1' ), false ), 'only true switches it on' );
+		askai_same( false, Askai_Button_Counter::should_load( null, false ) );
+	}
+);
+
+askai_test(
+	'counts: which requests are counted, and under which counter',
+	function () {
+		$allowed = array( 'chatgpt', 'claude', 'my-ai_2' );
+		$key     = function ( $event, $provider ) use ( $allowed ) {
+			return Askai_Button_Counter::counter_key( $event, $provider, $allowed );
+		};
+
+		askai_same( 'open', $key( 'open', null ) );
+		askai_same( 'send_chatgpt', $key( 'send', 'chatgpt' ) );
+		askai_same( 'send_claude', $key( 'send', 'claude' ) );
+		askai_same( 'send_my-ai_2', $key( 'send', 'my-ai_2' ) );
+
+		askai_same( null, $key( 'send', null ), 'send without a service' );
+		askai_same( null, $key( 'send', '' ), 'send with an empty service' );
+		askai_same( null, $key( 'send', 'googleai' ), 'a service that is not offered at the moment' );
+		askai_same( null, $key( 'send', 'Claude' ), 'ids are case sensitive' );
+		askai_same( null, $key( 'open', 'claude' ), 'open with a service' );
+		askai_same( null, $key( 'open', '' ), 'open with an empty service' );
+		foreach ( array( 'OPEN', 'click', '', ' open', "open\n", null, 1, true, array( 'open' ), new stdClass() ) as $event ) {
+			askai_same( null, $key( $event, null ), 'event ' . var_export( $event, true ) );
+			askai_same( null, $key( $event, 'claude' ), 'event ' . var_export( $event, true ) . ' with a service' );
+		}
+		foreach ( array( '<script>', "claude' OR '1'='1", 'claude;--', 'cl aude', "claude\n", 'claude%', '../claude', str_repeat( 'a', 41 ), array( 'claude' ), 7, true, new stdClass() ) as $provider ) {
+			askai_same( null, $key( 'send', $provider ), 'service ' . var_export( $provider, true ) );
+		}
+		askai_same( null, Askai_Button_Counter::counter_key( 'send', 'claude', array() ), 'no service offered' );
+		askai_same( null, Askai_Button_Counter::counter_key( 'send', '<b>', array( '<b>' ) ), 'an id that is not well formed is refused even if it were allowed' );
+
+		askai_same( true, Askai_Button_Counter::is_event( 'open' ) );
+		askai_same( true, Askai_Button_Counter::is_event( 'send' ) );
+		askai_same( false, Askai_Button_Counter::is_event( array( 'open' ) ) );
+		askai_same( false, Askai_Button_Counter::is_event( 'opens' ) );
+		askai_same( true, Askai_Button_Counter::is_provider_id( 'a' ) );
+		askai_same( true, Askai_Button_Counter::is_provider_id( str_repeat( 'a', 40 ) ) );
+		askai_same( false, Askai_Button_Counter::is_provider_id( '' ) );
+		askai_same( false, Askai_Button_Counter::is_provider_id( array( 'a' ) ) );
+	}
+);
+
+askai_test(
+	'counts: the ids that are accepted are those the front end outputs, after the filter',
+	function () {
+		$settings = Askai_Button_Settings::sanitize( array( 'providers' => array( 'claude' => array( 'enabled' => '0' ) ) ) );
+		askai_same( array( 'chatgpt', 'googleai' ), Askai_Button_Frontend::provider_ids( Askai_Button_Frontend::providers_from_settings( $settings ) ) );
+
+		$GLOBALS['askai_test_hooks']['filters']['askai_providers'] = function ( $providers ) {
+			$providers[] = array(
+				'id'          => 'example',
+				'name'        => 'Example AI',
+				'urlTemplate' => 'https://ai.example.com/?q={query}',
+			);
+			$providers[] = array( 'id' => 'incomplete' );
+			$providers[] = array(
+				'id'          => '<bad>',
+				'name'        => 'Bad',
+				'urlTemplate' => 'https://ai.example.com/?q={query}',
+			);
+			return $providers;
+		};
+		$ids = Askai_Button_Frontend::provider_ids( Askai_Button_Frontend::filtered_providers( $settings ) );
+		unset( $GLOBALS['askai_test_hooks']['filters']['askai_providers'] );
+
+		askai_same( array( 'chatgpt', 'googleai', 'example' ), $ids, 'the added service is accepted; incomplete and malformed entries are not' );
+		askai_same( array(), Askai_Button_Frontend::provider_ids( 'chatgpt' ), 'a filter result that is not a list' );
+	}
+);
+
+askai_test(
+	'counts: requests started by another site are recognised',
+	function () {
+		askai_same( false, Askai_Button_Counter::is_cross_site( null ), 'no header: an older browser' );
+		askai_same( false, Askai_Button_Counter::is_cross_site( '' ) );
+		askai_same( false, Askai_Button_Counter::is_cross_site( 'same-origin' ) );
+		askai_same( false, Askai_Button_Counter::is_cross_site( 'same-site' ) );
+		askai_same( true, Askai_Button_Counter::is_cross_site( 'cross-site' ) );
+		askai_same( true, Askai_Button_Counter::is_cross_site( 'none' ) );
+		askai_same( true, Askai_Button_Counter::is_cross_site( 'Same-Origin' ), 'browsers send lower case; anything else is not trusted' );
+		askai_same( true, Askai_Button_Counter::is_cross_site( array( 'same-origin' ) ) );
+	}
+);
+
+askai_test(
+	'counts: month keys and option names',
+	function () {
+		foreach ( array( '2026-01', '2026-10', '2026-12', '1999-09' ) as $month ) {
+			askai_same( true, Askai_Button_Counter::is_month( $month ), $month );
+		}
+		foreach ( array( '2026-00', '2026-13', '2026-1', '26-10', '2026/10', '2026-10-01', " 2026-10", "2026-10\n", '', null, 202610, array( '2026-10' ) ) as $month ) {
+			askai_same( false, Askai_Button_Counter::is_month( $month ), var_export( $month, true ) );
+		}
+
+		$GLOBALS['askai_test_date'] = '2026-10';
+		askai_same( '2026-10', Askai_Button_Counter::current_month(), 'the month comes from wp_date(), which uses the time zone of the site' );
+		askai_same( array( 'Y-m' ), $GLOBALS['askai_test_date_formats'] );
+
+		askai_same( 'askai_count_2026-10_open', Askai_Button_Counter::option_name( '2026-10', 'open' ) );
+		askai_same( 'askai_count_2026-10_send_chatgpt', Askai_Button_Counter::option_name( '2026-10', 'send_chatgpt' ) );
+		askai_same( '', Askai_Button_Counter::option_name( '2026-13', 'open' ), 'no such month' );
+		askai_same( '', Askai_Button_Counter::option_name( '2026-10', 'opened' ), 'no such counter' );
+		askai_same( '', Askai_Button_Counter::option_name( '2026-10', 'send_' ) );
+		askai_same( '', Askai_Button_Counter::option_name( '2026-10', "send_a' OR 1=1" ) );
+		askai_same( '', Askai_Button_Counter::option_name( '2026-10', 'send_' . str_repeat( 'a', 41 ) ) );
+		askai_true( strlen( Askai_Button_Counter::option_name( '2026-10', 'send_' . str_repeat( 'a', 40 ) ) ) <= 191, 'the longest name fits the column' );
+
+		askai_same( array( '2026-10', 'open' ), Askai_Button_Counter::parse_option_name( 'askai_count_2026-10_open' ) );
+		askai_same( array( '2026-10', 'send_my-ai_2' ), Askai_Button_Counter::parse_option_name( 'askai_count_2026-10_send_my-ai_2' ) );
+		foreach ( array( 'askai_settings', 'askai_count_', 'askai_count_2026-10', 'askai_count_2026-10_', 'askai_count_2026-10-open', 'askai_count_2026-13_open', 'askai_count_2026-10_open2', 'askai_count_2026-10_send_', 'xaskai_count_2026-10_open', null, 5, array() ) as $name ) {
+			askai_same( null, Askai_Button_Counter::parse_option_name( $name ), var_export( $name, true ) );
+		}
+	}
+);
+
+askai_test(
+	'counts: rows of the options table become numbers',
+	function () {
+		$row = function ( $name, $value ) {
+			return array(
+				'option_name'  => $name,
+				'option_value' => $value,
+			);
+		};
+		askai_same(
+			array(
+				'2026-10' => array(
+					'open'        => 12,
+					'send_claude' => 3,
+				),
+				'2026-09' => array( 'open' => 1 ),
+			),
+			Askai_Button_Counter::collect(
+				array(
+					$row( 'askai_count_2026-10_open', '12' ),
+					$row( 'askai_count_2026-10_send_claude', 3 ),
+					$row( 'askai_count_2026-09_open', '1' ),
+					$row( 'askai_count_2026-09_send_claude', 'abc' ),
+					$row( 'askai_count_2026-09_send_chatgpt', array( 1 ) ),
+					$row( 'askai_settings', '5' ),
+					$row( 'askai_count_2026-13_open', '5' ),
+					array( 'option_name' => 'askai_count_2026-10_open' ),
+					'not a row',
+				)
+			)
+		);
+		askai_same( array( '2026-10' => array( 'open' => 0 ) ), Askai_Button_Counter::collect( array( $row( 'askai_count_2026-10_open', '-4' ) ) ), 'a negative value counts as nothing' );
+		askai_same( array( '2026-10' => array( 'send_Foo' => 2, 'send_foo' => 3 ) ), Askai_Button_Counter::collect( array( $row( 'askai_count_2026-10_send_Foo', '2' ), $row( 'askai_count_2026-10_send_foo', '3' ) ) ) );
+		askai_same( array(), Askai_Button_Counter::collect( array() ) );
+	}
+);
+
+askai_test(
+	'counts: the table has the newest month first, every column in every row, and totals',
+	function () {
+		$builtin = array( 'chatgpt', 'claude', 'googleai' );
+		$columns = array( 'open', 'send_chatgpt', 'send_claude', 'send_googleai' );
+
+		$empty = Askai_Button_Counter::table( array(), '2026-10', $builtin );
+		askai_same( $columns, $empty['columns'] );
+		askai_same( array( '2026-10' => array_fill_keys( $columns, 0 ) ), $empty['rows'], 'the current month is shown with zeros' );
+		askai_same( array_fill_keys( $columns, 0 ), $empty['totals'] );
+		askai_same( false, $empty['has_data'] );
+
+		$table = Askai_Button_Counter::table(
+			array(
+				'2026-09' => array(
+					'open'         => 5,
+					'send_claude'  => 2,
+					'send_example' => 1,
+				),
+				'2026-11' => array(
+					'open'         => 2,
+					'send_chatgpt' => 1,
+					'send_claude'  => 2,
+					'send_another' => 0,
+				),
+				'2025-12' => array( 'send_googleai' => 4 ),
+				'nonsense' => array( 'open' => 99 ),
+				'2026-08' => 'not a row',
+			),
+			'2026-11',
+			$builtin
+		);
+		askai_same( array( 'open', 'send_chatgpt', 'send_claude', 'send_googleai', 'send_example' ), $table['columns'], 'a service that is not built in gets a column once it has a count' );
+		askai_same( array( '2026-11', '2026-09', '2025-12' ), array_keys( $table['rows'] ) );
+		askai_same(
+			array(
+				'open'          => 2,
+				'send_chatgpt'  => 1,
+				'send_claude'   => 2,
+				'send_googleai' => 0,
+				'send_example'  => 0,
+			),
+			$table['rows']['2026-11']
+		);
+		askai_same(
+			array(
+				'open'          => 7,
+				'send_chatgpt'  => 1,
+				'send_claude'   => 4,
+				'send_googleai' => 4,
+				'send_example'  => 1,
+			),
+			$table['totals']
+		);
+		askai_same( true, $table['has_data'] );
+
+		$later = Askai_Button_Counter::table( array( '2026-09' => array( 'open' => 1 ) ), '2026-11', $builtin );
+		askai_same( array( '2026-11', '2026-09' ), array_keys( $later['rows'] ), 'the current month is added when it has no count yet' );
+
+		$zeros = Askai_Button_Counter::table( array( '2026-09' => array( 'open' => 0 ) ), '2026-09', $builtin );
+		askai_same( false, $zeros['has_data'], 'rows of zeros are not data' );
+	}
+);
+
+askai_test(
+	'counts: CSV cells are quoted, and nothing can start a formula',
+	function () {
+		askai_same( '"12"', Askai_Button_Counter::csv_cell( 12 ) );
+		askai_same( '"2026-10"', Askai_Button_Counter::csv_cell( '2026-10' ) );
+		askai_same( '"a ""b"", c"', Askai_Button_Counter::csv_cell( 'a "b", c' ) );
+		askai_same( "\"'=1+1\"", Askai_Button_Counter::csv_cell( '=1+1' ) );
+		askai_same( "\"'+1\"", Askai_Button_Counter::csv_cell( '+1' ) );
+		askai_same( "\"'-cmd\"", Askai_Button_Counter::csv_cell( '-cmd' ) );
+		askai_same( "\"'@SUM(A1)\"", Askai_Button_Counter::csv_cell( '@SUM(A1)' ) );
+		askai_same( "\"'\t=1\"", Askai_Button_Counter::csv_cell( "\t=1" ) );
+		askai_same( "\"'\r=1\"", Askai_Button_Counter::csv_cell( "\r=1" ) );
+		askai_same( '""', Askai_Button_Counter::csv_cell( '' ) );
+		askai_same( '""', Askai_Button_Counter::csv_cell( array( '=1' ) ) );
+		askai_same( '"0"', Askai_Button_Counter::csv_cell( 0 ) );
+
+		askai_same( "\xEF\xBB\xBF\"a\",\"b\"\r\n\"1\",\"2\"\r\n", Askai_Button_Counter::csv( array( 'a', 'b' ), array( array( 1, 2 ) ) ) );
+
+		$table = Askai_Button_Counter::table(
+			array(
+				'2026-10' => array(
+					'open'       => 1234,
+					'send_-evil' => 2,
+				),
+				'2026-09' => array( 'send_claude' => 3 ),
+			),
+			'2026-10',
+			array( 'chatgpt', 'claude' )
+		);
+		$csv   = Askai_Button_Admin::counts_csv(
+			$table,
+			array(
+				'open'         => 'Ask AI',
+				'send_chatgpt' => 'ChatGPT',
+				'send_claude'  => '=Claude',
+			),
+			'Month'
+		);
+		askai_same(
+			"\xEF\xBB\xBF\"Month\",\"Ask AI\",\"ChatGPT\",\"'=Claude\",\"send_-evil\"\r\n\"2026-10\",\"1234\",\"0\",\"0\",\"2\"\r\n\"2026-09\",\"0\",\"0\",\"3\",\"0\"\r\n",
+			$csv,
+			'numbers are plain digits; a heading that starts a formula is neutralised'
+		);
 	}
 );
 

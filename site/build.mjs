@@ -556,7 +556,7 @@ ${[...LANGS.map((code) => [code, code]), ['x-default', FALLBACK_LANG]]
     'llms.txt',
     `# ${SITE_NAME}
 
-> ${STRINGS.en.tagline}. The visitor types a question and picks ChatGPT, Claude or Google AI Mode; that service opens in a new tab with the question and the address of the site filled in. No API, no server, no tracking. A JavaScript library (MIT) and a WordPress plugin (GPL-2.0-or-later), version ${version}.
+> ${STRINGS.en.tagline}. The visitor types a question and picks ChatGPT, Claude or Google AI Mode; that service opens in a new tab with the question and the address of the site filled in. No API, no server, no tracking. A JavaScript library (MIT) and a WordPress plugin (GPL-2.0-or-later), version ${version}. The plugin can optionally keep monthly click totals in the site's own database.
 
 Every page of this site exists as HTML and as Markdown. The Markdown copy of a page is the file index.md in the directory of that page. The pages are available in English and in Japanese with the same content.
 

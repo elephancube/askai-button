@@ -1,6 +1,7 @@
 <?php
 /**
- * Removes everything the plugin stored: one option and two post meta keys.
+ * Removes everything the plugin stored: its settings, two post meta keys and
+ * the usage counts.
  *
  * @package Askai_Button
  */
@@ -15,9 +16,23 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  * @return void
  */
 function askai_button_uninstall_site() {
+	global $wpdb;
+
 	delete_option( 'askai_settings' );
 	delete_post_meta_by_key( '_askai_disabled' );
 	delete_post_meta_by_key( '_askai_presets' );
+
+	// The usage counts: one option per month and counter, named `askai_count_<YYYY-MM>_<counter>`.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- The options API cannot list options by the start of their name. Each one is then removed with delete_option().
+	$askai_names = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+			$wpdb->esc_like( 'askai_count_' ) . '%'
+		)
+	);
+	foreach ( is_array( $askai_names ) ? $askai_names : array() as $askai_name ) {
+		delete_option( $askai_name );
+	}
 }
 
 if ( is_multisite() ) {

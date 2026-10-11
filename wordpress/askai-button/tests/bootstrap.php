@@ -72,6 +72,19 @@ function wp_json_encode( $data, $flags = 0, $depth = 512 ) {
 	return json_encode( $data, $flags, $depth ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 }
 
+/**
+ * Simplified: returns the text a test put in `$GLOBALS['askai_test_date']`
+ * and records the format that was asked for. WordPress formats the current
+ * time in the time zone of the site.
+ *
+ * @param string $format Format, as for date().
+ * @return string
+ */
+function wp_date( $format ) {
+	$GLOBALS['askai_test_date_formats'][] = $format;
+	return isset( $GLOBALS['askai_test_date'] ) ? $GLOBALS['askai_test_date'] : gmdate( $format );
+}
+
 /*
  * Hooks. Nothing is attached by default; a test lists the hooks that exist in
  * `$GLOBALS['askai_test_hooks']['present']` and provides the answers of
@@ -153,4 +166,5 @@ function admin_url( $path = '' ) {
 require_once dirname( __DIR__ ) . '/includes/class-settings.php';
 require_once dirname( __DIR__ ) . '/includes/class-multilingual.php';
 require_once dirname( __DIR__ ) . '/includes/class-frontend.php';
+require_once dirname( __DIR__ ) . '/includes/class-counter.php';
 require_once dirname( __DIR__ ) . '/includes/class-admin.php';

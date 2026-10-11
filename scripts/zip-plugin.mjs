@@ -22,6 +22,8 @@ const REQUIRED = [
   'readme.txt',
   'LICENSE',
   'assets/askai-button.min.js',
+  'assets/counter.js',
+  'includes/class-counter.php',
   `languages/${SLUG}.pot`,
 ];
 

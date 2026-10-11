@@ -274,3 +274,42 @@
 	display: block;
 	margin-block-start: 4px;
 }
+
+/* Usage counts. */
+
+.askai-usage {
+	margin-block-start: 24px;
+	max-inline-size: 900px;
+}
+
+.askai-usage-scroll {
+	overflow-x: auto;
+}
+
+.askai-usage-table caption {
+	padding-block: 8px;
+	font-weight: 600;
+	text-align: start;
+}
+
+.askai-usage-table th,
+.askai-usage-table td {
+	white-space: nowrap;
+}
+
+.askai-usage-table .askai-usage-number {
+	text-align: end;
+	font-variant-numeric: tabular-nums;
+}
+
+.askai-usage-table tfoot th,
+.askai-usage-table tfoot td {
+	font-weight: 600;
+}
+
+.askai-usage-reset {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+}

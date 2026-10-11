@@ -56,7 +56,7 @@ init({
 
 ## WordPress
 
-プラグインは [`wordpress/askai-button/`](wordpress/askai-button/) にあります。ボタンの表示と設定画面（設定 > AIに質問）を追加します。導入方法などは [`readme.txt`](wordpress/askai-button/readme.txt)（英語）と、ドキュメントサイトの [WordPress のページ](https://elephancube.github.io/askai-button/wordpress/)を参照してください。
+プラグインは [`wordpress/askai-button/`](wordpress/askai-button/) にあります。ボタンの表示と設定画面（設定 > AIに質問）を追加します。設定でオンにした場合に限り（標準はオフ）、ボタンと各AIサービスが使われた回数の月ごとの合計を、サイト自身のデータベースに保存します。質問の内容や訪問者に関する情報は保存しません。導入方法などは [`readme.txt`](wordpress/askai-button/readme.txt)（英語）と、ドキュメントサイトの [WordPress のページ](https://elephancube.github.io/askai-button/wordpress/)を参照してください。
 
 ## しないこと
 

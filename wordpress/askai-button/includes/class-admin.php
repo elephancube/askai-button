@@ -38,6 +38,12 @@ final class Askai_Button_Admin {
 	const META_NONCE_NAME   = 'askai_meta_nonce';
 
 	/**
+	 * Actions of the usage counts, each also the name of its nonce.
+	 */
+	const CSV_ACTION   = 'askai_counts_csv';
+	const RESET_ACTION = 'askai_counts_reset';
+
+	/**
 	 * Hooks into WordPress.
 	 *
 	 * @return void
@@ -49,6 +55,8 @@ final class Askai_Button_Admin {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_meta' ), 10, 2 );
+		add_action( 'admin_post_' . self::CSV_ACTION, array( __CLASS__, 'download_counts' ) );
+		add_action( 'admin_post_' . self::RESET_ACTION, array( __CLASS__, 'reset_counts' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( ASKAI_BUTTON_FILE ), array( __CLASS__, 'action_links' ) );
 	}
 
@@ -554,11 +562,13 @@ final class Askai_Button_Admin {
 					self::render_presets( $settings );
 					self::render_providers( $settings );
 					self::render_query( $settings );
+					self::render_counting( $settings );
 					submit_button();
 					?>
 				</form>
 				<?php self::render_preview(); ?>
 			</div>
+			<?php self::render_usage( $settings ); ?>
 		</div>
 		<?php
 	}
@@ -929,6 +939,195 @@ final class Askai_Button_Admin {
 			</tr>
 		</table>
 		<?php
+	}
+
+	/**
+	 * Section "Usage counts": the switch. The numbers are shown by render_usage().
+	 *
+	 * @param array $settings Settings.
+	 * @return void
+	 */
+	private static function render_counting( array $settings ) {
+		?>
+		<h2><?php esc_html_e( 'Usage counts', 'askai-button' ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Counting', 'askai-button' ); ?></th>
+				<td>
+					<input type="hidden" name="<?php echo esc_attr( self::name( '[count_usage]' ) ); ?>" value="0">
+					<label for="askai-count-usage">
+						<input type="checkbox" id="askai-count-usage" name="<?php echo esc_attr( self::name( '[count_usage]' ) ); ?>" value="1" <?php checked( $settings['count_usage'] ); ?> aria-describedby="askai-count-usage-help">
+						<?php esc_html_e( 'Count how often the button and each AI service are used', 'askai-button' ); ?>
+					</label>
+					<p class="description" id="askai-count-usage-help"><?php esc_html_e( 'Only monthly totals are stored, in the database of this site: how often the button opened the panel, and how often a question was sent to each AI service. Nothing is sent anywhere else. The question, the page, and anything about the visitor (IP address, browser, cookies, account) are never stored. The numbers are approximate: bots and repeated clicks are counted, and clicks of logged-in users who can edit posts are not.', 'askai-button' ); ?></p>
+				</td>
+			</tr>
+		</table>
+		<?php
+	}
+
+	/*
+	 * The usage counts.
+	 */
+
+	/**
+	 * Heading of a column of the usage table.
+	 *
+	 * @param string $key Counter: `open`, or `send_` and the id of an AI service.
+	 * @return string Plain text, not escaped.
+	 */
+	private static function counter_label( $key ) {
+		if ( Askai_Button_Counter::KEY_OPEN === $key ) {
+			return __( 'Ask AI', 'askai-button' );
+		}
+		$id    = substr( $key, 5 );
+		$names = self::provider_names();
+		return isset( $names[ $id ] ) ? $names[ $id ] : $id;
+	}
+
+	/**
+	 * Section "Usage": the counts, the download and the reset. Outside the
+	 * settings form, so that saving the settings never touches the counts.
+	 *
+	 * @param array $settings Settings.
+	 * @return void
+	 */
+	private static function render_usage( array $settings ) {
+		$table = Askai_Button_Counter::table( Askai_Button_Counter::read(), Askai_Button_Counter::current_month(), Askai_Button_Settings::provider_ids() );
+		?>
+		<div class="askai-usage" id="askai-usage">
+			<h2><?php esc_html_e( 'Usage', 'askai-button' ); ?></h2>
+			<?php if ( ! $settings['count_usage'] && ! $table['has_data'] ) : ?>
+				<p><?php esc_html_e( 'Nothing is counted at the moment. To start, tick "Count how often the button and each AI service are used" under "Usage counts" and save.', 'askai-button' ); ?></p>
+			<?php else : ?>
+				<?php if ( ! $settings['count_usage'] ) : ?>
+					<p class="askai-warning"><?php esc_html_e( 'Counting is switched off at the moment. The counts below are kept.', 'askai-button' ); ?></p>
+				<?php endif; ?>
+				<p id="askai-usage-help"><?php esc_html_e( 'Monthly totals: how often the button opened the panel, and how often a question was sent to each AI service. The numbers are approximate.', 'askai-button' ); ?></p>
+				<div class="askai-usage-scroll">
+					<table class="widefat striped askai-usage-table" aria-describedby="askai-usage-help">
+						<caption><?php esc_html_e( 'Usage by month', 'askai-button' ); ?></caption>
+						<thead>
+							<tr>
+								<th scope="col"><?php esc_html_e( 'Month', 'askai-button' ); ?></th>
+								<?php foreach ( $table['columns'] as $key ) : ?>
+									<th scope="col" class="askai-usage-number"><?php echo esc_html( self::counter_label( $key ) ); ?></th>
+								<?php endforeach; ?>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach ( $table['rows'] as $month => $row ) : ?>
+								<tr>
+									<th scope="row"><?php echo esc_html( $month ); ?></th>
+									<?php foreach ( $table['columns'] as $key ) : ?>
+										<td class="askai-usage-number"><?php echo esc_html( number_format_i18n( $row[ $key ] ) ); ?></td>
+									<?php endforeach; ?>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+						<tfoot>
+							<tr>
+								<th scope="row"><?php esc_html_e( 'Total', 'askai-button' ); ?></th>
+								<?php foreach ( $table['columns'] as $key ) : ?>
+									<td class="askai-usage-number"><?php echo esc_html( number_format_i18n( $table['totals'][ $key ] ) ); ?></td>
+								<?php endforeach; ?>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				<?php if ( $table['has_data'] ) : ?>
+					<p>
+						<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=' . self::CSV_ACTION ), self::CSV_ACTION ) ); ?>"><?php esc_html_e( 'Download CSV', 'askai-button' ); ?></a>
+					</p>
+					<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" class="askai-usage-reset">
+						<input type="hidden" name="action" value="<?php echo esc_attr( self::RESET_ACTION ); ?>">
+						<?php wp_nonce_field( self::RESET_ACTION ); ?>
+						<label for="askai-reset-confirm">
+							<input type="checkbox" id="askai-reset-confirm" name="askai_confirm" value="1" required>
+							<?php esc_html_e( 'Delete all counts of every month. This cannot be undone.', 'askai-button' ); ?>
+						</label>
+						<?php submit_button( __( 'Reset counts', 'askai-button' ), 'delete', 'askai-reset', false ); ?>
+					</form>
+				<?php endif; ?>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * The counts as a CSV file: one line per month, newest first.
+	 *
+	 * Pure apart from Askai_Button_Counter::csv().
+	 *
+	 * @param array    $table  Result of Askai_Button_Counter::table().
+	 * @param string[] $labels Counter => heading of its column.
+	 * @param string   $month  Heading of the first column.
+	 * @return string
+	 */
+	public static function counts_csv( array $table, array $labels, $month ) {
+		$header = array( $month );
+		foreach ( $table['columns'] as $key ) {
+			$header[] = isset( $labels[ $key ] ) ? $labels[ $key ] : $key;
+		}
+		$lines = array();
+		foreach ( $table['rows'] as $name => $row ) {
+			$line = array( $name );
+			foreach ( $table['columns'] as $key ) {
+				$line[] = (int) $row[ $key ];
+			}
+			$lines[] = $line;
+		}
+		return Askai_Button_Counter::csv( $header, $lines );
+	}
+
+	/**
+	 * Sends the counts as a CSV file. Administrators only.
+	 *
+	 * @return void
+	 */
+	public static function download_counts() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to do this.', 'askai-button' ), '', array( 'response' => 403 ) );
+		}
+		check_admin_referer( self::CSV_ACTION );
+
+		$table  = Askai_Button_Counter::table( Askai_Button_Counter::read(), Askai_Button_Counter::current_month(), Askai_Button_Settings::provider_ids() );
+		$labels = array();
+		foreach ( $table['columns'] as $key ) {
+			$labels[ $key ] = self::counter_label( $key );
+		}
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="askai-button-counts-' . wp_date( 'Y-m-d' ) . '.csv"' );
+		header( 'X-Content-Type-Options: nosniff' );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- A CSV file, not HTML. Every cell is quoted and neutralised by Askai_Button_Counter::csv_cell().
+		echo self::counts_csv( $table, $labels, __( 'Month', 'askai-button' ) );
+		exit;
+	}
+
+	/**
+	 * Removes all counts. Administrators only, and only with the box ticked.
+	 *
+	 * @return void
+	 */
+	public static function reset_counts() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to do this.', 'askai-button' ), '', array( 'response' => 403 ) );
+		}
+		check_admin_referer( self::RESET_ACTION );
+
+		if ( isset( $_POST['askai_confirm'] ) && '1' === $_POST['askai_confirm'] ) {
+			Askai_Button_Counter::reset();
+			add_settings_error( Askai_Button_Settings::OPTION, 'askai_counts_reset', esc_html__( 'All counts were deleted.', 'askai-button' ), 'success' );
+		} else {
+			add_settings_error( Askai_Button_Settings::OPTION, 'askai_counts_kept', esc_html__( 'Nothing was deleted: tick the box next to "Reset counts" to confirm.', 'askai-button' ), 'error' );
+		}
+
+		// Shown by the settings screen after the redirect, like the messages of a saved form.
+		set_transient( 'settings_errors', get_settings_errors(), 30 );
+		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( 'options-general.php?page=' . self::PAGE ) ) . '#askai-usage' );
+		exit;
 	}
 
 	/**

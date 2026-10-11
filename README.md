@@ -56,7 +56,7 @@ The button follows the page language (`lang` option, then `<html lang>`, then th
 
 ## WordPress
 
-The plugin is in [`wordpress/askai-button/`](wordpress/askai-button/). It adds the button and a settings screen (Settings > Ask AI). Installation and details: see its [`readme.txt`](wordpress/askai-button/readme.txt) and the [WordPress page](https://elephancube.github.io/askai-button/en/wordpress/) of the documentation site.
+The plugin is in [`wordpress/askai-button/`](wordpress/askai-button/). It adds the button and a settings screen (Settings > Ask AI). Optionally, and off by default, it keeps monthly totals of how often the button and each AI service are used, in the database of the site itself; the question and anything about the visitor are never stored. Installation and details: see its [`readme.txt`](wordpress/askai-button/readme.txt) and the [WordPress page](https://elephancube.github.io/askai-button/en/wordpress/) of the documentation site.
 
 ## What it does not do
 

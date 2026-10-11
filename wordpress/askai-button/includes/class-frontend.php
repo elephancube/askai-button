@@ -164,21 +164,7 @@ final class Askai_Button_Frontend {
 		 */
 		$presets = apply_filters( 'askai_presets', self::pick_presets( $settings, $page_presets ), $post );
 
-		/**
-		 * Filters the AI services handed to the script.
-		 *
-		 * Each entry is either the id of a built-in service (`chatgpt`, `claude`,
-		 * `googleai`) or an array with the keys `id` and, optionally, `name`,
-		 * `urlTemplate`, `method` (`url` or `copy_and_open`) and `color` (hex).
-		 * A service that is not built in needs a `name` and a `urlTemplate`
-		 * that starts with `https://` and contains `{query}`. Entries that do
-		 * not meet these rules are dropped.
-		 *
-		 * @since 0.1.0
-		 *
-		 * @param array $providers Enabled services, in the order they are shown.
-		 */
-		$providers = apply_filters( 'askai_providers', self::providers_from_settings( $settings ) );
+		$providers = self::filtered_providers( $settings );
 
 		/**
 		 * Filters the template of the text handed to the AI service.
@@ -252,6 +238,52 @@ final class Askai_Button_Frontend {
 			array( 'in_footer' => true )
 		);
 		wp_add_inline_script( self::HANDLE, $inline, 'after' );
+
+		if ( Askai_Button_Counter::should_load( $settings, current_user_can( 'edit_posts' ) ) ) {
+			Askai_Button_Counter::enqueue();
+		}
+	}
+
+	/**
+	 * The AI services of the settings, after the `askai_providers` filter.
+	 *
+	 * The result is not checked yet: see normalize_providers().
+	 *
+	 * @param array $settings Settings.
+	 * @return mixed
+	 */
+	public static function filtered_providers( array $settings ) {
+		/**
+		 * Filters the AI services handed to the script.
+		 *
+		 * Each entry is either the id of a built-in service (`chatgpt`, `claude`,
+		 * `googleai`) or an array with the keys `id` and, optionally, `name`,
+		 * `urlTemplate`, `method` (`url` or `copy_and_open`) and `color` (hex).
+		 * A service that is not built in needs a `name` and a `urlTemplate`
+		 * that starts with `https://` and contains `{query}`. Entries that do
+		 * not meet these rules are dropped.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param array $providers Enabled services, in the order they are shown.
+		 */
+		return apply_filters( 'askai_providers', self::providers_from_settings( $settings ) );
+	}
+
+	/**
+	 * Ids of the AI services in a list, after the checks of normalize_providers().
+	 *
+	 * Pure: depends only on its argument.
+	 *
+	 * @param mixed $providers List of ids and definitions.
+	 * @return string[]
+	 */
+	public static function provider_ids( $providers ) {
+		$ids = array();
+		foreach ( self::normalize_providers( $providers ) as $provider ) {
+			$ids[] = is_array( $provider ) ? $provider['id'] : $provider;
+		}
+		return $ids;
 	}
 
 	/**

@@ -105,6 +105,7 @@ final class Askai_Button_Settings {
 			'query_template'   => '',
 			'max_length'       => 500,
 			'lang_home_url'    => false,
+			'count_usage'      => false,
 		);
 	}
 
@@ -170,6 +171,7 @@ final class Askai_Button_Settings {
 		$out['max_length']     = self::to_int( self::pick( $input, 'max_length' ), $defaults['max_length'], 1, self::MAX_QUESTION_LENGTH );
 
 		$out['lang_home_url'] = self::to_bool( self::pick( $input, 'lang_home_url' ), $defaults['lang_home_url'] );
+		$out['count_usage']   = self::to_bool( self::pick( $input, 'count_usage' ), $defaults['count_usage'] );
 
 		return $out;
 	}

@@ -13,7 +13,7 @@ For the installation steps, see "[Install]({{page:install}}#wordpress)".
 - WordPress 6.4 or later
 - PHP 7.4 or later
 
-After activation the button appears on the public pages of the site with its default settings. The plugin calls no AI API and needs no API key. Your server makes no requests to anyone.
+After activation the button appears on the public pages of the site with its default settings. The plugin calls no AI API and needs no API key. Your server makes no requests to anyone. With the default settings it stores nothing about the use of the button; the optional "[Usage counts](#usage)" keep monthly totals on your own site.
 
 ## The settings screen {#settings}
 
@@ -66,6 +66,12 @@ The URL formats are not documented by the services and can change without notice
 
 `{site_url}` is the address of the front page of the site (`home_url('/')`). On a site run with Polylang or WPML it is the front page of the default language, on pages of every language, unless the setting "On multilingual sites, pass the front page of the language being viewed" is ticked. To hand over the address of the page the visitor is on, use `{url}` in the template.
 
+### Usage counts
+
+| Setting | Meaning |
+| --- | --- |
+| Count how often the button and each AI service are used | Off by default. When ticked, the plugin keeps monthly totals on your site. See "[Usage counts](#usage)". |
+
 ### Preview
 
 The settings screen has a preview that shows the button and the panel with the values of the form before they are saved. With a sample question it also shows the URL that would be opened. The preview and the buttons that reorder items need JavaScript; every setting can be edited and saved without it.
@@ -76,6 +82,23 @@ The edit screen of posts, pages and other public post types gets a box named "As
 
 - **Do not show the button on this page**: when ticked, the button is left out on that page.
 - **Questions for this page**: up to six. When any are set, they replace the preset questions of the site on that page.
+
+## Usage counts {#usage}
+
+Counting is off by default. When you tick "Count how often the button and each AI service are used" under "Settings > Ask AI" and save, the plugin counts four things per calendar month, in the time zone of the site:
+
+- how often the "Ask AI" button opened the panel
+- how often a question was sent to ChatGPT, to Claude and to Google AI Mode
+
+A service added with the `askai_providers` filter is counted under its id and gets a column of its own.
+
+**What is stored.** One whole number per month and counter, in the database of your own site (the options table; the rows are not loaded on ordinary page views). Nothing else is stored: not the question, not the address of the page, no IP address, no browser information, no cookie, no account, and no time finer than the month.
+
+**How a click is reported.** While counting is on, pages that show the button also load a small script, `counter.js`. For each of these clicks it sends one request to your own site (`POST /wp-json/askai-button/v1/count`) that names the kind of click (`open` or `send`) and, for a question, the id of the service. Nothing is sent to anyone else, and the JavaScript library of the button still makes no request by itself. The request does not delay the opening of the AI service, and a request that fails is dropped.
+
+**The numbers are approximate.** Bots and repeated clicks are counted. Clicks of logged-in users who can edit posts (authors, editors, administrators) are not counted: the script is not loaded for them. A page cache does not get in the way, because the page contains nothing that belongs to a single visitor. The endpoint accepts only the two kinds of click and the services the button offers at the moment, and refuses requests that a browser marks as coming from another site.
+
+**Where to see them.** The section "Usage" at the bottom of "Settings > Ask AI" shows one row per month, newest first, and a row of totals. "Download CSV" saves the table as a file. "Reset counts" deletes all counts after you tick the box next to it. Saving the settings does not change the counts. When you switch counting off, the counts stay visible and nothing new is added.
 
 ## Where the button is never shown {#never}
 
@@ -207,9 +230,10 @@ Deleting the plugin removes everything it stored:
 
 - the settings (the option `askai_settings`)
 - the two values per post (the post meta `_askai_disabled` and `_askai_presets`)
+- the usage counts (the options whose names start with `askai_count_`)
 
 On a multisite network they are removed from every site. Translations entered in Polylang or WPML are stored by those plugins and stay there. Deactivating the plugin removes nothing.
 
 ## External services {#external}
 
-The plugin itself contacts no external service. When a visitor presses the send button, the visitor's browser opens the chosen AI service in a new tab. This is the only moment at which data leaves the page. What is handed over is described under "[How it works and caveats]({{page:how-it-works}}#privacy)".
+The plugin itself contacts no external service. When a visitor presses the send button, the visitor's browser opens the chosen AI service in a new tab. This is the only moment at which data leaves your site. The optional "[Usage counts](#usage)" are reported to your own site only. What is handed over is described under "[How it works and caveats]({{page:how-it-works}}#privacy)".

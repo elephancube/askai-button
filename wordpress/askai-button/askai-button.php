@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       AskAI Button
  * Plugin URI:        https://github.com/elephancube/askai-button
- * Description:       Adds a floating "Ask AI" button. The visitor's question and your site URL are handed to ChatGPT, Claude or Google AI Mode in a new tab. No API, no server-side processing, no tracking.
+ * Description:       Adds a floating "Ask AI" button. The visitor's question and your site URL are handed to ChatGPT, Claude or Google AI Mode in a new tab. No API key, no external requests by the plugin, and the question is never stored.
  * Version:           0.1.0
  * Requires at least: 6.4
  * Requires PHP:      7.4
@@ -27,6 +27,7 @@ define( 'ASKAI_BUTTON_URL', plugin_dir_url( __FILE__ ) );
 require_once ASKAI_BUTTON_DIR . 'includes/class-settings.php';
 require_once ASKAI_BUTTON_DIR . 'includes/class-multilingual.php';
 require_once ASKAI_BUTTON_DIR . 'includes/class-frontend.php';
+require_once ASKAI_BUTTON_DIR . 'includes/class-counter.php';
 
 /**
  * Starts the plugin once all plugins are loaded.
@@ -36,6 +37,7 @@ require_once ASKAI_BUTTON_DIR . 'includes/class-frontend.php';
 function askai_button_boot() {
 	Askai_Button_Frontend::register();
 	Askai_Button_Multilingual::register();
+	Askai_Button_Counter::register();
 	if ( is_admin() ) {
 		require_once ASKAI_BUTTON_DIR . 'includes/class-admin.php';
 		Askai_Button_Admin::register();

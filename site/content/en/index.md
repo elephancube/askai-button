@@ -50,7 +50,7 @@ No AI API is called. The button only builds the address of an AI service and ope
 
 ### The question is not stored or sent
 
-The button itself makes no network requests. It does not store, send or measure the question. The only thing it keeps in the browser is the AI service chosen last.
+The button itself makes no network requests. It does not store, send or measure the question. The only thing it keeps in the browser is the AI service chosen last. The WordPress plugin can, if you switch it on, keep monthly totals of clicks in the database of your own site, never the question.
 
 :::
 ::: card

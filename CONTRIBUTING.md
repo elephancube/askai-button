@@ -14,10 +14,10 @@ For larger changes, open an issue first so we can agree on the direction before 
 ## What is out of scope
 
 - Calling AI APIs.
-- Storing or analysing questions.
+- Storing or analysing questions, pages, or anything about a visitor.
 - Bundling service logos.
 - Adding runtime dependencies.
-- Anything that sends data anywhere.
+- Anything that sends data to a third party. (The WordPress plugin's optional usage counts report a click to the site itself, as a kind of click and the id of a service, and store monthly totals only.)
 
 ## Development setup
 
@@ -112,7 +112,7 @@ By submitting a contribution you agree that it is licensed under the licence of 
 
 - サポートはベストエフォートです。返信が遅れることがあります。
 - 歓迎するもの: バグ報告、サービスのURL形式が変わったという報告（サービス名、気づいた日、ブラウザと端末、起きたことを書いてください）、翻訳、小さな修正。
-- 対象外: AIのAPI呼び出し、質問の保存・分析、サービスのロゴの同梱、ランタイム依存の追加、データをどこかへ送る機能。
+- 対象外: AIのAPI呼び出し、質問・ページ・訪問者に関する情報の保存や分析、サービスのロゴの同梱、ランタイム依存の追加、データを第三者へ送る機能（WordPress プラグインの「利用回数の記録」は、クリックの種類とサービスの id をサイト自身にだけ送り、月ごとの合計だけを保存します）。
 - フロントの挙動はすべて `packages/core` に置き、WordPressプラグインは設定を渡すだけにします。UI文言は `locales` の辞書だけに置き、キーは全言語で揃えます。`innerHTML` は使わず `textContent` を使います。URLテンプレートは設定値で、動作を前提にしません。配布JSは gzip 後 15 KB 未満（ビルドで検査します）。`wordpress/askai-button/assets/askai-button.min.js` はビルド成果物なので編集・コミットしません。PHP は 7.4 で動く書き方にし、入力はサニタイズ、出力はエスケープします。
 - 開発コマンド: `npm install`、`npm test`、`npm run typecheck`、`npm run build`、`npm run test:php`、`npm run i18n`、`npm run zip:plugin`、`npm run check:versions`。
 - リリース（メンテナー向け）: `CHANGELOG.md` の Unreleased を整え、`npm run bump -- <バージョン>` でバージョンを書き換えてコミットし、`v<バージョン>` のタグを push すると、GitHub Actions が npm への公開と GitHub リリースの作成を行います。手順の詳細は、上の「Releasing」を参照してください。
