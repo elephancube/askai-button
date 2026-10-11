@@ -72,6 +72,85 @@ function wp_json_encode( $data, $flags = 0, $depth = 512 ) {
 	return json_encode( $data, $flags, $depth ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 }
 
+/*
+ * Hooks. Nothing is attached by default; a test lists the hooks that exist in
+ * `$GLOBALS['askai_test_hooks']['present']` and provides the answers of
+ * filters in `$GLOBALS['askai_test_hooks']['filters']`. Every call is recorded.
+ */
+$GLOBALS['askai_test_hooks'] = array(
+	'present' => array(),
+	'filters' => array(),
+	'calls'   => array(),
+);
+
+/**
+ * Whether a test declared the hook as present.
+ *
+ * @param string $hook Hook name.
+ * @return bool
+ */
+function has_filter( $hook ) {
+	return in_array( $hook, $GLOBALS['askai_test_hooks']['present'], true );
+}
+
+/**
+ * Same as has_filter(), as in WordPress.
+ *
+ * @param string $hook Hook name.
+ * @return bool
+ */
+function has_action( $hook ) {
+	return has_filter( $hook );
+}
+
+/**
+ * Records the call. Returns the answer a test provided for the hook, or the value unchanged.
+ *
+ * @param string $hook    Hook name.
+ * @param mixed  $value   Value to filter.
+ * @param mixed  ...$args Further arguments.
+ * @return mixed
+ */
+function apply_filters( $hook, $value, ...$args ) {
+	$GLOBALS['askai_test_hooks']['calls'][] = array_merge( array( 'filter', $hook, $value ), $args );
+	if ( isset( $GLOBALS['askai_test_hooks']['filters'][ $hook ] ) ) {
+		return call_user_func_array( $GLOBALS['askai_test_hooks']['filters'][ $hook ], array_merge( array( $value ), $args ) );
+	}
+	return $value;
+}
+
+/**
+ * Records the call.
+ *
+ * @param string $hook    Hook name.
+ * @param mixed  ...$args Arguments.
+ * @return void
+ */
+function do_action( $hook, ...$args ) {
+	$GLOBALS['askai_test_hooks']['calls'][] = array_merge( array( 'action', $hook ), $args );
+}
+
+/**
+ * Simplified: a fixed site address.
+ *
+ * @param string $path Path.
+ * @return string
+ */
+function home_url( $path = '' ) {
+	return 'https://example.com' . $path;
+}
+
+/**
+ * Simplified: a fixed admin address.
+ *
+ * @param string $path Path.
+ * @return string
+ */
+function admin_url( $path = '' ) {
+	return 'https://example.com/wp-admin/' . $path;
+}
+
 require_once dirname( __DIR__ ) . '/includes/class-settings.php';
+require_once dirname( __DIR__ ) . '/includes/class-multilingual.php';
 require_once dirname( __DIR__ ) . '/includes/class-frontend.php';
 require_once dirname( __DIR__ ) . '/includes/class-admin.php';

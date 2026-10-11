@@ -34,6 +34,20 @@ See [`examples/`](examples/) for complete pages.
 AskAIButton.init({ providers: [{ id: 'claude', color: '#000' }] });
 ```
 
+## WordPress plugin
+
+[`wordpress/askai-button/`](wordpress/askai-button/) is a WordPress plugin that adds the button to a site and lets you set it up on a settings screen. It is a thin layer around the same script; see its [`readme.txt`](wordpress/askai-button/readme.txt).
+
+The script it loads is a build artefact and is not committed. To get an installable plugin:
+
+```sh
+npm install
+npm run build        # builds the script and copies it into the plugin
+npm run zip:plugin   # writes dist-plugin/askai-button-<version>.zip
+```
+
+Upload the zip under Plugins > Add New Plugin > Upload Plugin. The plugin is licensed under GPL-2.0-or-later.
+
 ## Development
 
 ```sh

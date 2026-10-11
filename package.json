@@ -10,7 +10,8 @@
     "i18n": "node scripts/i18n.mjs",
     "test": "npm test -w askai-button",
     "test:php": "php wordpress/askai-button/tests/run.php",
-    "typecheck": "npm run typecheck -w askai-button"
+    "typecheck": "npm run typecheck -w askai-button",
+    "zip:plugin": "node scripts/zip-plugin.mjs"
   },
   "devDependencies": {
     "happy-dom": "^20.0.0",

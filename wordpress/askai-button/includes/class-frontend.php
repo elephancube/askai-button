@@ -147,6 +147,9 @@ final class Askai_Button_Frontend {
 			return;
 		}
 
+		// On a multilingual site: the texts of the settings in the language of this page.
+		$settings = Askai_Button_Multilingual::translate( $settings );
+
 		$page_presets = $post ? get_post_meta( $post->ID, self::META_PRESETS, true ) : array();
 
 		/**
@@ -189,13 +192,27 @@ final class Askai_Button_Frontend {
 		 */
 		$query_template = apply_filters( 'askai_query_template', $settings['query_template'] );
 
+		/**
+		 * Filters the address of the site handed to the AI service as `{site_url}`.
+		 *
+		 * The default is the front page of the site. On a multilingual site it
+		 * is the front page in the language of the current page. A value that
+		 * is not an absolute http(s) address is ignored, and the script then
+		 * uses the origin of the page.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param string $site_url Address of the front page.
+		 */
+		$site_url = apply_filters( 'askai_site_url', Askai_Button_Multilingual::home_url() );
+
 		$canonical = $post ? wp_get_canonical_url( $post ) : false;
 
 		$options = self::build_options(
 			$settings,
 			array(
 				'lang'           => determine_locale(),
-				'site_url'       => home_url( '/' ),
+				'site_url'       => $site_url,
 				'url'            => is_string( $canonical ) ? $canonical : '',
 				'site_name'      => wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ),
 				'presets'        => $presets,

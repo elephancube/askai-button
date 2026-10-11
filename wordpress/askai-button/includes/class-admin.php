@@ -45,6 +45,7 @@ final class Askai_Button_Admin {
 	public static function register() {
 		add_action( 'admin_init', array( __CLASS__, 'register_setting' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_page' ) );
+		add_action( 'load-settings_page_' . self::PAGE, array( 'Askai_Button_Multilingual', 'on_settings_screen' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_meta' ), 10, 2 );
@@ -680,6 +681,7 @@ final class Askai_Button_Admin {
 		?>
 		<h2><?php esc_html_e( 'Texts', 'askai-button' ); ?></h2>
 		<p id="askai-texts-help"><?php esc_html_e( 'Leave a field empty to use the built-in wording, which follows the language of the page. The grey text in an empty field shows that wording in your language.', 'askai-button' ); ?></p>
+		<?php self::render_translation_note(); ?>
 		<table class="form-table" role="presentation">
 			<?php foreach ( self::label_names() as $key => $label ) : ?>
 				<tr>
@@ -697,6 +699,29 @@ final class Askai_Button_Admin {
 	}
 
 	/**
+	 * On a multilingual site: where the texts of a section are translated.
+	 *
+	 * @return void
+	 */
+	private static function render_translation_note() {
+		$info = Askai_Button_Multilingual::admin_info();
+		if ( ! $info ) {
+			return;
+		}
+		?>
+		<p class="askai-translation-note">
+			<?php
+			/* translators: 1: name of a multilingual plugin, such as Polylang, 2: name of the group of strings. */
+			echo esc_html( sprintf( __( 'Type these texts in the main language of the site. After saving, the ones you filled in can be translated into the other languages on the string translation screen of %1$s, in the group "%2$s".', 'askai-button' ), $info['name'], Askai_Button_Multilingual::GROUP ) );
+			?>
+			<?php if ( '' !== $info['url'] ) : ?>
+				<a href="<?php echo esc_url( $info['url'] ); ?>"><?php esc_html_e( 'Open the string translations', 'askai-button' ); ?></a>
+			<?php endif; ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Section "Preset questions".
 	 *
 	 * @param array $settings Settings.
@@ -705,6 +730,7 @@ final class Askai_Button_Admin {
 	private static function render_presets( array $settings ) {
 		?>
 		<h2><?php esc_html_e( 'Preset questions', 'askai-button' ); ?></h2>
+		<?php self::render_translation_note(); ?>
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Questions', 'askai-button' ); ?></th>
@@ -867,6 +893,7 @@ final class Askai_Button_Admin {
 	private static function render_query( array $settings ) {
 		?>
 		<h2><?php esc_html_e( 'Query', 'askai-button' ); ?></h2>
+		<?php self::render_translation_note(); ?>
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><label for="askai-query-template"><?php esc_html_e( 'Query template', 'askai-button' ); ?></label></th>

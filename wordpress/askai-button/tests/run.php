@@ -1795,6 +1795,340 @@ askai_test(
 );
 
 /*
+ * Multilingual sites. The order of these tests matters: first without any
+ * multilingual plugin, then with the hooks of WPML, then with the functions
+ * of Polylang, which cannot be taken away again once they are defined.
+ */
+
+/**
+ * Settings with several translatable texts filled in.
+ *
+ * @return array
+ */
+function askai_ml_settings() {
+	return array(
+		'labels'         => array(
+			'button_label' => 'AIに質問',
+			'panel_title'  => 'このサイトについて質問',
+			'note'         => '{provider} が開きます',
+		),
+		'presets'        => array( '料金は？', '', '営業時間は？', '場所は？' ),
+		'query_template' => "{question}\n\n参照: {site_url}",
+	);
+}
+
+/**
+ * Forgets recorded calls and prepared answers.
+ *
+ * @param string[] $present Hooks that exist.
+ * @return void
+ */
+function askai_ml_reset( array $present = array() ) {
+	$GLOBALS['askai_test_hooks'] = array(
+		'present' => $present,
+		'filters' => array(),
+		'calls'   => array(),
+	);
+	if ( isset( $GLOBALS['askai_test_pll'] ) ) {
+		$GLOBALS['askai_test_pll']['registered']   = array();
+		$GLOBALS['askai_test_pll']['translations'] = array();
+	}
+}
+
+askai_test(
+	'multilingual: the translatable texts of a settings array',
+	function () {
+		askai_same( array(), Askai_Button_Multilingual::strings( Askai_Button_Settings::defaults() ), 'defaults: nothing to translate' );
+		askai_same( array(), Askai_Button_Multilingual::strings( 'broken' ), 'unusable settings' );
+		askai_same(
+			array(
+				array( 'button_label', 'AIに質問', false ),
+				array( 'panel_title', 'このサイトについて質問', false ),
+				array( 'note', '{provider} が開きます', false ),
+				array( 'preset_1', '料金は？', false ),
+				array( 'preset_2', '営業時間は？', false ),
+				array( 'preset_3', '場所は？', false ),
+				array( 'query_template', "{question}\n\n参照: {site_url}", true ),
+			),
+			array_map( 'array_values', Askai_Button_Multilingual::strings( askai_ml_settings() ) ),
+			'empty texts are left out; questions are numbered as stored'
+		);
+		$dirty = Askai_Button_Multilingual::strings(
+			array(
+				'labels'  => array( 'note' => ' <b>bold</b> ' ),
+				'presets' => array( '<script>x</script>' ),
+			)
+		);
+		askai_same( array( 'bold', 'x' ), array( $dirty[0]['value'], $dirty[1]['value'] ), 'texts are registered as they are stored, cleaned' );
+	}
+);
+
+askai_test(
+	'multilingual: which API is used',
+	function () {
+		askai_same( '', Askai_Button_Multilingual::choose_api( false, false ) );
+		askai_same( 'polylang', Askai_Button_Multilingual::choose_api( true, false ) );
+		askai_same( 'wpml', Askai_Button_Multilingual::choose_api( false, true ) );
+		askai_same( 'polylang', Askai_Button_Multilingual::choose_api( true, true ), 'Polylang answers the WPML hooks too; its own API is used' );
+		askai_same( '', Askai_Button_Multilingual::choose_api( null, 1 ), 'only true counts' );
+	}
+);
+
+askai_test(
+	'multilingual: translations replace the texts, and are cleaned like typed texts',
+	function () {
+		$seen       = array();
+		$translator = function ( $value, $name ) use ( &$seen ) {
+			$seen[] = $name;
+			$map    = array(
+				'button_label'   => 'Ask AI',
+				'panel_title'    => '',
+				'note'           => array( 'not a string' ),
+				'preset_1'       => 'How much is it?',
+				'preset_2'       => "   \n ",
+				'preset_3'       => '<b></b>',
+				'query_template' => "{question}\r\n\r\nSee: {site_url}",
+			);
+			return $map[ $name ];
+		};
+		$out        = Askai_Button_Multilingual::translate_settings( askai_ml_settings(), $translator );
+		askai_same( array( 'button_label', 'panel_title', 'note', 'preset_1', 'preset_2', 'preset_3', 'query_template' ), $seen, 'every filled-in text is offered once' );
+		askai_same( 'Ask AI', $out['labels']['button_label'] );
+		askai_same( 'このサイトについて質問', $out['labels']['panel_title'], 'empty translation: original' );
+		askai_same( '{provider} が開きます', $out['labels']['note'], 'translation that is not a string: original' );
+		askai_same( '', $out['labels']['placeholder'], 'a text that was not filled in stays empty' );
+		askai_same( array( 'How much is it?', '営業時間は？', '場所は？' ), $out['presets'], 'blank or tag-only translation: original' );
+		askai_same( "{question}\n\nSee: {site_url}", $out['query_template'], 'line breaks in one form' );
+		askai_same( Askai_Button_Settings::sanitize( $out ), $out, 'the result is a clean settings array' );
+
+		$hostile = function ( $value, $name ) {
+			if ( 'query_template' === $name ) {
+				return str_repeat( "line </script><img src=x onerror=alert(1)>\n", 20 ) . str_repeat( 'x', 5000 );
+			}
+			if ( 'preset_1' === $name ) {
+				return str_repeat( 'あ', 5000 );
+			}
+			if ( 'preset_2' === $name ) {
+				return "one\ntwo\r\nthree\x00<scr<script>ipt>alert(1)</script>";
+			}
+			if ( 'note' === $name ) {
+				return "\xff\xfe not UTF-8";
+			}
+			return '<script>alert(1)</script></script><img src=x onerror=alert(1)>';
+		};
+		$out     = Askai_Button_Multilingual::translate_settings( askai_ml_settings(), $hostile );
+		askai_same( 'alert(1)', $out['labels']['button_label'], 'tags removed' );
+		askai_same( '{provider} が開きます', $out['labels']['note'], 'invalid UTF-8: original' );
+		askai_same( str_repeat( 'あ', 200 ), $out['presets'][0], 'capped at the length of a typed question' );
+		askai_same( 0, preg_match( '/[\x00-\x1f]/', $out['presets'][1] ), 'one line, no control characters' );
+		askai_same( 2000, mb_strlen( $out['query_template'] ), 'template capped' );
+		askai_same( 21, count( explode( "\n", $out['query_template'] ) ), 'the template keeps its line breaks: twenty lines and the rest' );
+		askai_same( 0, preg_match( '/<[a-z\/!]/i', $out['query_template'] . implode( '', $out['presets'] ) . implode( '', $out['labels'] ) ), 'no tag left anywhere' );
+
+		$options = Askai_Button_Frontend::build_options(
+			$out,
+			array(
+				'presets'        => Askai_Button_Frontend::pick_presets( $out, array() ),
+				'query_template' => $out['query_template'],
+			)
+		);
+		$json    = Askai_Button_Frontend::encode_options( $options );
+		askai_same( false, stripos( $json, '</script' ), 'printed options cannot close the script element' );
+		askai_same( $out['presets'], $options['presets'], 'printing changes nothing: already clean' );
+		askai_same( $out['query_template'], $options['queryTemplate'] );
+
+		$same = Askai_Button_Multilingual::translate_settings(
+			askai_ml_settings(),
+			function ( $value ) {
+				return $value;
+			}
+		);
+		askai_same( Askai_Button_Settings::sanitize( askai_ml_settings() ), $same, 'untranslated: equal to the stored settings' );
+	}
+);
+
+askai_test(
+	'multilingual: without Polylang or WPML nothing is called and nothing changes',
+	function () {
+		askai_ml_reset();
+		askai_same( false, function_exists( 'pll_register_string' ), 'precondition: no Polylang' );
+		askai_same( false, defined( 'ICL_SITEPRESS_VERSION' ), 'precondition: no WPML' );
+		askai_same( '', Askai_Button_Multilingual::api() );
+
+		$settings = Askai_Button_Settings::sanitize( askai_ml_settings() );
+		askai_same( $settings, Askai_Button_Multilingual::translate( $settings ) );
+		$raw = array( 'left' => 'as it is' );
+		askai_same( $raw, Askai_Button_Multilingual::translate( $raw ), 'the array is not even cleaned here' );
+
+		$GLOBALS['askai_test_options'][ Askai_Button_Settings::OPTION ] = askai_ml_settings();
+		Askai_Button_Multilingual::on_admin_init();
+		Askai_Button_Multilingual::on_settings_screen();
+		Askai_Button_Multilingual::on_option_added( Askai_Button_Settings::OPTION, askai_ml_settings() );
+		Askai_Button_Multilingual::on_option_updated( array(), askai_ml_settings() );
+		Askai_Button_Multilingual::register_strings( askai_ml_settings(), '' );
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'no hook was called' );
+		askai_same( null, Askai_Button_Multilingual::admin_info() );
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::home_url() );
+
+		// The hooks alone, without WPML itself, are not enough.
+		askai_ml_reset( array( 'wpml_register_single_string', 'wpml_translate_single_string' ) );
+		askai_same( '', Askai_Button_Multilingual::api(), 'hooks without WPML' );
+		askai_ml_reset();
+		unset( $GLOBALS['askai_test_options'][ Askai_Button_Settings::OPTION ] );
+	}
+);
+
+askai_test(
+	'multilingual: WPML through its documented hooks',
+	function () {
+		define( 'ICL_SITEPRESS_VERSION', '4.7.0' );
+
+		askai_ml_reset();
+		askai_same( '', Askai_Button_Multilingual::api(), 'WPML without its string translation: not used' );
+		Askai_Button_Multilingual::on_option_updated( array(), askai_ml_settings() );
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'] );
+		askai_ml_reset( array( 'wpml_translate_single_string' ) );
+		askai_same( '', Askai_Button_Multilingual::api(), 'both hooks are needed' );
+
+		$hooks = array( 'wpml_register_single_string', 'wpml_translate_single_string' );
+		askai_ml_reset( $hooks );
+		askai_same( 'wpml', Askai_Button_Multilingual::api() );
+
+		$expected = array(
+			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'button_label', 'AIに質問' ),
+			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'panel_title', 'このサイトについて質問' ),
+			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'note', '{provider} が開きます' ),
+			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'preset_1', '料金は？' ),
+			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'preset_2', '営業時間は？' ),
+			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'preset_3', '場所は？' ),
+			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'query_template', "{question}\n\n参照: {site_url}" ),
+		);
+		Askai_Button_Multilingual::on_option_updated( array(), askai_ml_settings() );
+		askai_same( $expected, $GLOBALS['askai_test_hooks']['calls'], 'registered when the option changes' );
+
+		askai_ml_reset( $hooks );
+		Askai_Button_Multilingual::on_option_added( Askai_Button_Settings::OPTION, askai_ml_settings() );
+		askai_same( $expected, $GLOBALS['askai_test_hooks']['calls'], 'registered when the option is first stored' );
+
+		askai_ml_reset( $hooks );
+		$GLOBALS['askai_test_options'][ Askai_Button_Settings::OPTION ] = askai_ml_settings();
+		Askai_Button_Multilingual::on_settings_screen();
+		askai_same( $expected, $GLOBALS['askai_test_hooks']['calls'], 'registered when the settings screen is opened' );
+
+		askai_ml_reset( $hooks );
+		Askai_Button_Multilingual::on_admin_init();
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'not on every admin request: WPML stores its strings' );
+
+		askai_ml_reset( $hooks );
+		Askai_Button_Multilingual::on_option_updated( askai_ml_settings(), Askai_Button_Settings::defaults() );
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'empty texts are not registered' );
+		unset( $GLOBALS['askai_test_options'][ Askai_Button_Settings::OPTION ] );
+
+		// Translation: by group and name, with the stored text as the value to fall back on.
+		askai_ml_reset( $hooks );
+		$GLOBALS['askai_test_hooks']['filters']['wpml_translate_single_string'] = function ( $value, $context, $name ) {
+			$map = array(
+				'button_label'   => 'Ask AI',
+				'preset_2'       => 'When are you open?',
+				'preset_3'       => '',
+				'query_template' => '<script>alert(1)</script>' . str_repeat( 'y', 5000 ),
+			);
+			return 'AskAI Button' === $context && isset( $map[ $name ] ) ? $map[ $name ] : $value;
+		};
+		$out = Askai_Button_Multilingual::translate( askai_ml_settings() );
+		askai_same( 'Ask AI', $out['labels']['button_label'] );
+		askai_same( 'このサイトについて質問', $out['labels']['panel_title'], 'no translation: original' );
+		askai_same( array( '料金は？', 'When are you open?', '場所は？' ), $out['presets'], 'empty translation: original' );
+		askai_same( 'alert(1)' . str_repeat( 'y', 1992 ), $out['query_template'], 'hostile translation cleaned and capped' );
+		askai_same(
+			array( 'filter', 'wpml_translate_single_string', '料金は？', 'AskAI Button', 'preset_1' ),
+			$GLOBALS['askai_test_hooks']['calls'][3],
+			'arguments of the filter: value, context, name'
+		);
+		askai_same( 7, count( $GLOBALS['askai_test_hooks']['calls'] ), 'one lookup per filled-in text' );
+
+		askai_same(
+			array(
+				'name' => 'WPML',
+				'url'  => '',
+			),
+			Askai_Button_Multilingual::admin_info()
+		);
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::home_url(), 'WPML filters home_url() itself' );
+	}
+);
+
+require __DIR__ . '/stubs-polylang.php';
+
+askai_test(
+	'multilingual: Polylang through its functions, also when the WPML hooks exist',
+	function () {
+		// Polylang answers the WPML hooks; the constant is still defined from the test before.
+		$hooks = array( 'wpml_register_single_string', 'wpml_translate_single_string' );
+		askai_ml_reset( $hooks );
+		askai_same( 'polylang', Askai_Button_Multilingual::api() );
+
+		$GLOBALS['askai_test_options'][ Askai_Button_Settings::OPTION ] = askai_ml_settings();
+		Askai_Button_Multilingual::on_admin_init();
+		askai_same(
+			array(
+				array( 'button_label', 'AIに質問', 'AskAI Button', false ),
+				array( 'panel_title', 'このサイトについて質問', 'AskAI Button', false ),
+				array( 'note', '{provider} が開きます', 'AskAI Button', false ),
+				array( 'preset_1', '料金は？', 'AskAI Button', false ),
+				array( 'preset_2', '営業時間は？', 'AskAI Button', false ),
+				array( 'preset_3', '場所は？', 'AskAI Button', false ),
+				array( 'query_template', "{question}\n\n参照: {site_url}", 'AskAI Button', true ),
+			),
+			$GLOBALS['askai_test_pll']['registered'],
+			'registered on every admin request; the template as multi-line'
+		);
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'the WPML hooks are not used' );
+
+		askai_ml_reset( $hooks );
+		Askai_Button_Multilingual::on_option_updated( array(), askai_ml_settings() );
+		Askai_Button_Multilingual::on_option_added( Askai_Button_Settings::OPTION, askai_ml_settings() );
+		Askai_Button_Multilingual::on_settings_screen();
+		askai_same( array(), $GLOBALS['askai_test_pll']['registered'], 'nothing extra on save: the next admin request registers' );
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'] );
+
+		$GLOBALS['askai_test_options'][ Askai_Button_Settings::OPTION ] = Askai_Button_Settings::defaults();
+		Askai_Button_Multilingual::on_admin_init();
+		askai_same( array(), $GLOBALS['askai_test_pll']['registered'], 'empty texts are not registered' );
+		unset( $GLOBALS['askai_test_options'][ Askai_Button_Settings::OPTION ] );
+
+		$GLOBALS['askai_test_pll']['translations'] = array(
+			'AIに質問'  => 'Ask AI',
+			'料金は？'   => 'How much is it?',
+			'営業時間は？' => '',
+			'場所は？'   => "<img src=x onerror=alert(1)>Where?\nHere" . str_repeat( 'z', 5000 ),
+			"{question}\n\n参照: {site_url}" => "{question}\r\n\r\nSee: {site_url}",
+		);
+
+		$out = Askai_Button_Multilingual::translate( askai_ml_settings() );
+		askai_same( 'Ask AI', $out['labels']['button_label'] );
+		askai_same( 'このサイトについて質問', $out['labels']['panel_title'], 'no translation: original' );
+		askai_same( 'How much is it?', $out['presets'][0] );
+		askai_same( '営業時間は？', $out['presets'][1], 'empty translation: original' );
+		askai_same( 'Where? Here' . str_repeat( 'z', 189 ), $out['presets'][2], 'hostile translation cleaned and capped' );
+		askai_same( "{question}\n\nSee: {site_url}", $out['query_template'] );
+		askai_same( array(), $GLOBALS['askai_test_hooks']['calls'], 'the WPML filter is not used' );
+
+		askai_same(
+			array(
+				'name' => 'Polylang',
+				'url'  => 'https://example.com/wp-admin/admin.php?page=mlang_strings&group=AskAI%20Button',
+			),
+			Askai_Button_Multilingual::admin_info()
+		);
+		askai_same( 'https://example.com/en/', Askai_Button_Multilingual::home_url(), 'front page of the current language' );
+		$GLOBALS['askai_test_pll']['home'] = '';
+		askai_same( 'https://example.com/', Askai_Button_Multilingual::home_url(), 'no answer from Polylang: front page of the site' );
+		askai_ml_reset();
+	}
+);
+
+/*
  * Report.
  */
 

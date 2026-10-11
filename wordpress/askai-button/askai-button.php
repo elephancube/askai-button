@@ -24,6 +24,7 @@ define( 'ASKAI_BUTTON_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ASKAI_BUTTON_URL', plugin_dir_url( __FILE__ ) );
 
 require_once ASKAI_BUTTON_DIR . 'includes/class-settings.php';
+require_once ASKAI_BUTTON_DIR . 'includes/class-multilingual.php';
 require_once ASKAI_BUTTON_DIR . 'includes/class-frontend.php';
 
 /**
@@ -33,6 +34,7 @@ require_once ASKAI_BUTTON_DIR . 'includes/class-frontend.php';
  */
 function askai_button_boot() {
 	Askai_Button_Frontend::register();
+	Askai_Button_Multilingual::register();
 	if ( is_admin() ) {
 		require_once ASKAI_BUTTON_DIR . 'includes/class-admin.php';
 		Askai_Button_Admin::register();
