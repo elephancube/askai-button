@@ -1,0 +1,69 @@
+name: Bug report
+description: Something does not work as documented.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Describe the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: A minimal page or configuration helps most.
+      placeholder: |
+        1.
+        2.
+    validations:
+      required: true
+  - type: dropdown
+    id: distribution
+    attributes:
+      label: Distribution
+      options:
+        - Script tag
+        - npm package
+        - WordPress plugin
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Version of the script, package or plugin. For the plugin, also the WordPress and PHP versions.
+    validations:
+      required: true
+  - type: input
+    id: browser-os
+    attributes:
+      label: Browser and OS
+      placeholder: Safari 18 on iOS 18
+    validations:
+      required: true
+  - type: input
+    id: page-language
+    attributes:
+      label: Page language
+      description: The value of the lang attribute of the page, if you know it.
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: Errors shown in the browser developer console, if any.
+      render: shell
+  - type: checkboxes
+    id: no-private-data
+    attributes:
+      label: Privacy
+      options:
+        - label: This report contains no private data (passwords, tokens, personal information, non-public URLs).
+          required: true

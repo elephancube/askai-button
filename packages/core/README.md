@@ -33,7 +33,9 @@ The script-tag build exposes the same functions on the global `AskAIButton`, for
 
 The button follows the language of the page (`<html lang>`). Japanese and English are built in.
 
-For the options and complete example pages, see the repository README.
+The functions are `init`, `open`, `close`, `update`, `registerProvider`, `registerLocale`, `defaults` and `destroy`.
+
+Every option, `data-*` attribute and event is described in the [reference](https://elephancube.github.io/askai-button/en/reference/). Installation steps and a live demo are on the [documentation site](https://elephancube.github.io/askai-button/en/).
 
 ## Colours
 

@@ -60,6 +60,7 @@ Good to know:
 * "Questions for this page" and "Do not show the button on this page" belong to one post. Each translation of a post has its own, and they are not copied to the other translations: Polylang neither copies nor synchronises them, also when the synchronisation of custom fields is switched on.
 * Polylang lists a string as long as its text is in use. When you change a question, the new text appears without a translation; the translation of the old text is kept by Polylang and comes back if you restore the old text. It can be removed there with "Clean strings translation database".
 * WPML keeps a string until it is deleted on its own screen. After you remove a question, its entry (for example `preset_3`) stays there unused. WPML identifies the questions by their number, so check the translations after changing the order of the questions.
+* Polylang has been checked on a live WordPress site. The WPML integration is written against the hooks that WPML documents (`wpml_register_single_string` and `wpml_translate_single_string`) and has not yet been run on a WPML installation.
 * Neither plugin is required, and nothing breaks when it is deactivated: the texts are then shown as typed.
 
 = For developers =
@@ -94,7 +95,7 @@ Yes. By default it is the address of the front page of your site. The query temp
 
 = Does it work on a multilingual site? =
 
-Yes. The built-in texts follow the language of each page. With Polylang or WPML, the texts you typed yourself can be translated on the string translation screen of that plugin. See "Multilingual sites" in the description.
+Yes. The built-in texts follow the language of each page. With Polylang or WPML, the texts you typed yourself can be translated on the string translation screen of that plugin. Polylang has been checked on a live site; the WPML integration follows the hooks that WPML documents and has not yet been run on a WPML installation. See "Multilingual sites" in the description.
 
 = Can I hide the button on some pages? =
 

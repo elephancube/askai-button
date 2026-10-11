@@ -1,0 +1,37 @@
+name: Translation
+description: Offer or request a language.
+labels: ["translation"]
+body:
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: Name and code, for example Korean (ko).
+    validations:
+      required: true
+  - type: dropdown
+    id: target
+    attributes:
+      label: What is it for
+      options:
+        - Widget dictionary (packages/core)
+        - WordPress plugin screens
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: reviewer
+    attributes:
+      label: Who can review it
+      description: A native or fluent speaker who can check the wording, if you know one.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+  - type: checkboxes
+    id: no-private-data
+    attributes:
+      label: Privacy
+      options:
+        - label: This report contains no private data.
+          required: true

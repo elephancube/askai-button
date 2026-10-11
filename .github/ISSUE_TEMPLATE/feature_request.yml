@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest a small improvement.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The following are out of scope and will not be accepted: calling AI APIs, storing or analysing questions, bundling service logos, adding runtime dependencies, and features that send data anywhere.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem you want to solve
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This request is not on the out-of-scope list above.
+          required: true

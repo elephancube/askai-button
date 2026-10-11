@@ -1,0 +1,61 @@
+name: Service URL change
+description: A service no longer accepts the URL, or behaves differently.
+labels: ["service-url"]
+body:
+  - type: dropdown
+    id: service
+    attributes:
+      label: Service
+      options:
+        - ChatGPT
+        - Claude
+        - Google AI Mode
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-changed
+    attributes:
+      label: What changed
+      description: What happens now, and what happened before.
+    validations:
+      required: true
+  - type: input
+    id: first-noticed
+    attributes:
+      label: Date first noticed
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+  - type: input
+    id: device-browser
+    attributes:
+      label: Device and browser
+      placeholder: Chrome on Windows 11
+    validations:
+      required: true
+  - type: input
+    id: url-template
+    attributes:
+      label: URL template in use
+      description: The template for this service, with {query} left as it is.
+      placeholder: https://example.com/?q={query}
+    validations:
+      required: true
+  - type: dropdown
+    id: copy-and-open
+    attributes:
+      label: Does the copy-and-open method work for this service?
+      options:
+        - Yes
+        - No
+        - Not tried
+    validations:
+      required: true
+  - type: checkboxes
+    id: no-private-data
+    attributes:
+      label: Privacy
+      options:
+        - label: This report contains no private data (passwords, tokens, personal information, non-public URLs).
+          required: true

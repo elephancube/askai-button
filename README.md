@@ -1,66 +1,101 @@
 # askai-button
 
-A floating "Ask AI" button for any web page. The visitor types a question, picks ChatGPT, Claude or Google AI Mode, and the AI opens in a new tab with the question and the address of your site already filled in.
+English | [日本語](README.ja.md)
 
-It calls no API and needs no server. It makes no network requests, and it does not store, send or measure the question.
+A floating "Ask AI" button for any web page. The visitor types a question, picks ChatGPT, Claude or Google AI Mode, and that service opens in a new tab with the question and the address of your site already filled in. No AI API is called, and the widget itself stores and sends nothing.
 
-## Install
+One TypeScript source produces a single-file script (global `AskAIButton`), an npm ESM package and a thin WordPress plugin.
+
+Documentation and a live demo: https://elephancube.github.io/askai-button/en/ ([install](https://elephancube.github.io/askai-button/en/install/), [option reference](https://elephancube.github.io/askai-button/en/reference/), [WordPress](https://elephancube.github.io/askai-button/en/wordpress/))
+
+## What is handed to the AI
+
+The text placed in the URL parameter of the chosen service is built from a template. The built-in English template is:
+
+```
+{question}
+
+Please refer to the following URL to answer this question.
+{site_url}
+```
+
+`{question}` is what the visitor typed. `{site_url}` is the root of the current origin unless you set `siteUrl`. The template, and the wording of every label, can be replaced through the options.
+
+## Quick start
+
+With a script tag:
 
 ```html
 <script src="askai-button.min.js" data-askai></script>
 ```
 
-The button follows the language of the page (`<html lang>`). Japanese and English are built in.
+With npm:
 
-Options can be given as `data-*` attributes on the script tag, or from code:
+```sh
+npm install askai-button
+```
 
 ```js
-AskAIButton.init({
+import { init } from 'askai-button';
+
+init({
   presets: ['What can I do on this site?', 'How much does it cost?'],
   providers: ['chatgpt', 'claude'],
 });
 ```
 
-See [`examples/`](examples/) for complete pages.
+The button follows the page language (`lang` option, then `<html lang>`, then the browser language, then `en`). Japanese and English are built in. See [`examples/`](examples/) for complete pages.
 
-## Colours
+## WordPress
 
-| Option | Applies to | Notes |
-| --- | --- | --- |
-| `accentColor` | The launcher button only. | Default `#222`. |
-| `color` (on a provider definition) | The selected AI choice and the send link. | Built-in defaults: ChatGPT `#0d7d61`, Claude `#b3542f`, Google AI Mode `#1a73e8`. A provider without a colour uses `#27455c`. Text is always white, so choose a colour dark enough for white text. |
+The plugin is in [`wordpress/askai-button/`](wordpress/askai-button/). It adds the button and a settings screen (Settings > Ask AI). Installation and details: see its [`readme.txt`](wordpress/askai-button/readme.txt) and the [WordPress page](https://elephancube.github.io/askai-button/en/wordpress/) of the documentation site.
 
-```js
-AskAIButton.init({ providers: [{ id: 'claude', color: '#000' }] });
-```
+## What it does not do
 
-## WordPress plugin
+- It calls no AI API and needs no API key.
+- It runs no server and makes no network requests of its own.
+- It does not track, measure or store the question, and sets no cookies.
+- The only thing kept is the visitor's last chosen service, in `localStorage`.
 
-[`wordpress/askai-button/`](wordpress/askai-button/) is a WordPress plugin that adds the button to a site and lets you set it up on a settings screen. It is a thin layer around the same script; see its [`readme.txt`](wordpress/askai-button/readme.txt).
+## Caveats
 
-The script it loads is a build artefact and is not committed. To get an installable plugin:
+- The `q` URL parameters these services accept are not documented by them and may change or stop working at any time. Every URL template is configurable, and a service can be set to copy the text to the clipboard and open the service instead.
+- The AI service has to be able to fetch your site. A site that blocks AI crawlers, needs a login or is not reachable from the internet cannot be read. The panel offers a button that copies the question and URL for pasting by hand.
+- Nothing here guarantees that a given service accepts the URL. Check the services you offer yourself.
 
-```sh
-npm install
-npm run build        # builds the script and copies it into the plugin
-npm run zip:plugin   # writes dist-plugin/askai-button-<version>.zip
-```
+## Repository layout
 
-Upload the zip under Plugins > Add New Plugin > Upload Plugin. The plugin is licensed under GPL-2.0-or-later.
+- `packages/core/` - the library (TypeScript, no runtime dependencies). All front-end behaviour lives here.
+- `wordpress/askai-button/` - the WordPress plugin; it passes settings to the library.
+- `site/` - the documentation and demo site: Markdown pages in `site/content/`, built into `site/dist/` by `site/build.mjs`.
+- `examples/` - plain HTML examples (run the build first).
+- `scripts/` - build helpers.
+- `.github/workflows/` - CI (`ci.yml`) and the deployment of the site to GitHub Pages (`pages.yml`).
 
 ## Development
 
 ```sh
 npm install
-npm test
-npm run build
+npm test              # unit tests (Vitest)
+npm run typecheck
+npm run build         # builds the script, copies it into the plugin, builds the site
+npm run build:site    # builds the site only (into site/dist)
+npm run site          # builds everything, then serves the site locally
+npm run serve:site    # serves the site that is already built
+npm run test:php      # plugin tests, needs PHP
+npm run i18n          # regenerates plugin translation files
+npm run zip:plugin    # writes dist-plugin/askai-button-<version>.zip
 ```
 
-## Notes
-
-- The `q` URL parameters used to hand the question to each AI service are undocumented and may change or stop working at any time. Every URL template can be replaced through the options.
-- ChatGPT, Claude and Google are trademarks of their respective owners. This project is not affiliated with or endorsed by them.
+See [CONTRIBUTING.md](CONTRIBUTING.md). To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+- The core library (everything outside `wordpress/`) is MIT licensed; see [LICENSE](LICENSE).
+- The WordPress plugin in `wordpress/askai-button/` is GPL-2.0-or-later; see its [LICENSE](wordpress/askai-button/LICENSE).
+
+Copyright (c) 2026 Elephancube Inc. Free and open source; there is no paid version. Support is best effort.
+
+## Trademarks
+
+ChatGPT, Claude and Google are trademarks of their respective owners. This project is not affiliated with or endorsed by them. No logos of these services are bundled.

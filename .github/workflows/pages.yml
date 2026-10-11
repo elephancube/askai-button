@@ -1,0 +1,69 @@
+name: Pages
+
+# Builds site/dist and publishes it with GitHub Pages.
+#
+# Before the first run: Settings > Pages > Source: "GitHub Actions".
+#
+# Custom domain: enter the domain under Settings > Pages > Custom domain and point its DNS
+# at GitHub Pages. Nothing has to change in this repository: the address and the base path
+# of the site are read from the Pages settings below, and no CNAME file is needed when the
+# site is deployed through Actions.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time. A running deployment is allowed to finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # GitHub Pages is not available while the repository is private: skip instead of failing.
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - run: npm ci
+
+      # base_url has no trailing slash, e.g. https://example.github.io/askai-button or,
+      # with a custom domain, https://example.org. The base path is taken from it by the build.
+      - name: Build
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          if [ -n "$PAGES_BASE_URL" ]; then
+            export SITE_URL="$PAGES_BASE_URL/"
+          fi
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

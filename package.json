@@ -6,8 +6,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w askai-button && node scripts/copy-dist.mjs",
+    "build": "npm run build -w askai-button && node scripts/copy-dist.mjs && node site/build.mjs",
+    "build:site": "node site/build.mjs",
     "i18n": "node scripts/i18n.mjs",
+    "serve:site": "node site/serve.mjs",
+    "site": "npm run build && node site/serve.mjs",
     "test": "npm test -w askai-button",
     "test:php": "php wordpress/askai-button/tests/run.php",
     "typecheck": "npm run typecheck -w askai-button",
@@ -15,6 +18,7 @@
   },
   "devDependencies": {
     "happy-dom": "^20.0.0",
+    "marked": "^18.1.0",
     "typescript": "^5.9.0",
     "vite": "^7.0.0",
     "vitest": "^5.0.3"
