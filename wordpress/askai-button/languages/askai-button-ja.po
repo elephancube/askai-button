@@ -1,0 +1,378 @@
+# Copyright (c) Elephancube Inc.
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: AskAI Button\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: askai-button\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. Description of the plugin
+#: askai-button.php
+msgid "Adds a floating \"Ask AI\" button. The visitor's question and your site URL are handed to ChatGPT, Claude or Google AI Mode in a new tab. No API, no server-side processing, no tracking."
+msgstr "「AIに質問」ボタンを画面の隅に表示します。訪問者の質問とサイトのURLを、ChatGPT・Claude・Google AIモードに別タブで渡します。APIを使わず、サーバー側の処理も計測もありません。"
+
+#: includes/class-admin.php:78 includes/class-admin.php:79 includes/class-admin.php:931
+msgid "Ask AI"
+msgstr "AIに質問"
+
+#: includes/class-admin.php:96
+msgid "Settings"
+msgstr "設定"
+
+#. translators: %d: position of the question in the list.
+#: includes/class-admin.php:135
+msgid "Question %d added."
+msgstr "質問%dを追加しました。"
+
+#. translators: %d: position of the question in the list.
+#: includes/class-admin.php:137
+msgid "Question %d removed."
+msgstr "質問%dを削除しました。"
+
+#. translators: 1: new position of the question, 2: number of questions.
+#: includes/class-admin.php:139
+msgid "Question moved to position %1$d of %2$d."
+msgstr "質問を%2$d件中%1$d番目に移動しました。"
+
+#. translators: 1: name of the AI service, 2: its new position, 3: number of services.
+#: includes/class-admin.php:141
+msgid "%1$s moved to position %2$d of %3$d."
+msgstr "%1$sを%3$d件中%2$d番目に移動しました。"
+
+#. translators: 1: number of questions in use, 2: largest number of questions.
+#: includes/class-admin.php:143
+msgid "%1$d of %2$d"
+msgstr "%1$d / %2$d 件"
+
+#. translators: %s: name of the setting, such as "Launcher colour".
+#: includes/class-admin.php:145
+msgid "Colour picker: %s"
+msgstr "カラーピッカー: %s"
+
+#. translators: %s: name of the setting, such as "Launcher colour".
+#: includes/class-admin.php:146
+msgid "Preview of the button"
+msgstr "ボタンのプレビュー"
+
+#. translators: %s: name of the setting, such as "Launcher colour".
+#: includes/class-admin.php:147
+msgid "No URL: the question is empty or too long."
+msgstr "URLなし（質問が空か、長すぎます）"
+
+#: includes/class-admin.php:197
+msgid "Settings saved, but some values were not accepted as typed:"
+msgstr "設定を保存しましたが、入力どおりに保存できなかった項目があります。"
+
+#: includes/class-admin.php:420
+msgid "Google AI Mode"
+msgstr "Google AIモード"
+
+#: includes/class-admin.php:431
+msgid "Button label"
+msgstr "ボタンのラベル"
+
+#: includes/class-admin.php:432
+msgid "Panel title"
+msgstr "パネルのタイトル"
+
+#: includes/class-admin.php:433
+msgid "Panel subtitle"
+msgstr "パネルの補足文"
+
+#: includes/class-admin.php:434
+msgid "Placeholder of the question field"
+msgstr "質問欄のプレースホルダー"
+
+#: includes/class-admin.php:435
+msgid "Note"
+msgstr "注記"
+
+#. translators: 1: name of the setting, 2: the value that was saved.
+#: includes/class-admin.php:449
+msgid "%1$s: the value was not a whole number in the allowed range. %2$d was saved instead."
+msgstr "%1$s: 指定できる範囲の整数ではなかったため、%2$d を保存しました。"
+
+#. translators: %s: name of the setting.
+#: includes/class-admin.php:451
+msgid "%s: the value was not one of the choices. The default was saved instead."
+msgstr "%s: 選択肢にない値だったため、既定値を保存しました。"
+
+#. translators: %s: name of the setting.
+#: includes/class-admin.php:453
+msgid "%s: the value was not a colour such as #1a73e8. The built-in colour is used."
+msgstr "%s: #1a73e8 のような色の指定ではなかったため、標準の色を使います。"
+
+#. translators: 1: name of the setting, 2: largest number of characters.
+#: includes/class-admin.php:455
+msgid "%1$s: HTML tags and control characters are not allowed, and the text can have up to %2$d characters. It was saved as plain text."
+msgstr "%1$s: HTMLタグと制御文字は使えません。文字数は%2$d文字までです。プレーンテキストとして保存しました。"
+
+#: includes/class-admin.php:460 includes/class-admin.php:626
+msgid "Distance from the edges"
+msgstr "画面端からの余白"
+
+#: includes/class-admin.php:462 includes/class-admin.php:633
+msgid "Stacking order (z-index)"
+msgstr "重なり順（z-index）"
+
+#: includes/class-admin.php:464 includes/class-admin.php:882
+msgid "Maximum question length"
+msgstr "質問の最大文字数"
+
+#: includes/class-admin.php:466 includes/class-admin.php:610 includes/class-admin.php:613
+msgid "Position"
+msgstr "位置"
+
+#: includes/class-admin.php:468 includes/class-admin.php:725 includes/class-admin.php:728
+msgid "When a question is tapped"
+msgstr "質問をタップしたとき"
+
+#: includes/class-admin.php:470 includes/class-admin.php:835
+msgid "Selected by default"
+msgstr "最初に選択しておく"
+
+#: includes/class-admin.php:472 includes/class-admin.php:640
+msgid "Launcher colour"
+msgstr "ボタンの色"
+
+#: includes/class-admin.php:474 includes/class-admin.php:872
+msgid "Query template"
+msgstr "クエリテンプレート"
+
+#. translators: %d: number of the question.
+#: includes/class-admin.php:480 includes/class-admin.php:769
+msgid "Question %d"
+msgstr "質問%d"
+
+#. translators: %d: largest number of questions.
+#: includes/class-admin.php:483
+msgid "Questions: only %d can be saved. The others were dropped."
+msgstr "質問: 保存できるのは%d件までです。超えた分は保存していません。"
+
+#. translators: %s: name of the AI service. Do not translate https:// and {query}.
+#: includes/class-admin.php:488
+msgid "URL template of %s: not accepted. It must start with https:// and contain {query}. The built-in URL is used."
+msgstr "%s のURLテンプレート: 保存できませんでした。https:// で始まり、{query} を含む必要があります。標準のURLを使います。"
+
+#. translators: %s: name of the AI service.
+#: includes/class-admin.php:492
+msgid "Colour of %s"
+msgstr "%s の色"
+
+#. translators: %s: name of the AI service.
+#: includes/class-admin.php:495
+msgid "Hand-over of %s"
+msgstr "%s への質問の渡し方"
+
+#. translators: %s: name of a post type.
+#: includes/class-admin.php:578
+msgid "%s (not registered at the moment)"
+msgstr "%s（現在は登録されていません）"
+
+#: includes/class-admin.php:582
+msgid "Display"
+msgstr "表示"
+
+#: includes/class-admin.php:585
+msgid "Button"
+msgstr "ボタン"
+
+#: includes/class-admin.php:590
+msgid "Show the button on the site"
+msgstr "サイトにボタンを表示する"
+
+#: includes/class-admin.php:595 includes/class-admin.php:598
+msgid "Post types"
+msgstr "投稿タイプ"
+
+#: includes/class-admin.php:605
+msgid "With none ticked, the button is shown on every post type. This limits the pages of single posts and pages only: lists such as the home page and archives always show the button."
+msgstr "どれにもチェックを入れない場合は、すべての投稿タイプで表示します。この設定で絞り込めるのは、投稿や固定ページなどの個別ページだけです。トップページやアーカイブなどの一覧ページには、常にボタンを表示します。"
+
+#: includes/class-admin.php:616
+msgid "Bottom right"
+msgstr "右下"
+
+#: includes/class-admin.php:620
+msgid "Bottom left"
+msgstr "左下"
+
+#: includes/class-admin.php:629
+msgid "px"
+msgstr "px"
+
+#: includes/class-admin.php:636
+msgid "Raise this number if another element of your theme covers the button."
+msgstr "テーマのほかの要素にボタンが隠れる場合は、この数値を大きくしてください。"
+
+#: includes/class-admin.php:643
+msgid "A colour such as #1a73e8. Leave empty to use the built-in colour. The text on the button is white, so choose a dark colour."
+msgstr "#1a73e8 のように指定します。空欄にすると標準の色を使います。ボタンの文字は白なので、濃い色を選んでください。"
+
+#: includes/class-admin.php:681
+msgid "Texts"
+msgstr "文言"
+
+#: includes/class-admin.php:682
+msgid "Leave a field empty to use the built-in wording, which follows the language of the page. The grey text in an empty field shows that wording in your language."
+msgstr "空欄にすると標準の文言を使います。標準の文言は、ページの言語に合わせて切り替わります。空欄に薄く表示されているのは、管理画面の言語での標準の文言です。"
+
+#: includes/class-admin.php:690
+msgid "Shown under the list of AI services. {provider} is replaced by the name of the selected service."
+msgstr "AIサービスの一覧の下に表示します。{provider} は、選択中のサービス名に置き換わります。"
+
+#: includes/class-admin.php:707
+msgid "Preset questions"
+msgstr "プリセット質問"
+
+#: includes/class-admin.php:710 includes/class-admin.php:713
+msgid "Questions"
+msgstr "質問"
+
+#. translators: %d: largest number of questions.
+#: includes/class-admin.php:718
+msgid "Shown in the panel as examples a visitor can tap. Up to %d. Empty fields are ignored."
+msgstr "訪問者がタップして使える質問の例として、パネルに表示します。%d件まで登録できます。空欄は無視されます。"
+
+#: includes/class-admin.php:731
+msgid "Put it into the question field"
+msgstr "質問欄に入力する"
+
+#: includes/class-admin.php:735
+msgid "Open the AI service at once"
+msgstr "すぐにAIサービスを開く"
+
+#. translators: %d: number of the question.
+#: includes/class-admin.php:775
+msgid "Move question %d up"
+msgstr "質問%dを上へ移動"
+
+#. translators: %d: number of the question.
+#: includes/class-admin.php:777
+msgid "Move question %d down"
+msgstr "質問%dを下へ移動"
+
+#. translators: %d: number of the question.
+#: includes/class-admin.php:779
+msgid "Remove question %d"
+msgstr "質問%dを削除"
+
+#. translators: %d: number of the question.
+#: includes/class-admin.php:779
+msgid "Remove"
+msgstr "削除"
+
+#: includes/class-admin.php:785
+msgid "Add a question"
+msgstr "質問を追加"
+
+#: includes/class-admin.php:803
+msgid "AI services"
+msgstr "AIサービス"
+
+#: includes/class-admin.php:804
+msgid "The services are offered in the order shown here. If the service selected by default is switched off, the first one in the list is selected. With every service switched off, the button is not shown."
+msgstr "AIサービスは、ここに並んでいる順に表示します。最初に選択しておくサービスが無効の場合は、一覧の先頭のサービスを選択します。すべてのサービスを無効にすると、ボタンは表示されません。"
+
+#: includes/class-admin.php:805
+msgid "URL templates: the URL formats used to hand over a question are not documented by the services and can change at any time. A template must start with https:// and contain {query}, which is replaced by the text handed to the service. Leave the field empty to use the built-in URL."
+msgstr "URLテンプレートについて: 質問を渡すためのURLの形式は、各サービスが公式に公開しているものではなく、予告なく変わることがあります。テンプレートは https:// で始まり、サービスに渡す文面に置き換わる {query} を含む必要があります。空欄にすると標準のURLを使います。"
+
+#. translators: %s: name of the AI service.
+#: includes/class-admin.php:819
+msgid "Move %s up"
+msgstr "%s を上へ移動"
+
+#. translators: %s: name of the AI service.
+#: includes/class-admin.php:821
+msgid "Move %s down"
+msgstr "%s を下へ移動"
+
+#: includes/class-admin.php:824
+msgid "Position in the list"
+msgstr "表示順"
+
+#: includes/class-admin.php:831
+msgid "Offer this service"
+msgstr "このサービスを表示する"
+
+#: includes/class-admin.php:839
+msgid "URL template"
+msgstr "URLテンプレート"
+
+#: includes/class-admin.php:843
+msgid "How the question is handed over"
+msgstr "質問の渡し方"
+
+#: includes/class-admin.php:845
+msgid "In the URL"
+msgstr "URLに含めて渡す"
+
+#: includes/class-admin.php:846
+msgid "Copied to the clipboard, then the service is opened"
+msgstr "クリップボードにコピーしてからサービスを開く"
+
+#: includes/class-admin.php:850
+msgid "Colour"
+msgstr "色"
+
+#: includes/class-admin.php:852
+msgid "Colour of the selected choice and of the send button. Leave empty to use the built-in colour."
+msgstr "選択中のサービスと送信ボタンの色です。空欄にすると標準の色を使います。"
+
+#: includes/class-admin.php:869
+msgid "Query"
+msgstr "クエリ"
+
+#: includes/class-admin.php:876
+msgid "The text handed to the AI service. Leave empty to use the built-in template, which follows the language of the page. Variables:"
+msgstr "AIサービスに渡す文面です。空欄にすると標準のテンプレートを使います。標準のテンプレートは、ページの言語に合わせて切り替わります。使える変数:"
+
+#: includes/class-admin.php:885
+msgid "characters"
+msgstr "文字"
+
+#: includes/class-admin.php:900
+msgid "Preview"
+msgstr "プレビュー"
+
+#: includes/class-admin.php:901
+msgid "Not saved yet. The preview shows the values in the form as they are now."
+msgstr "まだ保存されていません。フォームに現在入力されている内容を表示しています。"
+
+#: includes/class-admin.php:902
+msgid "The button is switched off in this form: visitors would not see it."
+msgstr "このフォームでは、ボタンを表示しない設定になっています。訪問者には表示されません。"
+
+#: includes/class-admin.php:905
+msgid "Sample question"
+msgstr "サンプルの質問"
+
+#: includes/class-admin.php:906
+msgid "What services do you offer?"
+msgstr "どのようなサービスがありますか？"
+
+#: includes/class-admin.php:908
+msgid "URL that would be opened"
+msgstr "開かれるURL"
+
+#: includes/class-admin.php:910
+msgid "The URL is the one of the send button in the preview, for the service selected there. That button is real: pressing it opens the service in a new tab. Texts are cleaned when the settings are saved, so a saved text can differ slightly from the preview."
+msgstr "プレビューの送信ボタンに設定されているURLを、そこで選択中のサービスについて表示しています。送信ボタンは実際に動作し、押すとサービスが別タブで開きます。文言は保存時に整形されるため、保存後の文言がプレビューとわずかに異なる場合があります。"
+
+#: includes/class-admin.php:957
+msgid "Do not show the button on this page"
+msgstr "このページではボタンを表示しない"
+
+#: includes/class-admin.php:961
+msgid "Questions for this page"
+msgstr "このページ専用の質問"
+
+#. translators: %d: largest number of questions.
+#: includes/class-admin.php:966
+msgid "When any are set, they replace the questions of the site on this page. Up to %d. Empty fields are ignored."
+msgstr "入力すると、このページではサイト共通の質問の代わりに表示します。%d件まで登録できます。空欄は無視されます。"

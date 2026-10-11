@@ -232,7 +232,7 @@ final class Askai_Button_Settings {
 	 * The order of the list is kept. Unknown ids and duplicates are dropped,
 	 * and known ids that are missing are added at the end.
 	 *
-	 * @param mixed $value Raw list of `{ id, enabled, url_template, method }`.
+	 * @param mixed $value Raw list of `{ id, enabled, url_template, method, color }`.
 	 * @return array[]
 	 */
 	public static function sanitize_providers( $value ) {
@@ -264,6 +264,7 @@ final class Askai_Button_Settings {
 				if ( in_array( $method, self::methods(), true ) ) {
 					$provider['method'] = $method;
 				}
+				$provider['color'] = self::sanitize_color( self::pick( $entry, 'color' ) );
 				$out[] = $provider;
 			}
 		}
@@ -495,6 +496,7 @@ final class Askai_Button_Settings {
 			'enabled'      => true,
 			'url_template' => '',
 			'method'       => 'url',
+			'color'        => '',
 		);
 	}
 

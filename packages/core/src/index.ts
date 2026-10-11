@@ -1,10 +1,20 @@
 import { resolveOptions } from './config';
-import { registerLocale as addLocale } from './i18n';
-import { registerProvider as addProvider } from './providers';
+import { buildDict, registerLocale as addLocale, resolveLang } from './i18n';
+import { registerProvider as addProvider, resolveProviders, type ResolvedProvider } from './providers';
 import type { Dict, Options, ProviderDef } from './types';
 import { Widget, type WidgetState } from './widget';
 
 export type { Dict, Localized, Options, ProviderDef, SendEvent, SendMethod } from './types';
+
+/** What the button uses when no option says otherwise. */
+export interface Defaults {
+  /** Language of the dictionary. */
+  lang: string;
+  /** Built-in wording, including the query template. */
+  labels: Dict;
+  /** Registered AI services, with their names in the requested language. */
+  providers: ResolvedProvider[];
+}
 
 const hasDom = typeof document !== 'undefined';
 
@@ -77,6 +87,19 @@ export function registerProvider(def: ProviderDef): void {
 export function registerLocale(code: string, dict: Partial<Dict>): void {
   addLocale(code, dict);
   rebuild();
+}
+
+/**
+ * Built-in wording and AI services for a language (the page language when omitted).
+ * Read-only: meant for settings screens that show what an empty field stands for.
+ */
+export function defaults(lang?: string): Defaults {
+  const resolved = resolveLang({
+    lang,
+    htmlLang: hasDom ? document.documentElement.lang : '',
+    navLang: hasDom ? navigator.language : '',
+  });
+  return { lang: resolved.ui, labels: buildDict(resolved), providers: resolveProviders(undefined, resolved.page) };
 }
 
 export function destroy(): void {

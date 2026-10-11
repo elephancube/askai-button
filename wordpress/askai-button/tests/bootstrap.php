@@ -1,7 +1,7 @@
 <?php
 /**
  * Test bootstrap: minimal stand-ins for the WordPress functions used by the
- * settings class and by the pure parts of the front-end class.
+ * settings class and by the pure parts of the front-end and admin classes.
  *
  * The stand-ins follow the WordPress implementations closely. Where one is a
  * simplification, its comment says so.
@@ -74,3 +74,4 @@ function wp_json_encode( $data, $flags = 0, $depth = 512 ) {
 
 require_once dirname( __DIR__ ) . '/includes/class-settings.php';
 require_once dirname( __DIR__ ) . '/includes/class-frontend.php';
+require_once dirname( __DIR__ ) . '/includes/class-admin.php';

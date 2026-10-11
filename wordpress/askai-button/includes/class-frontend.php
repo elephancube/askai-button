@@ -398,6 +398,9 @@ final class Askai_Button_Frontend {
 			if ( 'url' !== $provider['method'] ) {
 				$entry['method'] = $provider['method'];
 			}
+			if ( '' !== $provider['color'] ) {
+				$entry['color'] = $provider['color'];
+			}
 			$out[] = 1 === count( $entry ) ? $provider['id'] : $entry;
 		}
 		return $out;

@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "build": "npm run build -w askai-button && node scripts/copy-dist.mjs",
+    "i18n": "node scripts/i18n.mjs",
     "test": "npm test -w askai-button",
     "test:php": "php wordpress/askai-button/tests/run.php",
     "typecheck": "npm run typecheck -w askai-button"

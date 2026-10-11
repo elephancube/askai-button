@@ -9,6 +9,7 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       askai-button
+ * Domain Path:       /languages
  *
  * @package Askai_Button
  */
@@ -32,5 +33,25 @@ require_once ASKAI_BUTTON_DIR . 'includes/class-frontend.php';
  */
 function askai_button_boot() {
 	Askai_Button_Frontend::register();
+	if ( is_admin() ) {
+		require_once ASKAI_BUTTON_DIR . 'includes/class-admin.php';
+		Askai_Button_Admin::register();
+	}
 }
 add_action( 'plugins_loaded', 'askai_button_boot' );
+
+/**
+ * Makes the translations in the `languages` folder available.
+ *
+ * WordPress finds translations installed from WordPress.org by itself, but
+ * not the files a plugin ships with. Up to WordPress 6.6 this call loads
+ * them; from 6.7 on it only tells WordPress where they are, and they are
+ * loaded when the first string is translated. A translation installed in
+ * `wp-content/languages/plugins` takes precedence in both cases.
+ *
+ * @return void
+ */
+function askai_button_load_textdomain() {
+	load_plugin_textdomain( 'askai-button', false, dirname( plugin_basename( ASKAI_BUTTON_FILE ) ) . '/languages' );
+}
+add_action( 'init', 'askai_button_load_textdomain' );

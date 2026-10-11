@@ -35,10 +35,38 @@ afterEach(() => {
 });
 
 describe('public API', () => {
-  it('exposes the seven functions', () => {
+  it('exposes the eight functions', () => {
     expect(Object.keys(api).sort()).toEqual(
-      ['close', 'destroy', 'init', 'open', 'registerLocale', 'registerProvider', 'update'].sort(),
+      ['close', 'defaults', 'destroy', 'init', 'open', 'registerLocale', 'registerProvider', 'update'].sort(),
     );
+  });
+
+  it('reports the built-in wording and services without rendering anything', () => {
+    const ja = api.defaults('ja');
+    expect(ja.lang).toBe('ja');
+    expect(ja.labels.buttonLabel).toBe('AIに質問');
+    expect(ja.labels.note).toContain('{provider}');
+    expect(ja.labels.queryTemplate).toContain('{site_url}');
+    expect(ja.providers.map((p) => p.id)).toEqual(['chatgpt', 'claude', 'googleai']);
+    expect(ja.providers[2].name).toBe('Google AIモード');
+    expect(ja.providers[0]).toEqual({
+      id: 'chatgpt',
+      name: 'ChatGPT',
+      urlTemplate: 'https://chatgpt.com/?q={query}',
+      method: 'url',
+      color: '#0d7d61',
+    });
+
+    const en = api.defaults('en_US');
+    expect(en.lang).toBe('en');
+    expect(en.labels.buttonLabel).toBe('Ask AI');
+    expect(en.providers[2].name).toBe('Google AI Mode');
+
+    // Without an argument the page language is used; options passed to init() play no part.
+    api.init({ lang: 'en', labels: { buttonLabel: 'Custom' } });
+    expect(api.defaults().labels.buttonLabel).toBe('AIに質問');
+    expect(api.defaults('fr').lang).toBe('en');
+    expect(hosts().length).toBe(1);
   });
 
   it('never leaves two launchers', () => {

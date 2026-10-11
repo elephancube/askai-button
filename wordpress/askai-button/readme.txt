@@ -21,11 +21,29 @@ What it does not do:
 * It does not store, send or measure the question. The only thing kept is the visitor's last choice of AI service, in the browser's local storage.
 * It sets no cookies.
 
-This is version 0.1.0. It has no settings screen yet: after activation the button appears on the public pages of the site with its default settings. It is not shown in the admin area, in previews, on 404 pages, or on posts that are password protected or not published.
+After activation the button appears on the public pages of the site with its default settings. It is not shown in the admin area, in previews, on 404 pages, on attachment pages, or on posts that are password protected or not published.
 
-Developers can adjust the behaviour with the filters `askai_should_display`, `askai_presets`, `askai_providers` and `askai_query_template`.
+= Settings =
 
-The button is displayed in the language of the page. Japanese and English are built in.
+Everything is set on one screen, Settings > Ask AI:
+
+* Display: switch the button on or off, limit it to some post types, choose the corner, the distance from the edges, the z-index and the colour of the button.
+* Texts: the label of the button and the texts of the panel. A field left empty uses the built-in wording in the language of the page.
+* Preset questions: up to six example questions a visitor can tap, and whether a tap fills in the question or opens the AI service at once.
+* AI services: which services are offered, their order, the one selected by default, and for each service the URL template, the way the question is handed over (in the URL, or copied to the clipboard) and its colour.
+* Query: the template of the text handed to the AI service, and the maximum length of a question.
+
+A preview on the same screen shows the button and the panel with the values of the form before they are saved, together with the URL that would be opened for a sample question. The preview and the buttons that reorder questions and services need JavaScript; every setting can also be edited and saved without it.
+
+= Per post =
+
+The edit screen of posts, pages and other public post types has an "Ask AI" box with two settings: "Do not show the button on this page", and up to six "Questions for this page", which replace the questions of the site on that page.
+
+= For developers =
+
+The behaviour can be adjusted with the filters `askai_should_display`, `askai_presets`, `askai_providers` and `askai_query_template`.
+
+The button is displayed in the language of the page. Japanese and English are built in. The settings screen is available in English and Japanese.
 
 == External services ==
 
@@ -47,6 +65,7 @@ ChatGPT, Claude and Google are trademarks of their respective owners. This plugi
 
 1. Upload the `askai-button` folder to `/wp-content/plugins/`.
 2. Activate the plugin on the Plugins screen.
+3. Optionally, adjust the button under Settings > Ask AI.
 
 == Frequently Asked Questions ==
 
@@ -56,7 +75,15 @@ The plugin only passes an address. Whether and how a service opens that address 
 
 = Can I hide the button on some pages? =
 
-Yes, with the `askai_should_display` filter. A settings screen is planned.
+Yes. Tick "Do not show the button on this page" in the "Ask AI" box of the edit screen, or limit the button to some post types under Settings > Ask AI. Developers can also use the `askai_should_display` filter.
+
+= What happens when I leave a text or a URL template empty? =
+
+The built-in value is used. The built-in texts follow the language of the page, so an empty field is the right choice on a multilingual site.
+
+= A URL template was rejected. Why? =
+
+A template must start with `https://` and contain `{query}`, the place where the text for the AI service goes. Anything else is not saved and the built-in URL of that service is used.
 
 == License ==
 

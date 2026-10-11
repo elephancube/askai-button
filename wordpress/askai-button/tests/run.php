@@ -110,18 +110,21 @@ $askai_default_providers = array(
 		'enabled'      => true,
 		'url_template' => '',
 		'method'       => 'url',
+		'color'        => '',
 	),
 	array(
 		'id'           => 'claude',
 		'enabled'      => true,
 		'url_template' => '',
 		'method'       => 'url',
+		'color'        => '',
 	),
 	array(
 		'id'           => 'googleai',
 		'enabled'      => true,
 		'url_template' => '',
 		'method'       => 'url',
+		'color'        => '',
 	),
 );
 
@@ -507,18 +510,21 @@ askai_test(
 					'enabled'      => false,
 					'url_template' => 'https://claude.example/new?q={query}',
 					'method'       => 'copy_and_open',
+					'color'        => '',
 				),
 				array(
 					'id'           => 'googleai',
 					'enabled'      => true,
 					'url_template' => '',
 					'method'       => 'url',
+					'color'        => '',
 				),
 				array(
 					'id'           => 'chatgpt',
 					'enabled'      => true,
 					'url_template' => '',
 					'method'       => 'url',
+					'color'        => '',
 				),
 			),
 			$clean['providers']
@@ -564,18 +570,21 @@ askai_test(
 					'enabled'      => false,
 					'url_template' => '',
 					'method'       => 'url',
+					'color'        => '',
 				),
 				array(
 					'id'           => 'claude',
 					'enabled'      => true,
 					'url_template' => '',
 					'method'       => 'url',
+					'color'        => '',
 				),
 				array(
 					'id'           => 'chatgpt',
 					'enabled'      => true,
 					'url_template' => '',
 					'method'       => 'url',
+					'color'        => '',
 				),
 			),
 			$clean['providers']
@@ -1442,6 +1451,346 @@ askai_test(
 		askai_same( '', Askai_Button_Frontend::inline_script( array( 'siteName' => "\xff\xfe" ) ), 'invalid UTF-8' );
 		askai_same( '', Askai_Button_Frontend::encode_options( array() ), 'an empty list is not an object' );
 		askai_same( '', Askai_Button_Frontend::encode_options( array( 'a', 'b' ) ), 'a list is not an object' );
+	}
+);
+
+/*
+ * Colour of an AI service.
+ */
+
+askai_test(
+	'provider colour: hex or empty',
+	function () {
+		$cases = array(
+			array( '#1A73E8', '#1A73E8' ),
+			array( ' #abc ', '#abc' ),
+			array( '', '' ),
+			array( 'red', '' ),
+			array( '#12345', '' ),
+			array( '#1234567', '' ),
+			array( 'rgb(1,2,3)', '' ),
+			array( '#fff;background:url(x)', '' ),
+			array( '<script>', '' ),
+			array( null, '' ),
+			array( 5, '' ),
+			array( array( '#fff' ), '' ),
+		);
+		foreach ( $cases as $index => $case ) {
+			$clean = Askai_Button_Settings::sanitize(
+				array(
+					'providers' => array(
+						array(
+							'id'    => 'claude',
+							'color' => $case[0],
+						),
+					),
+				)
+			);
+			askai_same( 'claude', $clean['providers'][0]['id'], 'case #' . $index );
+			askai_same( $case[1], $clean['providers'][0]['color'], 'case #' . $index );
+			askai_same( '', $clean['providers'][1]['color'], 'others stay empty, case #' . $index );
+		}
+		foreach ( Askai_Button_Settings::defaults()['providers'] as $provider ) {
+			askai_same( '', $provider['color'], 'default of ' . $provider['id'] );
+		}
+		$stored = Askai_Button_Settings::sanitize( array( 'providers' => array( 'googleai' => array( 'color' => '#0b57d0' ) ) ) );
+		askai_same( '#0b57d0', $stored['providers'][0]['color'] );
+		askai_same( $stored, Askai_Button_Settings::sanitize( $stored ), 'sanitizing twice changes nothing' );
+	}
+);
+
+askai_test(
+	'options: a provider colour is passed only when set, and always in an object',
+	function () {
+		$settings = Askai_Button_Settings::sanitize(
+			array(
+				'providers' => array(
+					array(
+						'id'    => 'chatgpt',
+						'color' => '#123456',
+					),
+					array( 'id' => 'claude' ),
+					array(
+						'id'           => 'googleai',
+						'color'        => '#abc',
+						'method'       => 'copy_and_open',
+						'url_template' => 'https://g.example/?q={query}',
+					),
+				),
+			)
+		);
+		askai_same(
+			array(
+				array(
+					'id'    => 'chatgpt',
+					'color' => '#123456',
+				),
+				'claude',
+				array(
+					'id'          => 'googleai',
+					'urlTemplate' => 'https://g.example/?q={query}',
+					'method'      => 'copy_and_open',
+					'color'       => '#abc',
+				),
+			),
+			Askai_Button_Frontend::providers_from_settings( $settings ),
+			'providers_from_settings'
+		);
+		askai_same( Askai_Button_Frontend::providers_from_settings( $settings ), Askai_Button_Frontend::build_options( $settings )['providers'], 'build_options' );
+
+		$settings['providers'][0]['color'] = 'url(javascript:alert(1))';
+		askai_same( 'chatgpt', Askai_Button_Frontend::build_options( $settings )['providers'][0], 'a damaged stored colour is not passed' );
+
+		$json = Askai_Button_Frontend::encode_options( Askai_Button_Frontend::build_options( Askai_Button_Settings::defaults() ) );
+		askai_same( false, strpos( $json, 'color' ), 'no colour in the default output' );
+	}
+);
+
+/*
+ * Admin: order of the AI services, and what is reported after saving.
+ */
+
+askai_test(
+	'admin: the order fields decide the order of the services',
+	function () {
+		$input = array(
+			'position'  => 'bottom-left',
+			'providers' => array(
+				'chatgpt'  => array(
+					'order'   => '3',
+					'enabled' => '1',
+				),
+				'claude'   => array(
+					'order'  => '1',
+					'method' => 'copy_and_open',
+				),
+				'googleai' => array( 'order' => '2' ),
+			),
+		);
+		$ready = Askai_Button_Admin::prepare_input( $input );
+		askai_same( array( 'claude', 'googleai', 'chatgpt' ), array_keys( $ready['providers'] ) );
+		askai_same( 'bottom-left', $ready['position'], 'other keys untouched' );
+		askai_same( $input['providers']['claude'], $ready['providers']['claude'], 'entries untouched' );
+		$clean = Askai_Button_Settings::sanitize( $ready );
+		askai_same( array( 'claude', 'googleai', 'chatgpt' ), array_column( $clean['providers'], 'id' ) );
+		askai_same( 'copy_and_open', $clean['providers'][0]['method'] );
+
+		$ties = Askai_Button_Admin::prepare_input(
+			array(
+				'providers' => array(
+					'chatgpt'  => array( 'order' => '2' ),
+					'claude'   => array( 'order' => '2' ),
+					'googleai' => array( 'order' => '1' ),
+				),
+			)
+		);
+		askai_same( array( 'googleai', 'chatgpt', 'claude' ), array_keys( $ties['providers'] ), 'equal numbers keep the submitted order' );
+
+		$partial = Askai_Button_Admin::prepare_input(
+			array(
+				'providers' => array(
+					'chatgpt'  => array( 'order' => 'abc' ),
+					'claude'   => array( 'order' => array( 1 ) ),
+					'googleai' => array( 'order' => '-5' ),
+				),
+			)
+		);
+		askai_same( array( 'googleai', 'chatgpt', 'claude' ), array_keys( $partial['providers'] ), 'unusable numbers go last' );
+
+		$stored = Askai_Button_Settings::sanitize( array( 'providers' => array( 'googleai', 'claude' ) ) );
+		askai_same( $stored, Askai_Button_Admin::prepare_input( $stored ), 'a list without order fields is left alone' );
+		foreach ( array( null, 'x', 5, array(), array( 'providers' => 'x' ) ) as $index => $value ) {
+			askai_same( $value, Askai_Button_Admin::prepare_input( $value ), 'wrong type #' . $index );
+		}
+	}
+);
+
+askai_test(
+	'admin: nothing is reported when the values are saved as typed',
+	function () {
+		$changes = function ( $input ) {
+			return Askai_Button_Admin::find_changes( $input, Askai_Button_Settings::sanitize( $input ) );
+		};
+		askai_same( array(), $changes( array() ), 'empty' );
+		askai_same( array(), $changes( Askai_Button_Settings::defaults() ), 'defaults' );
+		askai_same( array(), Askai_Button_Admin::find_changes( 'x', Askai_Button_Settings::defaults() ), 'not an array' );
+
+		$form = array(
+			'enabled'          => '0',
+			'post_types'       => array( 'post' ),
+			'position'         => 'bottom-left',
+			'offset'           => ' 40 ',
+			'z_index'          => '-5',
+			'accent_color'     => ' #0f5c63 ',
+			'labels'           => array(
+				'button_label'   => '  5 < 6 & "7"  ',
+				'panel_title'    => "two\twords   here",
+				'panel_subtitle' => '',
+				'placeholder'    => 'x > y < z',
+				'note'           => 'Ask {provider} <',
+			),
+			'presets'          => array( ' one ', '', 'two', '', '', '' ),
+			'preset_action'    => 'send',
+			'providers'        => array(
+				'claude'   => array(
+					'order'        => '1',
+					'enabled'      => '1',
+					'url_template' => ' https://claude.example/new?q={query} ',
+					'method'       => 'copy_and_open',
+					'color'        => '#abc',
+				),
+				'chatgpt'  => array(
+					'order'        => '2',
+					'enabled'      => '0',
+					'url_template' => '',
+					'method'       => 'url',
+					'color'        => '',
+				),
+				'googleai' => array(
+					'order'        => '3',
+					'enabled'      => '1',
+					'url_template' => '',
+					'method'       => 'url',
+					'color'        => '',
+				),
+			),
+			'default_provider' => 'claude',
+			'query_template'   => "  {question}\r\n\r\nSee {site_url}\r\n",
+			'max_length'       => '300',
+			'use_md_url'       => '0',
+			'tracking'         => '0',
+		);
+		askai_same( array(), $changes( $form ), 'a complete form' );
+
+		$stored = Askai_Button_Settings::sanitize( $form );
+		askai_same( array(), $changes( $stored ), 'the stored value itself, as when WordPress cleans a new option a second time' );
+	}
+);
+
+askai_test(
+	'admin: every value that is saved differently is reported',
+	function () {
+		$changes = function ( $input ) {
+			return Askai_Button_Admin::find_changes( $input, Askai_Button_Settings::sanitize( $input ) );
+		};
+
+		askai_same( array( 'provider:chatgpt:url_template' ), $changes( array( 'providers' => array( 'chatgpt' => array( 'url_template' => 'javascript:alert(1)' ) ) ) ) );
+		askai_same( array( 'provider:claude:url_template' ), $changes( array( 'providers' => array( 'claude' => array( 'url_template' => 'http://x/?q={query}' ) ) ) ) );
+		askai_same( array( 'provider:googleai:url_template' ), $changes( array( 'providers' => array( 'googleai' => array( 'url_template' => 'https://x.example/?q=' ) ) ) ) );
+		askai_same(
+			array( 'provider:claude:url_template', 'provider:claude:color', 'provider:claude:method' ),
+			$changes(
+				array(
+					'providers' => array(
+						array(
+							'id'           => 'claude',
+							'url_template' => 'ftp://x/{query}',
+							'color'        => 'red',
+							'method'       => 'post',
+						),
+					),
+				)
+			),
+			'list form with id'
+		);
+		askai_same( array(), $changes( array( 'providers' => array( 'gemini' => array( 'url_template' => 'x' ) ) ) ), 'unknown services are not reported' );
+
+		askai_same( array( 'label:button_label' ), $changes( array( 'labels' => array( 'button_label' => '<script>alert(1)</script>' ) ) ) );
+		askai_same( array( 'label:note' ), $changes( array( 'labels' => array( 'note' => str_repeat( 'a', 201 ) ) ) ), 'too long' );
+		askai_same( array( 'label:panel_title' ), $changes( array( 'labels' => array( 'panel_title' => "a\x07b" ) ) ), 'control character' );
+		askai_same( array( 'label:placeholder' ), $changes( array( 'labels' => array( 'placeholder' => "bad \xff bytes" ) ) ), 'invalid UTF-8' );
+
+		askai_same( array( 'presets:count' ), $changes( array( 'presets' => array( '1', '2', '3', '4', '5', '6', '7', '8' ) ) ) );
+		askai_same( array(), $changes( array( 'presets' => array( '1', '', '2', '', '3', '4', '', '5', '6', '' ) ) ), 'six questions among empty fields' );
+		askai_same( array( 'preset:2' ), $changes( array( 'presets' => array( 'fine', 'a <b>bold</b> one', 'fine too' ) ) ) );
+		askai_same( array( 'preset:3', 'presets:count' ), $changes( array( 'presets' => array( '1', '2', '<i>3</i>', '4', '5', '6', '7' ) ) ) );
+
+		askai_same( array( 'offset' ), $changes( array( 'offset' => '9999' ) ), 'clamped' );
+		askai_same( array( 'offset' ), $changes( array( 'offset' => 'abc' ) ), 'not a number' );
+		askai_same( array( 'offset' ), $changes( array( 'offset' => '' ) ), 'emptied' );
+		askai_same( array( 'offset' ), $changes( array( 'offset' => '12.5' ) ), 'fraction' );
+		askai_same( array(), $changes( array( 'offset' => '012' ) ), 'leading zero is the same number' );
+		askai_same( array( 'z_index' ), $changes( array( 'z_index' => '99999999999999999999' ) ) );
+		askai_same( array( 'max_length' ), $changes( array( 'max_length' => '0' ) ) );
+		askai_same( array( 'max_length' ), $changes( array( 'max_length' => '5000' ) ) );
+
+		askai_same( array( 'accent_color' ), $changes( array( 'accent_color' => 'blue' ) ) );
+		askai_same( array(), $changes( array( 'accent_color' => '' ) ), 'an empty colour is a valid choice' );
+
+		askai_same( array( 'position' ), $changes( array( 'position' => 'top-left' ) ) );
+		askai_same( array( 'preset_action' ), $changes( array( 'preset_action' => 'submit' ) ) );
+		askai_same( array( 'default_provider' ), $changes( array( 'default_provider' => 'gemini' ) ) );
+
+		askai_same( array( 'query_template' ), $changes( array( 'query_template' => '{question} <b>{site_url}</b>' ) ) );
+		askai_same( array( 'query_template' ), $changes( array( 'query_template' => str_repeat( 'a', 2001 ) ) ) );
+		askai_same( array(), $changes( array( 'query_template' => "a  b\n\n\nc" ) ), 'inner whitespace of the template is kept, so nothing to report' );
+
+		askai_same(
+			array( 'offset', 'accent_color', 'label:note', 'preset:1', 'provider:chatgpt:url_template', 'query_template' ),
+			$changes(
+				array(
+					'offset'         => '-1',
+					'accent_color'   => '#12',
+					'labels'         => array( 'note' => '<em>x</em>' ),
+					'presets'        => array( '<p>q</p>' ),
+					'providers'      => array( 'chatgpt' => array( 'url_template' => 'https://{query}/' ) ),
+					'query_template' => '<!-- x -->{question}',
+				)
+			),
+			'several at once, in the order of the form'
+		);
+	}
+);
+
+/*
+ * Meta box.
+ */
+
+askai_test(
+	'meta box: values are cleaned like the site-wide ones',
+	function () {
+		askai_same(
+			array(
+				'disabled' => false,
+				'presets'  => array(),
+			),
+			Askai_Button_Admin::clean_meta_input( null, array() ),
+			'nothing submitted'
+		);
+		foreach ( array( '1', 'on', 1, true ) as $value ) {
+			askai_same( true, Askai_Button_Admin::clean_meta_input( $value, array() )['disabled'], var_export( $value, true ) );
+		}
+		foreach ( array( '0', '', null, array( '1' ), 'maybe', new stdClass() ) as $index => $value ) {
+			askai_same( false, Askai_Button_Admin::clean_meta_input( $value, array() )['disabled'], 'not ticked #' . $index );
+		}
+
+		$typed = array( '  5 < 6 & "7"  ', '', '<script>alert(1)</script>', "line\nbreak", 'back\\slash', str_repeat( 'あ', 250 ), '7', '8', '9' );
+		$clean = Askai_Button_Admin::clean_meta_input( '1', $typed );
+		askai_same( array( '5 < 6 & "7"', 'alert(1)', 'line break', 'back\\slash', str_repeat( 'あ', 200 ), '7' ), $clean['presets'] );
+		askai_same( Askai_Button_Settings::sanitize_presets( $typed ), $clean['presets'], 'same result as the settings class' );
+		askai_same( $clean['presets'], Askai_Button_Frontend::sanitize_meta_presets( $clean['presets'] ), 'the registered sanitize callback agrees' );
+		askai_same( true, Askai_Button_Frontend::sanitize_meta_disabled( '1' ), 'the registered sanitize callback of the switch agrees' );
+
+		foreach ( array( null, 'one string', 5, new stdClass(), array( array( 'nested' ), null, 5.5 ) ) as $index => $value ) {
+			$expected = 4 === $index ? array( '5.5' ) : array();
+			askai_same( $expected, Askai_Button_Admin::clean_meta_input( null, $value )['presets'], 'wrong type #' . $index );
+		}
+		askai_same( array(), Askai_Button_Admin::clean_meta_input( null, array( '', '   ', '<b></b>' ) )['presets'], 'only empty questions' );
+	}
+);
+
+askai_test(
+	'admin: a stored text is written into an attribute without losing or gaining anything',
+	function () {
+		askai_same( 'a &amp; b', Askai_Button_Admin::text_attr( 'a & b' ) );
+		askai_same( '&amp;amp; stays five characters', Askai_Button_Admin::text_attr( '&amp; stays five characters' ), 'an entity typed as text is encoded again' );
+		askai_same( '5 &lt; 6 &amp; &quot;7&quot; &#039;8&#039; &gt; 3', Askai_Button_Admin::text_attr( "5 < 6 & \"7\" '8' > 3" ) );
+		askai_same( '', Askai_Button_Admin::text_attr( null ) );
+		askai_same( '', Askai_Button_Admin::text_attr( array( 'x' ) ) );
+		foreach ( array( 'a" onmouseover="alert(1)', "it's", '&lt;b&gt;', 'plain', 'ページ & "引用"' ) as $text ) {
+			askai_same( $text, html_entity_decode( Askai_Button_Admin::text_attr( $text ), ENT_QUOTES, 'UTF-8' ), 'round trip: ' . $text );
+			askai_same( 0, preg_match( '/["\'<>]/', Askai_Button_Admin::text_attr( $text ) ), 'no quote or bracket left: ' . $text );
+		}
 	}
 );
 
