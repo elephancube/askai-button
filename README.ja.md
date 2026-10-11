@@ -23,11 +23,19 @@ Webページに「AIに質問」ボタンを表示する部品です。訪問者
 
 ## すぐに使う
 
-scriptタグの場合:
+scriptタグで、ファイルを自分のサーバーに置く場合（`askai-button.min.js` は[リリースページ](https://github.com/elephancube/askai-button/releases)またはドキュメントサイトからダウンロードできます）:
 
 ```html
 <script src="askai-button.min.js" data-askai></script>
 ```
+
+scriptタグで、CDN から読み込む場合（jsDelivr。unpkg では `https://unpkg.com/askai-button@0.1.0/dist/askai-button.min.js` で同じファイルを配信しています）:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
+```
+
+CDN を使うと、訪問者のブラウザーが CDN の運営者（第三者）からスクリプトを取得します。ボタン自体は、この場合も何も送信しません。ファイルを自分のサーバーに置けば、この通信は発生しません。URLのバージョンは正確に指定したままにしてください。バージョンを書かないURLや `@latest` を付けたURLでは、新しいバージョンが公開されるたびに、サイト上のスクリプトが変わります。Subresource Integrity と Content Security Policy については、[導入方法のページ](https://elephancube.github.io/askai-button/install/#cdn)で説明しています。
 
 npmの場合:
 
@@ -53,7 +61,7 @@ init({
 ## しないこと
 
 - AIのAPIを呼ばず、APIキーも要りません。
-- サーバーを持たず、部品自身はネットワーク通信をしません。
+- サーバーを持たず、部品自身はネットワーク通信をしません（スクリプトファイルの読み込みは、ファイルの置き場所への通信です。自分のサーバーか、CDN を選んだ場合はその CDN になります）。
 - 質問を計測・保存せず、Cookieも使いません。
 - 保存するのは、訪問者が最後に選んだサービスだけです（`localStorage`）。
 

@@ -1,0 +1,251 @@
+name: Release
+
+# Publishes one version: the npm package, and a GitHub release with the built files attached.
+#
+# Started by pushing a tag "v<version>", e.g. v1.2.3. The steps before that are in CONTRIBUTING.md
+# ("Releasing"). It can also be started by hand (Actions > Release > Run workflow): with "dry run"
+# ticked, which is the default, everything is built and checked but nothing is published.
+#
+# npm authentication: trusted publishing (OpenID Connect). No token is stored in this repository.
+# On npmjs.com, the package needs a trusted publisher with exactly these values:
+#   organization or user: the owner of this repository     repository: the name of this repository
+#   workflow filename:    release.yml                       environment: (empty)
+#   allowed actions:      "npm publish" must be allowed
+# A package has to exist before a trusted publisher can be added to it, so the very first version
+# is published by hand. This workflow notices a version that is already on npm and then only
+# creates the GitHub release.
+#
+# Jobs and their permissions:
+#   build           contents: read    installs the dependencies, tests, builds, packs
+#   npm             id-token: write   publishes the tarball made by "build"; runs no project code
+#   github-release  contents: write   creates the release from the files made by "build"
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run - build and check everything, publish nothing
+        type: boolean
+        default: true
+
+# Nothing is granted by default. Each job asks for what it needs.
+permissions: {}
+
+# One release at a time, and a running one is never cancelled half-way.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Check, test, build and pack
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+      publish: ${{ steps.meta.outputs.publish }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          # No dependency cache in a release build.
+          package-manager-cache: false
+
+      - run: npm ci
+
+      # A real release runs on a tag. A dry run may also be started on a branch.
+      - name: Work out what to release
+        id: meta
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          version=$(node -p "require('./packages/core/package.json').version")
+          publish=true
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN" != "false" ]; then
+            publish=false
+          fi
+          if [ "$REF_TYPE" = "tag" ]; then
+            tag="$REF_NAME"
+          elif [ "$publish" = "true" ]; then
+            echo "::error::A release has to be started on a tag. Choose the tag v$version under 'Use workflow from', or tick 'dry run'."
+            exit 1
+          else
+            tag=""
+          fi
+          case "$version" in
+            *-*) prerelease=true ;;
+            *) prerelease=false ;;
+          esac
+          {
+            echo "version=$version"
+            echo "tag=$tag"
+            echo "publish=$publish"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+          echo "version=$version tag=${tag:-(none)} publish=$publish prerelease=$prerelease"
+
+      # The tag, the package, the plugin header, readme.txt and the changelog must name the same version.
+      - name: Check the version numbers
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          if [ -n "$TAG" ]; then
+            node scripts/check-versions.mjs --tag "$TAG"
+          else
+            node scripts/check-versions.mjs
+          fi
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      # Builds the library (and fails if the script is over its size budget),
+      # copies it into the plugin, then builds the site.
+      - run: npm run build
+
+      - run: npm run zip:plugin
+
+      # "npm pack" runs the prepack script of the package (type check, tests, build) once more
+      # and writes exactly the file that is going to be published.
+      - name: Pack the npm package
+        working-directory: packages/core
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/release"
+          npm pack --pack-destination "$GITHUB_WORKSPACE/release"
+
+      - name: Collect the release files
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          cp packages/core/dist/askai-button.min.js packages/core/dist/askai-button.esm.js release/
+          cp "dist-plugin/askai-button-$VERSION.zip" release/
+          # The script attached to the release must be the one inside the npm package.
+          tar -xzOf "release/askai-button-$VERSION.tgz" package/dist/askai-button.min.js | cmp - release/askai-button.min.js
+          tar -xzOf "release/askai-button-$VERSION.tgz" package/dist/askai-button.esm.js | cmp - release/askai-button.esm.js
+          grep -q 'askai-button | MIT License' release/askai-button.min.js
+          grep -q 'askai-button | MIT License' release/askai-button.esm.js
+          if [ -n "$TAG" ]; then
+            node scripts/release-notes.mjs "$VERSION" > release/notes.md
+          else
+            node scripts/release-notes.mjs "$VERSION" > release/notes.md || echo "(CHANGELOG.md has no section for $VERSION yet.)" > release/notes.md
+          fi
+          {
+            echo "### Files of $VERSION"
+            echo '```'
+            (cd release && ls -l && sha256sum -- *)
+            echo '```'
+            echo "### Release notes"
+            cat release/notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release
+          path: release/
+          if-no-files-found: error
+          retention-days: 7
+
+  npm:
+    name: Publish to npm
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # the OpenID Connect token that npm exchanges for a short-lived publish token
+    steps:
+      # The repository is not checked out and no dependency is installed in this job.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: release
+          path: release
+
+      - name: Check the npm version
+        run: |
+          echo "node $(node --version), npm $(npm --version)"
+          node -e "
+            const [a, b, c] = process.argv[1].split('.').map(Number);
+            if (a < 11 || (a === 11 && (b < 5 || (b === 5 && c < 1)))) {
+              console.error('::error::Trusted publishing needs npm 11.5.1 or later.');
+              process.exit(1);
+            }
+          " "$(npm --version)"
+
+      - name: Is this version already on npm?
+        id: registry
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          published=$(npm view "askai-button@$VERSION" dist.integrity 2>/dev/null || true)
+          local_integrity="sha512-$(openssl dgst -sha512 -binary "release/askai-button-$VERSION.tgz" | openssl base64 -A)"
+          if [ -z "$published" ]; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "askai-button@$VERSION is not on npm yet."
+          else
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            if [ "$published" = "$local_integrity" ]; then
+              echo "::notice::askai-button@$VERSION is already on npm and is identical to the package built here. Nothing is published."
+            else
+              echo "::warning::askai-button@$VERSION is already on npm, and its content differs from the package built here (a version on npm can never be replaced). Nothing is published. The files attached to the GitHub release are the ones built here."
+            fi
+          fi
+
+      - name: Publish
+        if: steps.registry.outputs.exists == 'false'
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          if [ "$PRERELEASE" = "true" ]; then
+            npm publish "release/askai-button-$VERSION.tgz" --access public --tag next
+          else
+            npm publish "release/askai-button-$VERSION.tgz" --access public
+          fi
+
+  github-release:
+    name: Create the GitHub release
+    needs: [build, npm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # creating a release
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release
+          path: release
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.build.outputs.tag }}
+          VERSION: ${{ needs.build.outputs.version }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          files="release/askai-button.min.js release/askai-button.esm.js release/askai-button-$VERSION.zip"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" $files --clobber
+            gh release edit "$TAG" --notes-file release/notes.md
+          elif [ "$PRERELEASE" = "true" ]; then
+            gh release create "$TAG" $files --verify-tag --title "$TAG" --notes-file release/notes.md --prerelease
+          else
+            gh release create "$TAG" $files --verify-tag --title "$TAG" --notes-file release/notes.md
+          fi

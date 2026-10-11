@@ -133,7 +133,7 @@ AIサービスに渡るのは、次の文面だけです（日本語のページ
 
 ## 次に読むページ {#next}
 
-- [導入方法]({{page:install}})：`<script>` タグ、npm、WordPress プラグインの3通りの入れ方
+- [導入方法]({{page:install}})：`<script>` タグ（ファイルを自分のサーバーに置く方法と、CDN から読み込む方法）、npm、WordPress プラグインでの入れ方
 - [リファレンス]({{page:reference}})：オプション、`data-*` 属性、API、イベントの一覧
 - [WordPress]({{page:wordpress}})：プラグインの設定画面、ページ別の設定、フィルター
 - [しくみと注意点]({{page:how-it-works}})：プライバシー、AIサービスごとの違い、AIがサイトを読めない場合

@@ -324,5 +324,5 @@ The distributed files use ES2019 syntax. The targets are the last two versions o
 ## Content Security Policy {#csp}
 
 - The styles are applied to the shadow DOM with a constructed stylesheet (`adoptedStyleSheets`). Current browsers need no `<style>` element for this, so `'unsafe-inline'` does not have to be added to `style-src`. In a browser without constructed stylesheets, a `<style>` element is created inside the shadow DOM.
-- In `script-src`, allow the place where `askai-button.min.js` is served from. With `data-askai`, no inline script is needed.
+- In `script-src`, allow the place where `askai-button.min.js` is served from. For a file loaded from a CDN this is the host of the CDN (`https://cdn.jsdelivr.net` or `https://unpkg.com`). With `data-askai`, no inline script is needed.
 - The button makes no network requests, so nothing has to be set in `connect-src`.

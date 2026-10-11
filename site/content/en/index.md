@@ -133,7 +133,7 @@ The text can be changed freely. See "[Reference]({{page:reference}}#query-templa
 
 ## Where to go next {#next}
 
-- [Install]({{page:install}}): three ways to add it — a `<script>` tag, npm, or the WordPress plugin
+- [Install]({{page:install}}): how to add it — a `<script>` tag (with the file on your own server or from a CDN), npm, or the WordPress plugin
 - [Reference]({{page:reference}}): options, `data-*` attributes, API and events
 - [WordPress]({{page:wordpress}}): the settings screen, per-post settings and filters
 - [How it works and caveats]({{page:how-it-works}}): privacy, differences between the AI services, and what to do when the AI cannot read the site

@@ -1,14 +1,15 @@
 ---
 title: Install
-description: There are three ways to add askai-button to a site - one script tag, the npm package, or the WordPress plugin. This page gives the steps for each and explains how to check that it works.
+description: There are four ways to add askai-button to a site - a script tag with the file on your own server, a script tag that loads the file from a CDN, the npm package, or the WordPress plugin. This page gives the steps for each and explains how to check that it works.
 nav: Install
 ---
 
-All three give you the same button. Choose the one that fits how your site is built.
+All of them give you the same button. Choose the one that fits how your site is built.
 
 | Method | Good for |
 | --- | --- |
-| [Script tag](#script) | Sites where you can edit the HTML directly. No build step is needed. |
+| [Script tag, file on your own server](#script) | Sites where you can edit the HTML directly. No build step is needed, and no request goes to a third party. |
+| [Script tag, file from a CDN](#cdn) | Trying it out quickly, or sites where you cannot upload files. The visitor's browser fetches the file from the CDN. |
 | [npm](#npm) | Sites and web apps that bundle their JavaScript. |
 | [WordPress plugin](#wordpress) | WordPress sites. Everything is set in the admin area. |
 
@@ -85,6 +86,56 @@ Some settings, such as changing the wording or adding an AI service, cannot be g
 </script>
 ```
 
+## From a CDN {#cdn}
+
+Every version published on npm is also served by the public CDNs jsDelivr and unpkg. You then have no file to upload: one line is enough.
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+```
+
+The address contains the exact version (`@{{version}}`). The file behind such an address never changes. The `data-*` attributes and `AskAIButton.init()` work exactly as described [above](#script).
+
+The same file on unpkg:
+
+```html
+<script src="https://unpkg.com/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+```
+
+### What is different from hosting the file yourself
+
+- The browser of every visitor requests the file from the CDN. The operator of the CDN, a third party, therefore receives what a browser sends with any request, such as the IP address and, depending on the referrer policy of your page, the address of your site. If your site has a privacy policy, check whether this has to be mentioned in it.
+- The button itself is the same file and still sends nothing: no question, no measurement, no request of its own.
+- If the CDN cannot be reached, the button does not appear. The rest of your page is not affected.
+
+To have no request to a third party at all, [put the file on your own server](#script). This website does so too.
+
+### Pin the exact version
+
+Do not use an address without a version, or with `@latest`, on a live site. Such an address starts serving a new release as soon as it is published, so the behaviour or the look of the button on your site can change without you having done anything. With an exact version, you decide when to update: change the version number in the address after reading the [list of changes]({{repo}}/blob/main/CHANGELOG.md).
+
+A shorter range such as `@0.1` (jsDelivr) follows new releases within that range in the same way, and should be avoided for the same reason.
+
+### Subresource Integrity
+
+With an `integrity` attribute, the browser refuses to run the file if its content is not exactly what you expect. It only makes sense together with an exact version. The value depends on the file, so it is not printed here. You can compute the value with this command:
+
+```sh
+curl -s https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js | openssl dgst -sha384 -binary | openssl base64 -A
+```
+
+Put the result after `sha384-`, and add `crossorigin="anonymous"`:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js"
+  integrity="sha384-(the value from the command)" crossorigin="anonymous"
+  data-askai defer></script>
+```
+
+### Content Security Policy
+
+On a site with a Content Security Policy, allow the host of the CDN in `script-src`: `https://cdn.jsdelivr.net` for jsDelivr, `https://unpkg.com` for unpkg.
+
 ## With npm {#npm}
 
 ```sh
@@ -102,7 +153,8 @@ init({
 - The package is an ES module and includes TypeScript type definitions.
 - Call `init()` once, in the browser. Importing the package on a server causes no error and does nothing.
 - Calling `init()` again rebuilds the button with the new settings. Call `destroy()` to remove it.
-- `dist/askai-button.min.js` in the package is the same file as the one for the script tag.
+- The package has no CommonJS build. Projects that still use `require()` need a bundler, a current version of Node.js, or `await import('askai-button')`.
+- `dist/askai-button.min.js` in the package is the same file as the one for the script tag. It is also the file the [CDNs](#cdn) serve.
 
 From a component, for example in React, call it once after the component is shown.
 
@@ -158,11 +210,11 @@ If the address in step 5 is wrong, set it with `data-site-url` (`siteUrl` in `in
 
 ### When the button does not appear
 
-- Check the path of the file: the developer tools of the browser show whether `askai-button.min.js` was loaded.
+- Check the path of the file: the developer tools of the browser show whether `askai-button.min.js` was loaded. With a CDN address, check the version number in it: an address with a version that does not exist is answered with "not found".
 - Check that the script tag has `data-askai`, or that `AskAIButton.init()` is called.
 - A page with `<meta name="askai" content="off">` does not show the button.
 - Check that `providers` does not list only ids of AI services that do not exist. Without a usable AI service, the button is not shown.
-- On a site with a Content Security Policy, allow the file in `script-src`.
+- On a site with a Content Security Policy, allow the file in `script-src`. When the file comes from a CDN, the host of the CDN has to be allowed; see "[Content Security Policy](#content-security-policy)".
 
 ### Opening a file directly (file://) {#file}
 

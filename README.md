@@ -23,11 +23,19 @@ Please refer to the following URL to answer this question.
 
 ## Quick start
 
-With a script tag:
+With a script tag, the file being on your own server (download `askai-button.min.js` from the [releases](https://github.com/elephancube/askai-button/releases) or the documentation site):
 
 ```html
 <script src="askai-button.min.js" data-askai></script>
 ```
+
+With a script tag, the file coming from a CDN (jsDelivr; unpkg serves the same file at `https://unpkg.com/askai-button@0.1.0/dist/askai-button.min.js`):
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
+```
+
+With a CDN, the visitor's browser fetches the script from the CDN operator, a third party; the button itself still sends nothing. Hosting the file yourself avoids that request. Keep the exact version in the address: an address without a version, or with `@latest`, changes the script on your site whenever a release is published. Subresource Integrity and Content Security Policy are covered on the [install page](https://elephancube.github.io/askai-button/en/install/#cdn).
 
 With npm:
 
@@ -53,7 +61,7 @@ The plugin is in [`wordpress/askai-button/`](wordpress/askai-button/). It adds t
 ## What it does not do
 
 - It calls no AI API and needs no API key.
-- It runs no server and makes no network requests of its own.
+- It runs no server and makes no network requests of its own. (Loading the script file is a request to wherever you host it: your own server, or a CDN if you choose one.)
 - It does not track, measure or store the question, and sets no cookies.
 - The only thing kept is the visitor's last chosen service, in `localStorage`.
 

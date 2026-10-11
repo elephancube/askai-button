@@ -1,6 +1,6 @@
 ---
 title: 導入方法
-description: askai-button をサイトに入れる方法は3通りあります。script タグを1行追加する方法、npm パッケージを使う方法、WordPress プラグインを使う方法です。それぞれの手順と、動作の確認方法を説明します。
+description: askai-button をサイトに入れる方法は4通りあります。ファイルを自分のサーバーに置いて script タグで読み込む方法、CDN から script タグで読み込む方法、npm パッケージを使う方法、WordPress プラグインを使う方法です。それぞれの手順と、動作の確認方法を説明します。
 nav: 導入方法
 ---
 
@@ -8,7 +8,8 @@ nav: 導入方法
 
 | 方法 | 向いている場合 |
 | --- | --- |
-| [script タグ](#script) | HTMLを直接編集できるサイト。ビルドの仕組みがなくても使えます。 |
+| [script タグ（ファイルを自分のサーバーに置く）](#script) | HTMLを直接編集できるサイト。ビルドの仕組みがなくても使えます。第三者への通信は発生しません。 |
+| [script タグ（CDN から読み込む）](#cdn) | すぐに試したい場合や、ファイルをアップロードできないサイト。訪問者のブラウザーが CDN からファイルを取得します。 |
 | [npm](#npm) | JavaScript をバンドルしているサイトやWebアプリ。 |
 | [WordPress プラグイン](#wordpress) | WordPress のサイト。管理画面で設定できます。 |
 
@@ -85,6 +86,56 @@ nav: 導入方法
 </script>
 ```
 
+## CDN から読み込む {#cdn}
+
+npm に公開したバージョンは、公開 CDN の jsDelivr と unpkg からも配信されます。ファイルをアップロードする必要はなく、次の1行だけで使えます。
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+```
+
+URLには、正確なバージョン（`@{{version}}`）が入っています。このようなURLで配信されるファイルの内容は、あとから変わりません。`data-*` 属性や `AskAIButton.init()` の使い方は、[上の説明](#script)と同じです。
+
+unpkg から読み込む場合は、次のとおりです。
+
+```html
+<script src="https://unpkg.com/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+```
+
+### 自分のサーバーに置く場合との違い
+
+- 訪問者のブラウザーが、CDN にファイルを取りに行きます。そのため、CDN の運営者（第三者）に、ブラウザーが通常のリクエストで送る情報（IPアドレスや、ページのリファラーの設定によってはサイトのURLなど）が伝わります。プライバシーポリシーを公開しているサイトでは、記載が必要かどうかを確認してください。
+- ボタンの中身は同じファイルで、ボタン自体は何も送りません。質問の送信も、計測も、独自の通信もありません。
+- CDN につながらないときは、ボタンが表示されません。ページのほかの部分には影響しません。
+
+第三者への通信をまったく発生させたくない場合は、[ファイルを自分のサーバーに置いてください](#script)。このWebサイトも、そうしています。
+
+### バージョンを固定する
+
+公開中のサイトでは、バージョンを書かないURLや `@latest` を付けたURLを使わないでください。こうしたURLは、新しいバージョンが公開されるとすぐにそちらを配信するため、サイトの運営者が何もしなくても、ボタンの動作や見た目が変わることがあります。正確なバージョンを指定しておけば、更新する時期を自分で決められます。更新するときは、[変更履歴]({{repo}}/blob/main/CHANGELOG.md)を確認してから、URLのバージョン番号を書き換えます。
+
+`@0.1` のような範囲の指定（jsDelivr）も、その範囲の中で新しいバージョンに切り替わるので、同じ理由で避けてください。
+
+### Subresource Integrity（SRI）
+
+`integrity` 属性を付けると、ファイルの内容が想定と少しでも違う場合に、ブラウザーがそのファイルを実行しなくなります。正確なバージョンを指定している場合にだけ意味があります。値はファイルごとに決まるため、このページには載せていません。値は次のコマンドで計算できます。
+
+```sh
+curl -s https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js | openssl dgst -sha384 -binary | openssl base64 -A
+```
+
+出力された値を `sha384-` のあとに書き、`crossorigin="anonymous"` も付けます。
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js"
+  integrity="sha384-（コマンドで得た値）" crossorigin="anonymous"
+  data-askai defer></script>
+```
+
+### Content Security Policy
+
+Content Security Policy を設定しているサイトでは、`script-src` で CDN のホストを許可してください。jsDelivr は `https://cdn.jsdelivr.net`、unpkg は `https://unpkg.com` です。
+
 ## npm で入れる {#npm}
 
 ```sh
@@ -102,7 +153,8 @@ init({
 - ES モジュールとして提供しています。TypeScript の型定義も入っています。
 - `init()` は、ブラウザーの中で一度だけ呼びます。サーバー側で読み込んでもエラーにはならず、何もしません。
 - もう一度 `init()` を呼ぶと、ボタンは新しい設定で作り直されます。取り除くときは `destroy()` を呼びます。
-- パッケージの `dist/askai-button.min.js` は、script タグ用のファイルと同じものです。
+- CommonJS 用のビルドはありません。`require()` を使っているプロジェクトでは、バンドラー、新しいバージョンの Node.js、または `await import('askai-button')` を使ってください。
+- パッケージの `dist/askai-button.min.js` は、script タグ用のファイルと同じものです。[CDN](#cdn) が配信するのも、このファイルです。
 
 React などのコンポーネントから使うときは、表示されたあとに一度だけ呼びます。
 
@@ -158,11 +210,11 @@ npm run zip:plugin
 
 ### ボタンが表示されないとき
 
-- ファイルのパスが正しいか（ブラウザーの開発者ツールで、`askai-button.min.js` が読み込まれているか）を確認します。
+- ファイルのパスが正しいか（ブラウザーの開発者ツールで、`askai-button.min.js` が読み込まれているか）を確認します。CDN のURLを使っている場合は、URLのバージョン番号も確認します。存在しないバージョンを指定すると、ファイルは見つかりません。
 - script タグに `data-askai` が付いているか、または `AskAIButton.init()` を呼んでいるかを確認します。
 - ページに `<meta name="askai" content="off">` があると、ボタンは表示されません。
 - `providers` に、存在しないAIサービスのidだけを指定していないかを確認します。使えるAIサービスが1つもないと、ボタンは表示されません。
-- Content Security Policy を設定しているサイトでは、`script-src` でこのファイルの読み込みを許可してください。
+- Content Security Policy を設定しているサイトでは、`script-src` でこのファイルの読み込みを許可してください。CDN から読み込む場合は、CDN のホストを許可します（「[Content Security Policy](#content-security-policy)」を参照）。
 
 ### ファイルを直接開いて試すとき（file://） {#file}
 

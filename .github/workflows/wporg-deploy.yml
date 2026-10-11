@@ -1,0 +1,126 @@
+name: WordPress.org deploy
+
+# Commits one version of the plugin to the WordPress.org plugin directory (Subversion).
+#
+# THIS CANNOT RUN YET. It needs the plugin to have been approved by the WordPress.org plugin
+# review team: only then does the Subversion repository
+# https://plugins.svn.wordpress.org/askai-button/ exist. Until the two secrets below are set,
+# the job stops after its first step and does nothing.
+#
+# What it does:
+#   1. builds the script and stages the plugin in dist-plugin/askai-button/ - exactly the files
+#      of the release zip (scripts/zip-plugin.mjs --dir), so no tests and no development files;
+#   2. copies that folder to trunk/ and to tags/<version>/ of the Subversion repository;
+#   3. copies .wordpress-org/ (icon, banners, screenshots) to assets/ of the Subversion repository.
+# A version that already has a folder under tags/ is not committed again.
+#
+# Started by:
+#   - publishing a GitHub release. Note: a release created by another workflow with the built-in
+#     GITHUB_TOKEN does not start this workflow (GitHub does not chain workflows that way). A
+#     release published by a person on the website, or with a personal token, does.
+#   - hand (Actions > WordPress.org deploy > Run workflow): give the tag of the version, e.g.
+#     v1.2.3. With "dry run" ticked, which is the default, everything is prepared and compared
+#     with the Subversion repository, but nothing is committed.
+#
+# Secrets (Settings > Secrets and variables > Actions):
+#   SVN_USERNAME  the WordPress.org user name of a committer of the plugin (case sensitive)
+#   SVN_PASSWORD  the SVN password of that account, generated in the WordPress.org profile under
+#                 "Account & Security" > "SVN credentials" - not the password of the account
+#
+# The deploy action is pinned to the release 2.3.0; the project publishes no "v2" tag.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag of the version to deploy, e.g. v1.2.3
+        type: string
+        required: true
+      dry_run:
+        description: Dry run - prepare and compare, commit nothing
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# One deploy at a time, and a running one is never cancelled half-way.
+concurrency:
+  group: wporg-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Plugin directory (Subversion)
+    runs-on: ubuntu-latest
+    # Pre-releases stay on GitHub.
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    steps:
+      - name: Check that the Subversion credentials are set
+        id: guard
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          if [ -n "$SVN_USERNAME" ] && [ -n "$SVN_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SVN_USERNAME and SVN_PASSWORD are not set. Nothing is deployed."
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          node-version: 24
+
+      - name: Build and stage the plugin
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          npm ci
+          npm run build
+          node scripts/zip-plugin.mjs --dir
+
+      # The version comes from the plugin itself and has to be the one of the tag.
+      - name: Read the version
+        id: meta
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+        run: |
+          version="$(sed -n 's/^ \* Version: *\([0-9][0-9A-Za-z.-]*\) *$/\1/p' dist-plugin/askai-button/askai-button.php | head -n 1)"
+          stable="$(sed -n 's/^Stable tag: *\([0-9][0-9A-Za-z.-]*\) *$/\1/p' dist-plugin/askai-button/readme.txt | head -n 1)"
+          if [ -z "$version" ] || [ "$version" != "$stable" ]; then
+            echo "::error::Version of the plugin ($version) and stable tag of readme.txt ($stable) differ."
+            exit 1
+          fi
+          if [ "v$version" != "$TAG" ] && [ "$version" != "$TAG" ]; then
+            echo "::error::The tag $TAG does not belong to version $version of the plugin."
+            exit 1
+          fi
+          if [ -d dist-plugin/askai-button/tests ]; then
+            echo "::error::The staged plugin contains tests/."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Commit to the WordPress.org plugin directory
+        if: steps.guard.outputs.ready == 'true'
+        uses: 10up/action-wordpress-plugin-deploy@2.3.0
+        with:
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: askai-button
+          VERSION: ${{ steps.meta.outputs.version }}
+          BUILD_DIR: dist-plugin/askai-button
+          ASSETS_DIR: .wordpress-org

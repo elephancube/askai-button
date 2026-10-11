@@ -16,14 +16,17 @@ jobs:
     name: Library, plugin zip and site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
 
       - run: npm ci
+
+      # The package, the plugin header, readme.txt and the READMEs must name the same version.
+      - run: npm run check:versions
 
       - run: npm run typecheck
 
@@ -43,7 +46,7 @@ jobs:
       matrix:
         php: ['7.4', '8.4']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:

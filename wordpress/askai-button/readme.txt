@@ -1,5 +1,5 @@
 === AskAI Button ===
-Contributors: TODO-wordpress-org-username
+Contributors: elephancube
 Tags: ai, chatgpt, claude, button, multilingual
 Requires at least: 6.4
 Tested up to: 7.1
@@ -67,7 +67,16 @@ Good to know:
 
 The behaviour can be adjusted with the filters `askai_should_display`, `askai_presets`, `askai_providers`, `askai_query_template` and `askai_site_url`. Values returned by these filters are checked in the same way as the settings.
 
-The button itself is the `askai-button` JavaScript library. The plugin only passes the settings to it. The source of the library and of this plugin is in one repository; the file `assets/askai-button.min.js` is built from it.
+The button itself is the `askai-button` JavaScript library. The plugin only passes the settings to it.
+
+= Source code =
+
+The file `assets/askai-button.min.js` is minified. It is built from the TypeScript sources of the `askai-button` library, which are public, together with the sources of this plugin, in one repository: [github.com/elephancube/askai-button](https://github.com/elephancube/askai-button).
+
+* The library: the folder `packages/core` (sources in `packages/core/src`).
+* This plugin: the folder `wordpress/askai-button`.
+
+To build the script yourself you need Node.js with npm. In a copy of the repository, run `npm ci` and then `npm run build`. This compiles the library with Vite into `packages/core/dist/askai-button.min.js` and copies that file to `wordpress/askai-button/assets/`. `npm run zip:plugin` then packs the plugin as it is distributed. Nothing else in the plugin is compiled or minified.
 
 == Installation ==
 
@@ -112,6 +121,14 @@ A template must start with `https://` and contain `{query}`, the place where the
 = What is removed when I delete the plugin? =
 
 Its settings and the two values it stores per post. Translations entered in Polylang or WPML are stored by those plugins and stay there.
+
+== Screenshots ==
+
+1. The button in the corner of a page.
+2. The panel: the visitor types a question, or taps one of your preset questions, and chooses an AI service.
+3. The settings screen, Settings > Ask AI, with the live preview of the button and the panel.
+4. The AI services on the settings screen: which ones are offered, their order, URL templates and colours.
+5. The "Ask AI" box on the edit screen of a post or page.
 
 == External services ==
 

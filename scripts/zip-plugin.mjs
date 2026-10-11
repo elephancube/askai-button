@@ -1,11 +1,14 @@
-// Packs the WordPress plugin into dist-plugin/askai-button-<version>.zip. No dependencies.
+// Packs the WordPress plugin. No dependencies.
 //
-//   npm run build && node scripts/zip-plugin.mjs
+//   npm run build && node scripts/zip-plugin.mjs          -> dist-plugin/askai-button-<version>.zip
+//   npm run build && node scripts/zip-plugin.mjs --dir    -> dist-plugin/askai-button/ (the same files, not packed)
 //
 // The archive has one top-level folder, askai-button/, with everything WordPress needs.
-// The tests are left out. The built script must exist: run the build first.
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+// The tests and hidden files are left out. The built script must exist: run the build first.
+// The folder written by --dir holds exactly the files of the archive; it is what gets
+// committed to the WordPress.org plugin directory.
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateRawSync } from 'node:zlib';
 
@@ -145,14 +148,39 @@ if (stable !== version) {
   fail(`the version of ${SLUG}.php (${version}) and the stable tag of readme.txt (${stable}) differ.`);
 }
 
+const readme = readFileSync(join(pluginDir, 'readme.txt'), 'utf8');
+const contributors = (/^Contributors:\s*(.*)$/m.exec(readme) || [])[1] || '';
+if (!/^[A-Za-z0-9._-]+(\s*,\s*[A-Za-z0-9._-]+)*$/.test(contributors.trim()) || /TODO/i.test(contributors)) {
+  console.warn(
+    `zip-plugin: warning: "Contributors: ${contributors.trim()}" in readme.txt is not a list of WordPress.org user names. Set it before submitting to WordPress.org.`,
+  );
+}
+
 const entries = files.map((file) => {
   const path = join(pluginDir, file);
   return { name: `${SLUG}/${file}`, data: readFileSync(path), mtime: statSync(path).mtime };
 });
-const archive = zip(entries);
-const target = join(outDir, `${SLUG}-${version}.zip`);
-mkdirSync(outDir, { recursive: true });
-writeFileSync(target, archive);
 
-for (const entry of entries) console.log(`  ${entry.name} (${entry.data.length} bytes)`);
-console.log(`zip-plugin: ${entries.length} files, ${archive.length} bytes -> ${target}`);
+const unknown = process.argv.slice(2).filter((arg) => arg !== '--dir');
+if (unknown.length) fail(`unknown argument ${unknown[0]}. The only option is --dir.`);
+
+if (process.argv.includes('--dir')) {
+  // Emptied first, so that a file removed from the plugin does not survive in the folder.
+  const target = join(outDir, SLUG);
+  rmSync(target, { recursive: true, force: true });
+  for (const entry of entries) {
+    const path = join(outDir, entry.name);
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, entry.data);
+    console.log(`  ${entry.name} (${entry.data.length} bytes)`);
+  }
+  console.log(`zip-plugin: ${entries.length} files -> ${target}`);
+} else {
+  const archive = zip(entries);
+  const target = join(outDir, `${SLUG}-${version}.zip`);
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(target, archive);
+
+  for (const entry of entries) console.log(`  ${entry.name} (${entry.data.length} bytes)`);
+  console.log(`zip-plugin: ${entries.length} files, ${archive.length} bytes -> ${target}`);
+}

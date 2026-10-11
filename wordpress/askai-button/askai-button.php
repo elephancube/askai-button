@@ -1,6 +1,7 @@
 <?php
 /**
  * Plugin Name:       AskAI Button
+ * Plugin URI:        https://github.com/elephancube/askai-button
  * Description:       Adds a floating "Ask AI" button. The visitor's question and your site URL are handed to ChatGPT, Claude or Google AI Mode in a new tab. No API, no server-side processing, no tracking.
  * Version:           0.1.0
  * Requires at least: 6.4
@@ -43,17 +44,22 @@ function askai_button_boot() {
 add_action( 'plugins_loaded', 'askai_button_boot' );
 
 /**
- * Makes the translations in the `languages` folder available.
+ * Makes the translations in the `languages` folder available on WordPress 6.4 to 6.7.
  *
- * WordPress finds translations installed from WordPress.org by itself, but
- * not the files a plugin ships with. Up to WordPress 6.6 this call loads
- * them; from 6.7 on it only tells WordPress where they are, and they are
- * loaded when the first string is translated. A translation installed in
- * `wp-content/languages/plugins` takes precedence in both cases.
+ * From WordPress 6.8 on nothing is needed: WordPress reads the "Domain Path"
+ * header and finds the files of the plugin by itself. Older versions only
+ * look in `wp-content/languages/plugins`, where translations installed from
+ * WordPress.org are stored, and have to be told about the folder of the
+ * plugin. A translation installed from WordPress.org takes precedence on
+ * every version.
  *
  * @return void
  */
 function askai_button_load_textdomain() {
+	if ( version_compare( get_bloginfo( 'version' ), '6.8', '>=' ) ) {
+		return;
+	}
+	// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Reached on WordPress 6.4 to 6.7 only, which do not load the bundled translations by themselves.
 	load_plugin_textdomain( 'askai-button', false, dirname( plugin_basename( ASKAI_BUTTON_FILE ) ) . '/languages' );
 }
 add_action( 'init', 'askai_button_load_textdomain' );

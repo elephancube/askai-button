@@ -324,5 +324,5 @@ AskAIButton.init();
 ## Content Security Policy {#csp}
 
 - スタイルは、構築済みスタイルシート（`adoptedStyleSheets`）で Shadow DOM に適用します。現在のブラウザーでは `<style>` 要素を使わないため、`style-src` に `'unsafe-inline'` を追加する必要はありません。構築済みスタイルシートに対応していないブラウザーでは、Shadow DOM の中に `<style>` 要素を作ります。
-- `script-src` では、`askai-button.min.js` を置いた場所を許可してください。`data-askai` を使えば、インラインスクリプトは不要です。
+- `script-src` では、`askai-button.min.js` を置いた場所を許可してください。CDN から読み込む場合は、CDN のホスト（`https://cdn.jsdelivr.net` または `https://unpkg.com`）です。`data-askai` を使えば、インラインスクリプトは不要です。
 - ボタンは外部と通信しないため、`connect-src` の設定は不要です。

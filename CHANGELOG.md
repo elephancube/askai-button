@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Core library (`packages/core`, MIT): a floating "Ask AI" button and panel in a Shadow DOM, with no runtime dependencies. The visitor's question is handed to ChatGPT, Claude or Google AI Mode in a new tab through a configurable URL template; a service can instead be set to copy the text to the clipboard and open the service.
 - Options for position, offset, z-index, accent colour, provider list and default provider, preset questions (fill or send), maximum question length, site URL, page URL and site name, query template, labels, and an `onSend` callback. Provider names and colours can be overridden or new providers registered.
-- Script-tag use with `data-askai` and `data-*` attributes (global `AskAIButton`), and an ESM build for npm.
+- Script-tag use with `data-askai` and `data-*` attributes (global `AskAIButton`). The single file can be hosted on your own server or loaded from a CDN (jsDelivr, unpkg).
+- npm package `askai-button`: an ES module with TypeScript declarations (no CommonJS build). It also contains the single file for the script tag.
 - Programmatic functions: `init`, `open`, `close`, `update`, `registerProvider`, `registerLocale`, `defaults`, `destroy`.
 - Built-in Japanese and English wording, chosen from the page language; custom languages through `registerLocale`.
 - A `<meta name="askai" content="off">` switch to hide the button on a page.

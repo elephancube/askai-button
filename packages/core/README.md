@@ -2,7 +2,7 @@
 
 A floating "Ask AI" button for any web page. The visitor types a question, picks ChatGPT, Claude or Google AI Mode, and the AI opens in a new tab with the question and the address of your site already filled in.
 
-It calls no API and needs no server. It makes no network requests, and it does not store, send or measure the question.
+It calls no API and needs no server. It makes no network requests of its own, and it does not store, send or measure the question.
 
 ## Install
 
@@ -12,11 +12,19 @@ npm install askai-button
 
 ## Use
 
-With a script tag, using the single file in `dist/`:
+With a script tag, using the single file in `dist/` copied to your own server:
 
 ```html
 <script src="askai-button.min.js" data-askai></script>
 ```
+
+Or with the same file loaded from a CDN (jsDelivr; unpkg serves it at `https://unpkg.com/askai-button@0.1.0/dist/askai-button.min.js`):
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
+```
+
+With a CDN, the visitor's browser fetches the script from the CDN operator, a third party; the button itself still sends nothing. Hosting the file yourself avoids that request. Keep the exact version in the address rather than `@latest`, so that a new release cannot change your site unnoticed. See the [install page](https://elephancube.github.io/askai-button/en/install/#cdn) for Subresource Integrity and Content Security Policy.
 
 From code:
 
@@ -29,7 +37,7 @@ init({
 });
 ```
 
-The script-tag build exposes the same functions on the global `AskAIButton`, for example `AskAIButton.init({ ... })`.
+The package is an ES module with TypeScript declarations; there is no CommonJS build. The script-tag build exposes the same functions on the global `AskAIButton`, for example `AskAIButton.init({ ... })`.
 
 The button follows the language of the page (`<html lang>`). Japanese and English are built in.
 
