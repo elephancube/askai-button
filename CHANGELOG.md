@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-12
+
 ### Added
 
 - Core library (`packages/core`, MIT): a floating "Ask AI" button and panel in a Shadow DOM, with no runtime dependencies. The visitor's question is handed to ChatGPT, Claude or Google AI Mode in a new tab through a configurable URL template; a service can instead be set to copy the text to the clipboard and open the service.
