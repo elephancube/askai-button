@@ -120,7 +120,7 @@ No logos of the AI services are used. The panel shows each service by its name i
 
 ## Licence {#licence}
 
-- The JavaScript library (`askai-button`): MIT License
+- The JavaScript library (askai-button, npm package `{{package}}`): MIT License
 - The WordPress plugin (AskAI Button): GPL-2.0-or-later. The library file bundled with it is under the MIT License.
 
 Copyright (c) 2026 Elephancube Inc.

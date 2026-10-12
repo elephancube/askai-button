@@ -88,10 +88,10 @@ nav: 導入方法
 
 ## CDN から読み込む {#cdn}
 
-npm に公開したバージョンは、公開 CDN の jsDelivr と unpkg からも配信されます。ファイルをアップロードする必要はなく、次の1行だけで使えます。
+npm に公開したバージョン（パッケージ名は `{{package}}`）は、公開 CDN の jsDelivr と unpkg からも配信されます。ファイルをアップロードする必要はなく、次の1行だけで使えます。
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+<script src="https://cdn.jsdelivr.net/npm/{{package}}@{{version}}/dist/askai-button.min.js" data-askai defer></script>
 ```
 
 URLには、正確なバージョン（`@{{version}}`）が入っています。このようなURLで配信されるファイルの内容は、あとから変わりません。`data-*` 属性や `AskAIButton.init()` の使い方は、[上の説明](#script)と同じです。
@@ -99,7 +99,7 @@ URLには、正確なバージョン（`@{{version}}`）が入っています。
 unpkg から読み込む場合は、次のとおりです。
 
 ```html
-<script src="https://unpkg.com/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+<script src="https://unpkg.com/{{package}}@{{version}}/dist/askai-button.min.js" data-askai defer></script>
 ```
 
 ### 自分のサーバーに置く場合との違い
@@ -121,13 +121,13 @@ unpkg から読み込む場合は、次のとおりです。
 `integrity` 属性を付けると、ファイルの内容が想定と少しでも違う場合に、ブラウザーがそのファイルを実行しなくなります。正確なバージョンを指定している場合にだけ意味があります。値はファイルごとに決まるため、このページには載せていません。値は次のコマンドで計算できます。
 
 ```sh
-curl -s https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js | openssl dgst -sha384 -binary | openssl base64 -A
+curl -s https://cdn.jsdelivr.net/npm/{{package}}@{{version}}/dist/askai-button.min.js | openssl dgst -sha384 -binary | openssl base64 -A
 ```
 
 出力された値を `sha384-` のあとに書き、`crossorigin="anonymous"` も付けます。
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js"
+<script src="https://cdn.jsdelivr.net/npm/{{package}}@{{version}}/dist/askai-button.min.js"
   integrity="sha384-（コマンドで得た値）" crossorigin="anonymous"
   data-askai defer></script>
 ```
@@ -138,12 +138,14 @@ Content Security Policy を設定しているサイトでは、`script-src` で 
 
 ## npm で入れる {#npm}
 
+npm パッケージの名前は `{{package}}` です。`@elephancube` スコープで公開しています。プロジェクト、リポジトリ、スクリプトファイルの名前は askai-button です。インストールや読み込みのときは、必ず `@elephancube/` を付けた名前を指定してください。
+
 ```sh
-npm install askai-button
+npm install {{package}}
 ```
 
 ```js
-import { init } from 'askai-button';
+import { init } from '{{package}}';
 
 init({
   presets: ['このサイトでは何ができますか？', '料金を教えてください'],
@@ -153,14 +155,14 @@ init({
 - ES モジュールとして提供しています。TypeScript の型定義も入っています。
 - `init()` は、ブラウザーの中で一度だけ呼びます。サーバー側で読み込んでもエラーにはならず、何もしません。
 - もう一度 `init()` を呼ぶと、ボタンは新しい設定で作り直されます。取り除くときは `destroy()` を呼びます。
-- CommonJS 用のビルドはありません。`require()` を使っているプロジェクトでは、バンドラー、新しいバージョンの Node.js、または `await import('askai-button')` を使ってください。
+- CommonJS 用のビルドはありません。`require()` を使っているプロジェクトでは、バンドラー、新しいバージョンの Node.js、または `await import('{{package}}')` を使ってください。
 - パッケージの `dist/askai-button.min.js` は、script タグ用のファイルと同じものです。[CDN](#cdn) が配信するのも、このファイルです。
 
 React などのコンポーネントから使うときは、表示されたあとに一度だけ呼びます。
 
 ```js
 import { useEffect } from 'react';
-import { init, destroy } from 'askai-button';
+import { init, destroy } from '{{package}}';
 
 export function AskAI() {
   useEffect(() => {

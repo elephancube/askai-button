@@ -6,16 +6,16 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w askai-button && node scripts/copy-dist.mjs && node site/build.mjs",
+    "build": "npm run build -w packages/core && node scripts/copy-dist.mjs && node site/build.mjs",
     "build:site": "node site/build.mjs",
     "bump": "node scripts/bump-version.mjs",
     "check:versions": "node scripts/check-versions.mjs",
     "i18n": "node scripts/i18n.mjs",
     "serve:site": "node site/serve.mjs",
     "site": "npm run build && node site/serve.mjs",
-    "test": "npm test -w askai-button",
+    "test": "npm test -w packages/core",
     "test:php": "php wordpress/askai-button/tests/run.php",
-    "typecheck": "npm run typecheck -w askai-button",
+    "typecheck": "npm run typecheck -w packages/core",
     "zip:plugin": "node scripts/zip-plugin.mjs"
   },
   "devDependencies": {

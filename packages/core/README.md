@@ -6,8 +6,10 @@ It calls no API and needs no server. It makes no network requests of its own, an
 
 ## Install
 
+The npm package is `@elephancube/askai-button`. The project, its repository and the script file are called askai-button.
+
 ```sh
-npm install askai-button
+npm install @elephancube/askai-button
 ```
 
 ## Use
@@ -18,10 +20,10 @@ With a script tag, using the single file in `dist/` copied to your own server:
 <script src="askai-button.min.js" data-askai></script>
 ```
 
-Or with the same file loaded from a CDN (jsDelivr; unpkg serves it at `https://unpkg.com/askai-button@0.1.0/dist/askai-button.min.js`):
+Or with the same file loaded from a CDN (jsDelivr; unpkg serves it at `https://unpkg.com/@elephancube/askai-button@0.1.0/dist/askai-button.min.js`):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@elephancube/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
 ```
 
 With a CDN, the visitor's browser fetches the script from the CDN operator, a third party; the button itself still sends nothing. Hosting the file yourself avoids that request. Keep the exact version in the address rather than `@latest`, so that a new release cannot change your site unnoticed. See the [install page](https://elephancube.github.io/askai-button/en/install/#cdn) for Subresource Integrity and Content Security Policy.
@@ -29,7 +31,7 @@ With a CDN, the visitor's browser fetches the script from the CDN operator, a th
 From code:
 
 ```js
-import { init } from 'askai-button';
+import { init } from '@elephancube/askai-button';
 
 init({
   presets: ['What can I do on this site?', 'How much does it cost?'],

@@ -29,22 +29,22 @@ scriptタグで、ファイルを自分のサーバーに置く場合（`askai-b
 <script src="askai-button.min.js" data-askai></script>
 ```
 
-scriptタグで、CDN から読み込む場合（jsDelivr。unpkg では `https://unpkg.com/askai-button@0.1.0/dist/askai-button.min.js` で同じファイルを配信しています）:
+scriptタグで、CDN から読み込む場合（jsDelivr。unpkg では `https://unpkg.com/@elephancube/askai-button@0.1.0/dist/askai-button.min.js` で同じファイルを配信しています）:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@elephancube/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
 ```
 
 CDN を使うと、訪問者のブラウザーが CDN の運営者（第三者）からスクリプトを取得します。ボタン自体は、この場合も何も送信しません。ファイルを自分のサーバーに置けば、この通信は発生しません。URLのバージョンは正確に指定したままにしてください。バージョンを書かないURLや `@latest` を付けたURLでは、新しいバージョンが公開されるたびに、サイト上のスクリプトが変わります。Subresource Integrity と Content Security Policy については、[導入方法のページ](https://elephancube.github.io/askai-button/install/#cdn)で説明しています。
 
-npmの場合:
+npmの場合（パッケージは `@elephancube` スコープで公開しています。プロジェクトとファイルの名前は askai-button です）:
 
 ```sh
-npm install askai-button
+npm install @elephancube/askai-button
 ```
 
 ```js
-import { init } from 'askai-button';
+import { init } from '@elephancube/askai-button';
 
 init({
   presets: ['このサイトでできることは？', '料金はいくらですか？'],

@@ -63,11 +63,13 @@ if (!existsSync(scriptFile) || !existsSync(moduleFile)) {
 }
 const library = await import(pathToFileURL(moduleFile).href);
 const scriptBytes = readFileSync(scriptFile);
-const version = JSON.parse(readFileSync(join(root, 'packages/core/package.json'), 'utf8')).version;
+const { name: packageName, version } = JSON.parse(readFileSync(join(root, 'packages/core/package.json'), 'utf8'));
 const kb = (bytes) => (bytes / 1024).toFixed(1);
 
 const facts = {
   version,
+  // The name of the npm package. It differs from the name of the project when the package has a scope.
+  package: packageName,
   repo: REPO_URL,
   gzip_kb: kb(gzipSync(scriptBytes).length),
   min_kb: kb(scriptBytes.length),
@@ -571,6 +573,7 @@ ${section('ja')}
 ## Optional
 
 - [Source code](${REPO_URL}): the repository of the library, the WordPress plugin and this site
+- [npm package](https://www.npmjs.com/package/${packageName}): the library on npm, installed with "npm install ${packageName}"
 - [${SCRIPT}](${absolute(SCRIPT)}): the script itself, ${facts.min_kb} KB (${facts.gzip_kb} KB gzip)
 `,
   );

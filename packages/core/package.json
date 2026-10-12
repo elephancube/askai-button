@@ -1,5 +1,5 @@
 {
-  "name": "askai-button",
+  "name": "@elephancube/askai-button",
   "version": "0.1.0",
   "description": "A floating \"Ask AI\" button that hands the visitor's question and your site URL to ChatGPT, Claude or Google AI Mode. No API, no server, no tracking.",
   "license": "MIT",

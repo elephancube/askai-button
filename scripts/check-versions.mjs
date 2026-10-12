@@ -5,7 +5,7 @@
 //                                                    CHANGELOG.md has a dated section for it
 //
 // The places are listed in version-files.mjs.
-import { LOCATIONS, changelogSections, find, isVersion, read } from './version-files.mjs';
+import { LOCATIONS, changelogSections, find, isVersion, packageName, packageNameProblems, read } from './version-files.mjs';
 
 const args = process.argv.slice(2);
 let tag;
@@ -40,6 +40,13 @@ for (const location of LOCATIONS) {
   const wrong = found.versions.filter((value) => value !== version);
   console.log(`  ${wrong.length ? 'WRONG' : 'ok   '}  ${location.file}: ${location.label} = ${[...new Set(found.versions)].join(', ')}`);
   if (wrong.length) problems.push(`${location.file}: ${location.label} is ${[...new Set(wrong)].join(', ')}, expected ${version}`);
+}
+
+// The READMEs and the lock file must name the npm package exactly as its package.json does.
+{
+  const wrongNames = packageNameProblems();
+  console.log(`  ${wrongNames.length ? 'WRONG' : 'ok   '}  npm package name "${packageName()}" in the READMEs and the lock file`);
+  problems.push(...wrongNames);
 }
 
 if (tag !== undefined) {

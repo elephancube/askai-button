@@ -66,7 +66,7 @@ Keep them small and focused, with a short description of what changed and why. M
 
 ## Releasing
 
-For maintainers. A release is one version number for the npm package, the script and the WordPress plugin.
+For maintainers. A release is one version number for the npm package (`@elephancube/askai-button`), the script and the WordPress plugin.
 
 1. Make sure the "Unreleased" section of `CHANGELOG.md` describes everything that changed.
 2. Set the version. The script writes the number to every place it appears (the package and the lock file, the plugin header and its version constant, `Stable tag` in `readme.txt`, the CDN addresses in the READMEs) and moves the "Unreleased" entries under a heading with the version and the date. With `--check` it only prints what it would do.
@@ -94,13 +94,13 @@ For maintainers. A release is one version number for the npm package, the script
    ```
 
 5. The tag starts the "Release" workflow (`.github/workflows/release.yml`). It checks that the tag, the files and the changelog name the same version, runs the tests, builds, publishes the package to npm, and creates a GitHub release with `askai-button.min.js`, `askai-button.esm.js` and the plugin zip attached. The text of the release is the section of `CHANGELOG.md` for that version.
-6. Check the result: the package page on npm (`npm view askai-button version`), the CDN address from the installation page, the files of the GitHub release, and the website, which is rebuilt from `main` and shows the new version number.
+6. Check the result: the package page on npm (`npm view @elephancube/askai-button version`), the CDN address from the installation page, the files of the GitHub release, and the website, which is rebuilt from `main` and shows the new version number.
 
 Things to know:
 
 - A version number can be used only once on npm, even if the version is removed again. If something went wrong, fix it and release the next patch version.
 - The website is deployed when `main` is pushed and names the new version in its CDN addresses, which do not work before the package is on npm. Push the tag right after `main`.
-- The workflow publishes to npm with trusted publishing (OpenID Connect); no npm token is stored in the repository. The values to enter on npmjs.com are in the comment at the top of the workflow file. A package has to exist before a trusted publisher can be added, so the first version of a new package is published by hand, with `npm publish` in `packages/core`; the workflow sees that the version is already on npm and only creates the GitHub release.
+- The workflow publishes to npm with trusted publishing (OpenID Connect); no npm token is stored in the repository. The values to enter on npmjs.com are in the comment at the top of the workflow file. A package has to exist before a trusted publisher can be added, so the first version of a new package is published by hand, with `npm publish --access public` in `packages/core`; the workflow sees that the version is already on npm and only creates the GitHub release.
 - To rehearse without publishing, start the workflow by hand (Actions > Release > Run workflow) and leave "dry run" ticked.
 - A version with a suffix such as `1.3.0-beta.1` is published under the npm tag `next` and marked as a pre-release on GitHub.
 

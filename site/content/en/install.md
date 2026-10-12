@@ -88,10 +88,10 @@ Some settings, such as changing the wording or adding an AI service, cannot be g
 
 ## From a CDN {#cdn}
 
-Every version published on npm is also served by the public CDNs jsDelivr and unpkg. You then have no file to upload: one line is enough.
+Every version published on npm (as `{{package}}`) is also served by the public CDNs jsDelivr and unpkg. You then have no file to upload: one line is enough.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+<script src="https://cdn.jsdelivr.net/npm/{{package}}@{{version}}/dist/askai-button.min.js" data-askai defer></script>
 ```
 
 The address contains the exact version (`@{{version}}`). The file behind such an address never changes. The `data-*` attributes and `AskAIButton.init()` work exactly as described [above](#script).
@@ -99,7 +99,7 @@ The address contains the exact version (`@{{version}}`). The file behind such an
 The same file on unpkg:
 
 ```html
-<script src="https://unpkg.com/askai-button@{{version}}/dist/askai-button.min.js" data-askai defer></script>
+<script src="https://unpkg.com/{{package}}@{{version}}/dist/askai-button.min.js" data-askai defer></script>
 ```
 
 ### What is different from hosting the file yourself
@@ -121,13 +121,13 @@ A shorter range such as `@0.1` (jsDelivr) follows new releases within that range
 With an `integrity` attribute, the browser refuses to run the file if its content is not exactly what you expect. It only makes sense together with an exact version. The value depends on the file, so it is not printed here. You can compute the value with this command:
 
 ```sh
-curl -s https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js | openssl dgst -sha384 -binary | openssl base64 -A
+curl -s https://cdn.jsdelivr.net/npm/{{package}}@{{version}}/dist/askai-button.min.js | openssl dgst -sha384 -binary | openssl base64 -A
 ```
 
 Put the result after `sha384-`, and add `crossorigin="anonymous"`:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/askai-button@{{version}}/dist/askai-button.min.js"
+<script src="https://cdn.jsdelivr.net/npm/{{package}}@{{version}}/dist/askai-button.min.js"
   integrity="sha384-(the value from the command)" crossorigin="anonymous"
   data-askai defer></script>
 ```
@@ -138,12 +138,14 @@ On a site with a Content Security Policy, allow the host of the CDN in `script-s
 
 ## With npm {#npm}
 
+The npm package is called `{{package}}`. It is published under the `@elephancube` scope; the project, its repository and the script file are called askai-button. Always use the name with `@elephancube/` when you install or import it.
+
 ```sh
-npm install askai-button
+npm install {{package}}
 ```
 
 ```js
-import { init } from 'askai-button';
+import { init } from '{{package}}';
 
 init({
   presets: ['What can I do on this site?', 'How much does it cost?'],
@@ -153,14 +155,14 @@ init({
 - The package is an ES module and includes TypeScript type definitions.
 - Call `init()` once, in the browser. Importing the package on a server causes no error and does nothing.
 - Calling `init()` again rebuilds the button with the new settings. Call `destroy()` to remove it.
-- The package has no CommonJS build. Projects that still use `require()` need a bundler, a current version of Node.js, or `await import('askai-button')`.
+- The package has no CommonJS build. Projects that still use `require()` need a bundler, a current version of Node.js, or `await import('{{package}}')`.
 - `dist/askai-button.min.js` in the package is the same file as the one for the script tag. It is also the file the [CDNs](#cdn) serve.
 
 From a component, for example in React, call it once after the component is shown.
 
 ```js
 import { useEffect } from 'react';
-import { init, destroy } from 'askai-button';
+import { init, destroy } from '{{package}}';
 
 export function AskAI() {
   useEffect(() => {

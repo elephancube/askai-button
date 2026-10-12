@@ -29,22 +29,22 @@ With a script tag, the file being on your own server (download `askai-button.min
 <script src="askai-button.min.js" data-askai></script>
 ```
 
-With a script tag, the file coming from a CDN (jsDelivr; unpkg serves the same file at `https://unpkg.com/askai-button@0.1.0/dist/askai-button.min.js`):
+With a script tag, the file coming from a CDN (jsDelivr; unpkg serves the same file at `https://unpkg.com/@elephancube/askai-button@0.1.0/dist/askai-button.min.js`):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@elephancube/askai-button@0.1.0/dist/askai-button.min.js" data-askai defer></script>
 ```
 
 With a CDN, the visitor's browser fetches the script from the CDN operator, a third party; the button itself still sends nothing. Hosting the file yourself avoids that request. Keep the exact version in the address: an address without a version, or with `@latest`, changes the script on your site whenever a release is published. Subresource Integrity and Content Security Policy are covered on the [install page](https://elephancube.github.io/askai-button/en/install/#cdn).
 
-With npm:
+With npm (the package is published under the `@elephancube` scope; the project and the file are called askai-button):
 
 ```sh
-npm install askai-button
+npm install @elephancube/askai-button
 ```
 
 ```js
-import { init } from 'askai-button';
+import { init } from '@elephancube/askai-button';
 
 init({
   presets: ['What can I do on this site?', 'How much does it cost?'],

@@ -21,7 +21,7 @@ This is a small project and support is best effort. There is no guaranteed respo
 
 ## Scope
 
-In scope: the `askai-button` script (including the npm package) and the WordPress plugin in this repository, for example script injection through options or settings, unsafe handling of the question or the URL templates, or missing capability, nonce, sanitising or escaping checks in the plugin.
+In scope: the `askai-button` script (including the npm package `@elephancube/askai-button`) and the WordPress plugin in this repository, for example script injection through options or settings, unsafe handling of the question or the URL templates, or missing capability, nonce, sanitising or escaping checks in the plugin.
 
 Out of scope:
 

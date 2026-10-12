@@ -120,7 +120,7 @@ ChatGPT、Claude、Google は、各社の商標です。本プロジェクトは
 
 ## ライセンス {#licence}
 
-- JavaScript ライブラリ（`askai-button`）：MIT License
+- JavaScript ライブラリ（askai-button、npm パッケージは `{{package}}`）：MIT License
 - WordPress プラグイン（AskAI Button）：GPL-2.0-or-later。同梱しているライブラリのファイルは MIT License です。
 
 Copyright (c) 2026 Elephancube Inc.

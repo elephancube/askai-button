@@ -6,8 +6,13 @@ name: Release
 # ("Releasing"). It can also be started by hand (Actions > Release > Run workflow): with "dry run"
 # ticked, which is the default, everything is built and checked but nothing is published.
 #
+# The npm package has a scope, so its name (the "name" of packages/core/package.json) is not the
+# name of this repository. Nothing below spells the name out: it is read from that file, and the
+# packed file is renamed to npm-package.tgz so that no step depends on how npm names it. The other
+# files of a release keep their own names (askai-button.min.js, askai-button-<version>.zip, ...).
+#
 # npm authentication: trusted publishing (OpenID Connect). No token is stored in this repository.
-# On npmjs.com, the package needs a trusted publisher with exactly these values:
+# On npmjs.com, the package (its Settings page, "Trusted Publisher") needs these exact values:
 #   organization or user: the owner of this repository     repository: the name of this repository
 #   workflow filename:    release.yml                       environment: (empty)
 #   allowed actions:      "npm publish" must be allowed
@@ -45,6 +50,7 @@ jobs:
     permissions:
       contents: read
     outputs:
+      package: ${{ steps.meta.outputs.package }}
       version: ${{ steps.meta.outputs.version }}
       tag: ${{ steps.meta.outputs.tag }}
       publish: ${{ steps.meta.outputs.publish }}
@@ -71,6 +77,7 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
+          package=$(node -p "require('./packages/core/package.json').name")
           version=$(node -p "require('./packages/core/package.json').version")
           publish=true
           if [ "$EVENT" = "workflow_dispatch" ] && [ "$DRY_RUN" != "false" ]; then
@@ -89,12 +96,13 @@ jobs:
             *) prerelease=false ;;
           esac
           {
+            echo "package=$package"
             echo "version=$version"
             echo "tag=$tag"
             echo "publish=$publish"
             echo "prerelease=$prerelease"
           } >> "$GITHUB_OUTPUT"
-          echo "version=$version tag=${tag:-(none)} publish=$publish prerelease=$prerelease"
+          echo "package=$package version=$version tag=${tag:-(none)} publish=$publish prerelease=$prerelease"
 
       # The tag, the package, the plugin header, readme.txt and the changelog must name the same version.
       - name: Check the version numbers
@@ -118,23 +126,37 @@ jobs:
       - run: npm run zip:plugin
 
       # "npm pack" runs the prepack script of the package (type check, tests, build) once more
-      # and writes exactly the file that is going to be published.
+      # and writes exactly the file that is going to be published. npm names the file after the
+      # package (for a scoped package: <scope>-<name>-<version>.tgz); it is stored under a fixed name.
       - name: Pack the npm package
         working-directory: packages/core
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/release"
-          npm pack --pack-destination "$GITHUB_WORKSPACE/release"
+          mkdir -p "$GITHUB_WORKSPACE/release" "$RUNNER_TEMP/npm-pack"
+          npm pack --pack-destination "$RUNNER_TEMP/npm-pack"
+          count=$(find "$RUNNER_TEMP/npm-pack" -maxdepth 1 -name '*.tgz' | wc -l)
+          if [ "$count" -ne 1 ]; then
+            echo "::error::Expected exactly one packed file, found $count."
+            exit 1
+          fi
+          mv "$RUNNER_TEMP"/npm-pack/*.tgz "$GITHUB_WORKSPACE/release/npm-package.tgz"
 
       - name: Collect the release files
         env:
+          PACKAGE: ${{ steps.meta.outputs.package }}
           VERSION: ${{ steps.meta.outputs.version }}
           TAG: ${{ steps.meta.outputs.tag }}
         run: |
+          # The packed file must be the package and the version that are being released.
+          packed=$(tar -xzOf release/npm-package.tgz package/package.json | node -e "const p = JSON.parse(require('fs').readFileSync(0, 'utf8')); console.log(p.name + '@' + p.version)")
+          if [ "$packed" != "$PACKAGE@$VERSION" ]; then
+            echo "::error::The packed file is $packed, expected $PACKAGE@$VERSION."
+            exit 1
+          fi
           cp packages/core/dist/askai-button.min.js packages/core/dist/askai-button.esm.js release/
           cp "dist-plugin/askai-button-$VERSION.zip" release/
           # The script attached to the release must be the one inside the npm package.
-          tar -xzOf "release/askai-button-$VERSION.tgz" package/dist/askai-button.min.js | cmp - release/askai-button.min.js
-          tar -xzOf "release/askai-button-$VERSION.tgz" package/dist/askai-button.esm.js | cmp - release/askai-button.esm.js
+          tar -xzOf release/npm-package.tgz package/dist/askai-button.min.js | cmp - release/askai-button.min.js
+          tar -xzOf release/npm-package.tgz package/dist/askai-button.esm.js | cmp - release/askai-button.esm.js
           grep -q 'askai-button | MIT License' release/askai-button.min.js
           grep -q 'askai-button | MIT License' release/askai-button.esm.js
           if [ -n "$TAG" ]; then
@@ -143,7 +165,7 @@ jobs:
             node scripts/release-notes.mjs "$VERSION" > release/notes.md || echo "(CHANGELOG.md has no section for $VERSION yet.)" > release/notes.md
           fi
           {
-            echo "### Files of $VERSION"
+            echo "### Files of $PACKAGE@$VERSION"
             echo '```'
             (cd release && ls -l && sha256sum -- *)
             echo '```'
@@ -192,32 +214,34 @@ jobs:
       - name: Is this version already on npm?
         id: registry
         env:
+          PACKAGE: ${{ needs.build.outputs.package }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
-          published=$(npm view "askai-button@$VERSION" dist.integrity 2>/dev/null || true)
-          local_integrity="sha512-$(openssl dgst -sha512 -binary "release/askai-button-$VERSION.tgz" | openssl base64 -A)"
+          published=$(npm view "$PACKAGE@$VERSION" dist.integrity 2>/dev/null || true)
+          local_integrity="sha512-$(openssl dgst -sha512 -binary release/npm-package.tgz | openssl base64 -A)"
           if [ -z "$published" ]; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "askai-button@$VERSION is not on npm yet."
+            echo "$PACKAGE@$VERSION is not on npm yet."
           else
             echo "exists=true" >> "$GITHUB_OUTPUT"
             if [ "$published" = "$local_integrity" ]; then
-              echo "::notice::askai-button@$VERSION is already on npm and is identical to the package built here. Nothing is published."
+              echo "::notice::$PACKAGE@$VERSION is already on npm and is identical to the package built here. Nothing is published."
             else
-              echo "::warning::askai-button@$VERSION is already on npm, and its content differs from the package built here (a version on npm can never be replaced). Nothing is published. The files attached to the GitHub release are the ones built here."
+              echo "::warning::$PACKAGE@$VERSION is already on npm, and its content differs from the package built here (a version on npm can never be replaced). Nothing is published. The files attached to the GitHub release are the ones built here."
             fi
           fi
 
       - name: Publish
         if: steps.registry.outputs.exists == 'false'
         env:
-          VERSION: ${{ needs.build.outputs.version }}
           PRERELEASE: ${{ needs.build.outputs.prerelease }}
         run: |
+          # "--access public" is required for a package with a scope: without it npm treats the
+          # first version as private.
           if [ "$PRERELEASE" = "true" ]; then
-            npm publish "release/askai-button-$VERSION.tgz" --access public --tag next
+            npm publish ./release/npm-package.tgz --access public --tag next
           else
-            npm publish "release/askai-button-$VERSION.tgz" --access public
+            npm publish ./release/npm-package.tgz --access public
           fi
 
   github-release:
@@ -232,6 +256,7 @@ jobs:
           name: release
           path: release
 
+      # npm-package.tgz is not attached: the package is on npm.
       - name: Create or update the release
         env:
           GH_TOKEN: ${{ github.token }}

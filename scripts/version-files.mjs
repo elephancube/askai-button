@@ -37,6 +37,9 @@ export function compareVersions(a, b) {
   return 0;
 }
 
+/** Files outside the website that spell out the npm package name and the CDN addresses. */
+export const DOC_FILES = ['README.md', 'README.ja.md', 'packages/core/README.md'];
+
 /**
  * One entry per place. `pattern` has three groups: text before, the version, text after.
  * With `all`, every match in the file counts; `optional` places may be absent.
@@ -45,12 +48,13 @@ export const LOCATIONS = [
   {
     file: 'packages/core/package.json',
     label: 'package version',
-    pattern: new RegExp(String.raw`(^\{\s*"name": "askai-button",\s*"version": ")(${VERSION})(")`),
+    // The name of the package is not spelled out in these patterns: see packageName() below.
+    pattern: new RegExp(String.raw`(^\{\s*"name": "[^"]+",\s*"version": ")(${VERSION})(")`),
   },
   {
     file: 'package-lock.json',
     label: 'version of packages/core in the lock file',
-    pattern: new RegExp(String.raw`("packages/core": \{\s*"name": "askai-button",\s*"version": ")(${VERSION})(")`),
+    pattern: new RegExp(String.raw`("packages/core": \{\s*"name": "[^"]+",\s*"version": ")(${VERSION})(")`),
   },
   {
     file: 'wordpress/askai-button/askai-button.php',
@@ -68,14 +72,58 @@ export const LOCATIONS = [
     label: 'readme.txt "Stable tag:"',
     pattern: new RegExp(String.raw`(^Stable tag:[ \t]*)(${VERSION})([ \t]*$)`, 'm'),
   },
-  ...['README.md', 'README.ja.md', 'packages/core/README.md'].map((file) => ({
+  ...DOC_FILES.map((file) => ({
     file,
     label: 'version in the CDN addresses',
-    pattern: new RegExp(String.raw`((?:cdn\.jsdelivr\.net/npm|unpkg\.com)/askai-button@)(${VERSION})(/)`, 'g'),
+    // Matches any package name, with or without a scope. That it is the right name is a separate
+    // check: packageNameProblems() below.
+    pattern: new RegExp(String.raw`((?:cdn\.jsdelivr\.net/npm|unpkg\.com)/(?:@[\w.-]+/)?[\w.-]+@)(${VERSION})(/)`, 'g'),
     all: true,
     optional: true,
   })),
 ];
+
+/** The name of the npm package, e.g. "@scope/name". Its only source is packages/core/package.json. */
+export function packageName(root = ROOT) {
+  return JSON.parse(readFileSync(join(root, 'packages/core/package.json'), 'utf8')).name;
+}
+
+const NAME = String.raw`((?:@[\w.-]+/)?[\w.-]+)`;
+const NAMED = [
+  ['address', new RegExp(String.raw`(?:cdn\.jsdelivr\.net/npm|unpkg\.com|npmjs\.com/package)/${NAME}`, 'g')],
+  ['command', new RegExp(String.raw`npm (?:install|i|view) ${NAME}`, 'g')],
+  ['import', new RegExp(String.raw`(?:from|import\()\s*['"]${NAME}['"]`, 'g')],
+];
+
+/**
+ * Places that name another npm package than packages/core/package.json does: CDN addresses,
+ * `npm install` commands and import statements in DOC_FILES, and the entry in the lock file.
+ * A name counts when its last part is the last part of the package name, so that the name
+ * without its scope, or with another scope, is found.
+ */
+export function packageNameProblems(root = ROOT) {
+  const name = packageName(root);
+  const last = name.split('/').pop();
+  const problems = [];
+  for (const file of DOC_FILES) {
+    const text = read(file, root);
+    if (text === undefined) continue;
+    for (const [kind, pattern] of NAMED) {
+      for (const match of text.matchAll(pattern)) {
+        if (match[1].split('/').pop() === last && match[1] !== name) {
+          problems.push(`${file}: the ${kind} "${match[0]}" names the package "${match[1]}", but the package is "${name}"`);
+        }
+      }
+    }
+  }
+  const lock = read('package-lock.json', root);
+  if (lock !== undefined) {
+    const entry = (JSON.parse(lock).packages || {})['packages/core'];
+    if (!entry) problems.push('package-lock.json has no entry for packages/core. Run "npm install".');
+    else if (entry.name !== name) problems.push(`package-lock.json names packages/core "${entry.name}", but the package is "${name}". Run "npm install".`);
+  }
+  return problems;
+}
 
 export function read(file, root = ROOT) {
   const path = join(root, file);
