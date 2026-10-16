@@ -1,5 +1,5 @@
 /*
- * Usage counts of AskAI Button. Written by hand; not a build artefact.
+ * Usage counts of Elephancube Ask AI Button. Written by hand; not a build artefact.
  *
  * Loaded only while "Count how often the button and each AI service are used"
  * is switched on. Tells the site itself, and nobody else, that the panel was

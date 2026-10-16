@@ -1,6 +1,6 @@
 node_modules/
 dist/
 dist-plugin/
-wordpress/askai-button/assets/askai-button.min.js
+wordpress/elephancube-ask-ai-button/assets/askai-button.min.js
 *.log
 .DS_Store

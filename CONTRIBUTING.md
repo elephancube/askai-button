@@ -28,7 +28,7 @@ npm run typecheck
 npm run build         # builds the script, checks its size, copies it into the plugin
 npm run test:php      # plugin tests; needs PHP on your PATH
 npm run i18n          # regenerates the plugin translation files
-npm run zip:plugin    # writes dist-plugin/askai-button-<version>.zip (run the build first)
+npm run zip:plugin    # writes dist-plugin/elephancube-ask-ai-button-<version>.zip (run the build first)
 npm run check:versions  # the version number is the same everywhere it is written
 ```
 
@@ -39,7 +39,7 @@ npm run check:versions  # the version number is the same everywhere it is writte
 - Never put text into the page with `innerHTML`. Text goes in through `textContent`, and the question goes into URLs through `encodeURIComponent`.
 - URL templates are configuration. Never assume a service's URL parameter works.
 - No runtime dependencies. The built script must stay under 15 KB gzip; `npm run build` fails if it does not.
-- `wordpress/askai-button/assets/askai-button.min.js` is a build artefact (it is git-ignored). Do not edit or commit it.
+- `wordpress/elephancube-ask-ai-button/assets/askai-button.min.js` is a build artefact (it is git-ignored). Do not edit or commit it.
 - PHP must be valid for PHP 7.4. Sanitize input and escape output.
 - CSS lives inside the Shadow DOM and uses logical properties. Do not give buttons or chips a fixed width.
 
@@ -54,11 +54,11 @@ Keep placeholders such as `{provider}`, `{question}` and `{site_url}` intact in 
 
 ### WordPress plugin translations
 
-The plugin's own screens are translated with gettext files in `wordpress/askai-button/languages/`. Run `npm run i18n` after changing translatable strings in the PHP sources or a `.po` file. It rewrites the `.pot` and `.po` files and compiles the `.mo` files, and exits with an error if a `.po` file is missing a translation, has an unused one, or has placeholders that differ from the original.
+The plugin's own screens are translated with gettext files in `wordpress/elephancube-ask-ai-button/languages/`. Run `npm run i18n` after changing translatable strings in the PHP sources or a `.po` file. It rewrites the `.pot` and `.po` files and compiles the `.mo` files, and exits with an error if a `.po` file is missing a translation, has an unused one, or has placeholders that differ from the original.
 
 ### Tests
 
-`npm test` runs the core tests in `packages/core/test/`. `npm run test:php` runs `wordpress/askai-button/tests/run.php`.
+`npm test` runs the core tests in `packages/core/test/`. `npm run test:php` runs `wordpress/elephancube-ask-ai-button/tests/run.php`.
 
 ## Commits and pull requests
 
@@ -106,14 +106,14 @@ Things to know:
 
 ## Licence of contributions
 
-By submitting a contribution you agree that it is licensed under the licence of the part of the project it changes: MIT for the core library and everything outside `wordpress/`, GPL-2.0-or-later for the WordPress plugin in `wordpress/askai-button/`.
+By submitting a contribution you agree that it is licensed under the licence of the part of the project it changes: MIT for the core library and everything outside `wordpress/`, GPL-2.0-or-later for the WordPress plugin in `wordpress/elephancube-ask-ai-button/`.
 
 ## 日本語の要約
 
 - サポートはベストエフォートです。返信が遅れることがあります。
 - 歓迎するもの: バグ報告、サービスのURL形式が変わったという報告（サービス名、気づいた日、ブラウザと端末、起きたことを書いてください）、翻訳、小さな修正。
 - 対象外: AIのAPI呼び出し、質問・ページ・訪問者に関する情報の保存や分析、サービスのロゴの同梱、ランタイム依存の追加、データを第三者へ送る機能（WordPress プラグインの「利用回数の記録」は、クリックの種類とサービスの id をサイト自身にだけ送り、月ごとの合計だけを保存します）。
-- フロントの挙動はすべて `packages/core` に置き、WordPressプラグインは設定を渡すだけにします。UI文言は `locales` の辞書だけに置き、キーは全言語で揃えます。`innerHTML` は使わず `textContent` を使います。URLテンプレートは設定値で、動作を前提にしません。配布JSは gzip 後 15 KB 未満（ビルドで検査します）。`wordpress/askai-button/assets/askai-button.min.js` はビルド成果物なので編集・コミットしません。PHP は 7.4 で動く書き方にし、入力はサニタイズ、出力はエスケープします。
+- フロントの挙動はすべて `packages/core` に置き、WordPressプラグインは設定を渡すだけにします。UI文言は `locales` の辞書だけに置き、キーは全言語で揃えます。`innerHTML` は使わず `textContent` を使います。URLテンプレートは設定値で、動作を前提にしません。配布JSは gzip 後 15 KB 未満（ビルドで検査します）。`wordpress/elephancube-ask-ai-button/assets/askai-button.min.js` はビルド成果物なので編集・コミットしません。PHP は 7.4 で動く書き方にし、入力はサニタイズ、出力はエスケープします。
 - 開発コマンド: `npm install`、`npm test`、`npm run typecheck`、`npm run build`、`npm run test:php`、`npm run i18n`、`npm run zip:plugin`、`npm run check:versions`。
 - リリース（メンテナー向け）: `CHANGELOG.md` の Unreleased を整え、`npm run bump -- <バージョン>` でバージョンを書き換えてコミットし、`v<バージョン>` のタグを push すると、GitHub Actions が npm への公開と GitHub リリースの作成を行います。手順の詳細は、上の「Releasing」を参照してください。
 - 貢献したコードのライセンスは、変更した部分のライセンスに従います（コアは MIT、プラグインは GPL-2.0-or-later）。

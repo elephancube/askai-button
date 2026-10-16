@@ -57,18 +57,18 @@ export const LOCATIONS = [
     pattern: new RegExp(String.raw`("packages/core": \{\s*"name": "[^"]+",\s*"version": ")(${VERSION})(")`),
   },
   {
-    file: 'wordpress/askai-button/askai-button.php',
+    file: 'wordpress/elephancube-ask-ai-button/elephancube-ask-ai-button.php',
     label: 'plugin header "Version:"',
     pattern: new RegExp(String.raw`(^[ \t]*\*[ \t]*Version:[ \t]*)(${VERSION})([ \t]*$)`, 'm'),
   },
   {
-    file: 'wordpress/askai-button/askai-button.php',
+    file: 'wordpress/elephancube-ask-ai-button/elephancube-ask-ai-button.php',
     label: 'ASKAI_BUTTON_VERSION constant',
     pattern: new RegExp(String.raw`(define\(\s*'ASKAI_BUTTON_VERSION',\s*')(${VERSION})(')`),
     optional: true,
   },
   {
-    file: 'wordpress/askai-button/readme.txt',
+    file: 'wordpress/elephancube-ask-ai-button/readme.txt',
     label: 'readme.txt "Stable tag:"',
     pattern: new RegExp(String.raw`(^Stable tag:[ \t]*)(${VERSION})([ \t]*$)`, 'm'),
   },

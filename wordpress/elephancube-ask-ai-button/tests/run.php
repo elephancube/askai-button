@@ -2,7 +2,7 @@
 /**
  * Plain PHP test runner. No WordPress, no Composer.
  *
- *     php wordpress/askai-button/tests/run.php
+ *     php wordpress/elephancube-ask-ai-button/tests/run.php
  *
  * Exits with a non-zero status if any check fails.
  *
@@ -2020,13 +2020,13 @@ askai_test(
 		askai_same( 'wpml', Askai_Button_Multilingual::api() );
 
 		$expected = array(
-			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'button_label', 'AIに質問' ),
-			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'panel_title', 'このサイトについて質問' ),
-			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'note', '{provider} が開きます' ),
-			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'preset_1', '料金は？' ),
-			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'preset_2', '営業時間は？' ),
-			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'preset_3', '場所は？' ),
-			array( 'action', 'wpml_register_single_string', 'AskAI Button', 'query_template', "{question}\n\n参照: {site_url}" ),
+			array( 'action', 'wpml_register_single_string', 'Elephancube Ask AI Button', 'button_label', 'AIに質問' ),
+			array( 'action', 'wpml_register_single_string', 'Elephancube Ask AI Button', 'panel_title', 'このサイトについて質問' ),
+			array( 'action', 'wpml_register_single_string', 'Elephancube Ask AI Button', 'note', '{provider} が開きます' ),
+			array( 'action', 'wpml_register_single_string', 'Elephancube Ask AI Button', 'preset_1', '料金は？' ),
+			array( 'action', 'wpml_register_single_string', 'Elephancube Ask AI Button', 'preset_2', '営業時間は？' ),
+			array( 'action', 'wpml_register_single_string', 'Elephancube Ask AI Button', 'preset_3', '場所は？' ),
+			array( 'action', 'wpml_register_single_string', 'Elephancube Ask AI Button', 'query_template', "{question}\n\n参照: {site_url}" ),
 		);
 		Askai_Button_Multilingual::on_option_updated( array(), askai_ml_settings() );
 		askai_same( $expected, $GLOBALS['askai_test_hooks']['calls'], 'registered when the option changes' );
@@ -2058,7 +2058,7 @@ askai_test(
 				'preset_3'       => '',
 				'query_template' => '<script>alert(1)</script>' . str_repeat( 'y', 5000 ),
 			);
-			return 'AskAI Button' === $context && isset( $map[ $name ] ) ? $map[ $name ] : $value;
+			return 'Elephancube Ask AI Button' === $context && isset( $map[ $name ] ) ? $map[ $name ] : $value;
 		};
 		$out = Askai_Button_Multilingual::translate( askai_ml_settings() );
 		askai_same( 'Ask AI', $out['labels']['button_label'] );
@@ -2066,7 +2066,7 @@ askai_test(
 		askai_same( array( '料金は？', 'When are you open?', '場所は？' ), $out['presets'], 'empty translation: original' );
 		askai_same( 'alert(1)' . str_repeat( 'y', 1992 ), $out['query_template'], 'hostile translation cleaned and capped' );
 		askai_same(
-			array( 'filter', 'wpml_translate_single_string', '料金は？', 'AskAI Button', 'preset_1' ),
+			array( 'filter', 'wpml_translate_single_string', '料金は？', 'Elephancube Ask AI Button', 'preset_1' ),
 			$GLOBALS['askai_test_hooks']['calls'][3],
 			'arguments of the filter: value, context, name'
 		);
@@ -2135,13 +2135,13 @@ askai_test(
 		Askai_Button_Multilingual::on_admin_init();
 		askai_same(
 			array(
-				array( 'button_label', 'AIに質問', 'AskAI Button', false ),
-				array( 'panel_title', 'このサイトについて質問', 'AskAI Button', false ),
-				array( 'note', '{provider} が開きます', 'AskAI Button', false ),
-				array( 'preset_1', '料金は？', 'AskAI Button', false ),
-				array( 'preset_2', '営業時間は？', 'AskAI Button', false ),
-				array( 'preset_3', '場所は？', 'AskAI Button', false ),
-				array( 'query_template', "{question}\n\n参照: {site_url}", 'AskAI Button', true ),
+				array( 'button_label', 'AIに質問', 'Elephancube Ask AI Button', false ),
+				array( 'panel_title', 'このサイトについて質問', 'Elephancube Ask AI Button', false ),
+				array( 'note', '{provider} が開きます', 'Elephancube Ask AI Button', false ),
+				array( 'preset_1', '料金は？', 'Elephancube Ask AI Button', false ),
+				array( 'preset_2', '営業時間は？', 'Elephancube Ask AI Button', false ),
+				array( 'preset_3', '場所は？', 'Elephancube Ask AI Button', false ),
+				array( 'query_template', "{question}\n\n参照: {site_url}", 'Elephancube Ask AI Button', true ),
 			),
 			$GLOBALS['askai_test_pll']['registered'],
 			'registered on every admin request; the template as multi-line'
@@ -2180,7 +2180,7 @@ askai_test(
 		askai_same(
 			array(
 				'name' => 'Polylang',
-				'url'  => 'https://example.com/wp-admin/admin.php?page=mlang_strings&group=AskAI%20Button',
+				'url'  => 'https://example.com/wp-admin/admin.php?page=mlang_strings&group=Elephancube%20Ask%20AI%20Button',
 			),
 			Askai_Button_Multilingual::admin_info()
 		);
@@ -2571,6 +2571,64 @@ askai_test(
 			$csv,
 			'numbers are plain digits; a heading that starts a formula is neutralised'
 		);
+	}
+);
+
+askai_test(
+	'counts: only names of exactly the plugin\'s own form are read, exported or deleted',
+	function () {
+		$own   = array(
+			'askai_count_2026-10_open',
+			'askai_count_2026-10_send_chatgpt',
+			'askai_count_1999-01_send_my-ai_2',
+			'askai_count_2026-12_send_' . str_repeat( 'a', 40 ),
+		);
+		$other = array(
+			'askai_count_something_else',
+			'askai_count_2026-10_open_extra',
+			'askai_count_2026-1_open',
+			'askai_count_2026-13_open',
+			'askai_count_2026-10_send_',
+			'askai_count_2026-10_send_' . str_repeat( 'a', 41 ),
+			'askai_count_2026-10_send_a.b',
+			"askai_count_2026-10_open\n",
+			'ASKAI_COUNT_2026-10_OPEN',
+			'askai_counter_2026-10_open',
+			'askai_count_total',
+			'askai_count_',
+			'myplugin_askai_count_2026-10_open',
+			'askai_countdown_2026-10_open',
+		);
+
+		askai_same( $own, Askai_Button_Counter::own_option_names( array_merge( $other, $own, $own ) ), 'own names kept, each once; lookalikes dropped' );
+		askai_same( array(), Askai_Button_Counter::own_option_names( $other ) );
+		askai_same( array(), Askai_Button_Counter::own_option_names( 'askai_count_2026-10_open' ), 'not a list' );
+		askai_same( array( 'askai_count_2026-10_open' ), Askai_Button_Counter::own_option_names( array( null, 5, array( 'x' ), 'askai_count_2026-10_open' ) ) );
+
+		foreach ( $own as $name ) {
+			askai_same( $name, call_user_func_array( array( 'Askai_Button_Counter', 'option_name' ), Askai_Button_Counter::parse_option_name( $name ) ), 'round trip ' . $name );
+		}
+
+		$rows = array();
+		foreach ( array_merge( $own, $other ) as $name ) {
+			$rows[] = array(
+				'option_name'  => $name,
+				'option_value' => '7',
+			);
+		}
+		$counts = Askai_Button_Counter::collect( $rows );
+		askai_same( array( '2026-10', '1999-01', '2026-12' ), array_keys( $counts ), 'the usage table and the CSV read only the own rows' );
+		askai_same( array( 'open' => 7, 'send_chatgpt' => 7 ), $counts['2026-10'] );
+	}
+);
+
+askai_test(
+	'counts: uninstall.php deletes with the same pattern as the class',
+	function () {
+		$source = file_get_contents( dirname( __DIR__ ) . '/uninstall.php' );
+		askai_true( false !== strpos( $source, "\$askai_pattern = '" . Askai_Button_Counter::OPTION_PATTERN . "';" ), 'the pattern is repeated exactly' );
+		askai_true( false !== strpos( $source, '1 === preg_match( $askai_pattern, $askai_name )' ), 'and applied before each delete_option()' );
+		askai_same( 1, substr_count( $source, 'delete_option( $askai_name )' ) );
 	}
 );
 

@@ -1,4 +1,4 @@
-=== AskAI Button ===
+=== Elephancube Ask AI Button ===
 Contributors: elephancube
 Tags: ai, chatgpt, claude, button, multilingual
 Requires at least: 6.4
@@ -45,19 +45,19 @@ Off by default. With "Count how often the button and each AI service are used" t
 
 The button is displayed in the language of the page. Japanese and English are built in; other languages fall back to English. The settings screen is in English and Japanese.
 
-With Polylang, or WPML with its String Translation add-on, the texts you typed yourself appear on the string translation screen of that plugin, in the group "AskAI Button". Neither plugin is required. Polylang has been checked on a live site; the WPML integration follows the hooks that WPML documents and has not yet been run on a WPML installation.
+With Polylang, or WPML with its String Translation add-on, the texts you typed yourself appear on the string translation screen of that plugin, in the group "Elephancube Ask AI Button". Neither plugin is required. Polylang has been checked on a live site; the WPML integration follows the hooks that WPML documents and has not yet been run on a WPML installation.
 
-The details, and the filters for developers (`askai_should_display`, `askai_presets`, `askai_providers`, `askai_query_template`, `askai_site_url`), are in the [documentation](https://elephancube.github.io/askai-button/en/wordpress/).
+The details, and the filters for developers (prefix `askai_`), are in the [documentation](https://elephancube.github.io/askai-button/en/wordpress/).
 
 = Source code =
 
-The file `assets/askai-button.min.js` is minified. It is built from the public TypeScript sources of the `askai-button` library, which are in one repository with this plugin: [github.com/elephancube/askai-button](https://github.com/elephancube/askai-button). The library is in the folder `packages/core`, this plugin in `wordpress/askai-button`.
+The file `assets/askai-button.min.js` is minified. It is built from the public TypeScript sources of the `askai-button` library, which are in one repository with this plugin: [github.com/elephancube/askai-button](https://github.com/elephancube/askai-button). The library is in the folder `packages/core`, this plugin in `wordpress/elephancube-ask-ai-button`.
 
-To build it you need Node.js with npm. In a copy of the repository, run `npm ci` and `npm run build`: this compiles the library with Vite into `packages/core/dist/askai-button.min.js` and copies it to `wordpress/askai-button/assets/`. `npm run zip:plugin` packs the plugin as distributed. Nothing else in the plugin is compiled or minified; `assets/counter.js` and `assets/admin.js` are written by hand.
+To build it you need Node.js with npm. In a copy of the repository, run `npm ci` and `npm run build`: this compiles the library with Vite into `packages/core/dist/askai-button.min.js` and copies it to `wordpress/elephancube-ask-ai-button/assets/`. `npm run zip:plugin` packs the plugin as distributed. Nothing else in the plugin is compiled or minified; `assets/counter.js` and `assets/admin.js` are written by hand.
 
 == Installation ==
 
-1. Upload the `askai-button` folder to `/wp-content/plugins/`, or upload the zip file under Plugins > Add New Plugin > Upload Plugin.
+1. Upload the `elephancube-ask-ai-button` folder to `/wp-content/plugins/`, or upload the zip file under Plugins > Add New Plugin > Upload Plugin.
 2. Activate the plugin on the Plugins screen.
 3. Optionally, adjust the button under Settings > Ask AI.
 

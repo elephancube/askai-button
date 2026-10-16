@@ -1,5 +1,5 @@
 /*
- * Settings screen and meta box of AskAI Button. Written by hand; not a build artefact.
+ * Settings screen and meta box of Elephancube Ask AI Button. Written by hand; not a build artefact.
  *
  * Nothing here decides how the button looks or behaves. The preview is the
  * bundled script itself, running in a frame; this file only turns the values

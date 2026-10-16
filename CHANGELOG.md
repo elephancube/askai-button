@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- WordPress plugin: renamed to Elephancube Ask AI Button (slug and text domain `elephancube-ask-ai-button`, folder `wordpress/elephancube-ask-ai-button`). The settings, post meta and usage counts keep their names, so an install of the 0.1.0 zip from GitHub keeps its settings; the new plugin does not run while the old copy is active. The settings screen is now at `options-general.php?page=elephancube-ask-ai-button` and the usage-count endpoint at `elephancube-ask-ai-button/v1/count`.
+
+### Fixed
+
+- WordPress plugin: uninstalling and "Reset counts" delete only options whose whole name has the plugin's own form (`askai_count_<YYYY-MM>_open` or `askai_count_<YYYY-MM>_send_<id>`), not every option that starts with `askai_count_`.
+
 ## [0.1.0] - 2026-10-12
 
 ### Added

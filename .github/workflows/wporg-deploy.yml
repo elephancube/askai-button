@@ -4,11 +4,11 @@ name: WordPress.org deploy
 #
 # THIS CANNOT RUN YET. It needs the plugin to have been approved by the WordPress.org plugin
 # review team: only then does the Subversion repository
-# https://plugins.svn.wordpress.org/askai-button/ exist. Until the two secrets below are set,
+# https://plugins.svn.wordpress.org/elephancube-ask-ai-button/ exist. Until the two secrets below are set,
 # the job stops after its first step and does nothing.
 #
 # What it does:
-#   1. builds the script and stages the plugin in dist-plugin/askai-button/ - exactly the files
+#   1. builds the script and stages the plugin in dist-plugin/elephancube-ask-ai-button/ - exactly the files
 #      of the release zip (scripts/zip-plugin.mjs --dir), so no tests and no development files;
 #   2. copies that folder to trunk/ and to tags/<version>/ of the Subversion repository;
 #   3. copies .wordpress-org/ (icon, banners, screenshots) to assets/ of the Subversion repository.
@@ -98,8 +98,8 @@ jobs:
         env:
           TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
         run: |
-          version="$(sed -n 's/^ \* Version: *\([0-9][0-9A-Za-z.-]*\) *$/\1/p' dist-plugin/askai-button/askai-button.php | head -n 1)"
-          stable="$(sed -n 's/^Stable tag: *\([0-9][0-9A-Za-z.-]*\) *$/\1/p' dist-plugin/askai-button/readme.txt | head -n 1)"
+          version="$(sed -n 's/^ \* Version: *\([0-9][0-9A-Za-z.-]*\) *$/\1/p' dist-plugin/elephancube-ask-ai-button/elephancube-ask-ai-button.php | head -n 1)"
+          stable="$(sed -n 's/^Stable tag: *\([0-9][0-9A-Za-z.-]*\) *$/\1/p' dist-plugin/elephancube-ask-ai-button/readme.txt | head -n 1)"
           if [ -z "$version" ] || [ "$version" != "$stable" ]; then
             echo "::error::Version of the plugin ($version) and stable tag of readme.txt ($stable) differ."
             exit 1
@@ -108,7 +108,7 @@ jobs:
             echo "::error::The tag $TAG does not belong to version $version of the plugin."
             exit 1
           fi
-          if [ -d dist-plugin/askai-button/tests ]; then
+          if [ -d dist-plugin/elephancube-ask-ai-button/tests ]; then
             echo "::error::The staged plugin contains tests/."
             exit 1
           fi
@@ -122,7 +122,7 @@ jobs:
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: askai-button
+          SLUG: elephancube-ask-ai-button
           VERSION: ${{ steps.meta.outputs.version }}
-          BUILD_DIR: dist-plugin/askai-button
+          BUILD_DIR: dist-plugin/elephancube-ask-ai-button
           ASSETS_DIR: .wordpress-org

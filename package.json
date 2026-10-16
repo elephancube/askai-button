@@ -14,7 +14,7 @@
     "serve:site": "node site/serve.mjs",
     "site": "npm run build && node site/serve.mjs",
     "test": "npm test -w packages/core",
-    "test:php": "php wordpress/askai-button/tests/run.php",
+    "test:php": "php wordpress/elephancube-ask-ai-button/tests/run.php",
     "typecheck": "npm run typecheck -w packages/core",
     "zip:plugin": "node scripts/zip-plugin.mjs"
   },

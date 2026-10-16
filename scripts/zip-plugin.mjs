@@ -1,9 +1,9 @@
 // Packs the WordPress plugin. No dependencies.
 //
-//   npm run build && node scripts/zip-plugin.mjs          -> dist-plugin/askai-button-<version>.zip
-//   npm run build && node scripts/zip-plugin.mjs --dir    -> dist-plugin/askai-button/ (the same files, not packed)
+//   npm run build && node scripts/zip-plugin.mjs          -> dist-plugin/elephancube-ask-ai-button-<version>.zip
+//   npm run build && node scripts/zip-plugin.mjs --dir    -> dist-plugin/elephancube-ask-ai-button/ (the same files, not packed)
 //
-// The archive has one top-level folder, askai-button/, with everything WordPress needs.
+// The archive has one top-level folder, elephancube-ask-ai-button/, with everything WordPress needs.
 // The tests and hidden files are left out. The built script must exist: run the build first.
 // The folder written by --dir holds exactly the files of the archive; it is what gets
 // committed to the WordPress.org plugin directory.
@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateRawSync } from 'node:zlib';
 
-const SLUG = 'askai-button';
+const SLUG = 'elephancube-ask-ai-button';
 const pluginDir = fileURLToPath(new URL(`../wordpress/${SLUG}/`, import.meta.url));
 const outDir = fileURLToPath(new URL('../dist-plugin/', import.meta.url));
 const EXCLUDED_DIRS = ['tests'];
@@ -24,6 +24,7 @@ const REQUIRED = [
   'assets/askai-button.min.js',
   'assets/counter.js',
   'includes/class-counter.php',
+  'includes/plugin.php',
   `languages/${SLUG}.pot`,
 ];
 

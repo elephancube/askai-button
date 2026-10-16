@@ -56,7 +56,7 @@ init({
 
 ## WordPress
 
-プラグインは [`wordpress/askai-button/`](wordpress/askai-button/) にあります。ボタンの表示と設定画面（設定 > AIに質問）を追加します。設定でオンにした場合に限り（標準はオフ）、ボタンと各AIサービスが使われた回数の月ごとの合計を、サイト自身のデータベースに保存します。質問の内容や訪問者に関する情報は保存しません。導入方法などは [`readme.txt`](wordpress/askai-button/readme.txt)（英語）と、ドキュメントサイトの [WordPress のページ](https://elephancube.github.io/askai-button/wordpress/)を参照してください。
+プラグインは [`wordpress/elephancube-ask-ai-button/`](wordpress/elephancube-ask-ai-button/) にあります。ボタンの表示と設定画面（設定 > AIに質問）を追加します。設定でオンにした場合に限り（標準はオフ）、ボタンと各AIサービスが使われた回数の月ごとの合計を、サイト自身のデータベースに保存します。質問の内容や訪問者に関する情報は保存しません。導入方法などは [`readme.txt`](wordpress/elephancube-ask-ai-button/readme.txt)（英語）と、ドキュメントサイトの [WordPress のページ](https://elephancube.github.io/askai-button/wordpress/)を参照してください。
 
 ## しないこと
 
@@ -74,7 +74,7 @@ init({
 ## リポジトリの構成
 
 - `packages/core/` - ライブラリ本体（TypeScript、ランタイム依存なし）。フロントの挙動はすべてここにあります。
-- `wordpress/askai-button/` - WordPressプラグイン。設定をライブラリに渡します。
+- `wordpress/elephancube-ask-ai-button/` - WordPressプラグイン。設定をライブラリに渡します。
 - `site/` - ドキュメントとデモのサイト。`site/content/` の Markdown を、`site/build.mjs` が `site/dist/` に出力します。
 - `examples/` - 素のHTMLの例（先にビルドが必要です）。
 - `scripts/` - ビルド補助スクリプト。
@@ -92,7 +92,7 @@ npm run site          # すべてビルドしてから、サイトを手元で�
 npm run serve:site    # ビルド済みのサイトを手元で配信
 npm run test:php      # プラグインのテスト（PHPが必要）
 npm run i18n          # プラグインの翻訳ファイルを再生成
-npm run zip:plugin    # dist-plugin/askai-button-<version>.zip を作成
+npm run zip:plugin    # dist-plugin/elephancube-ask-ai-button-<version>.zip を作成
 ```
 
 [CONTRIBUTING.md](CONTRIBUTING.md)（英語、末尾に日本語の要約あり）を参照してください。セキュリティ上の問題の報告は [SECURITY.md](SECURITY.md) を参照してください。
@@ -100,7 +100,7 @@ npm run zip:plugin    # dist-plugin/askai-button-<version>.zip を作成
 ## ライセンス
 
 - コアライブラリ（`wordpress/` の外のすべて）は MIT ライセンスです。[LICENSE](LICENSE) を参照してください。
-- `wordpress/askai-button/` の WordPress プラグインは GPL-2.0-or-later です。[LICENSE](wordpress/askai-button/LICENSE) を参照してください。
+- `wordpress/elephancube-ask-ai-button/` の WordPress プラグインは GPL-2.0-or-later です。[LICENSE](wordpress/elephancube-ask-ai-button/LICENSE) を参照してください。
 
 Copyright (c) 2026 Elephancube Inc.（株式会社エレファンキューブ）。無料のオープンソースで、有料版はありません。サポートはベストエフォートです。
 

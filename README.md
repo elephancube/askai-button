@@ -56,7 +56,7 @@ The button follows the page language (`lang` option, then `<html lang>`, then th
 
 ## WordPress
 
-The plugin is in [`wordpress/askai-button/`](wordpress/askai-button/). It adds the button and a settings screen (Settings > Ask AI). Optionally, and off by default, it keeps monthly totals of how often the button and each AI service are used, in the database of the site itself; the question and anything about the visitor are never stored. Installation and details: see its [`readme.txt`](wordpress/askai-button/readme.txt) and the [WordPress page](https://elephancube.github.io/askai-button/en/wordpress/) of the documentation site.
+The plugin is in [`wordpress/elephancube-ask-ai-button/`](wordpress/elephancube-ask-ai-button/). It adds the button and a settings screen (Settings > Ask AI). Optionally, and off by default, it keeps monthly totals of how often the button and each AI service are used, in the database of the site itself; the question and anything about the visitor are never stored. Installation and details: see its [`readme.txt`](wordpress/elephancube-ask-ai-button/readme.txt) and the [WordPress page](https://elephancube.github.io/askai-button/en/wordpress/) of the documentation site.
 
 ## What it does not do
 
@@ -74,7 +74,7 @@ The plugin is in [`wordpress/askai-button/`](wordpress/askai-button/). It adds t
 ## Repository layout
 
 - `packages/core/` - the library (TypeScript, no runtime dependencies). All front-end behaviour lives here.
-- `wordpress/askai-button/` - the WordPress plugin; it passes settings to the library.
+- `wordpress/elephancube-ask-ai-button/` - the WordPress plugin; it passes settings to the library.
 - `site/` - the documentation and demo site: Markdown pages in `site/content/`, built into `site/dist/` by `site/build.mjs`.
 - `examples/` - plain HTML examples (run the build first).
 - `scripts/` - build helpers.
@@ -92,7 +92,7 @@ npm run site          # builds everything, then serves the site locally
 npm run serve:site    # serves the site that is already built
 npm run test:php      # plugin tests, needs PHP
 npm run i18n          # regenerates plugin translation files
-npm run zip:plugin    # writes dist-plugin/askai-button-<version>.zip
+npm run zip:plugin    # writes dist-plugin/elephancube-ask-ai-button-<version>.zip
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). To report a security problem, see [SECURITY.md](SECURITY.md).
@@ -100,7 +100,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). To report a security problem, see [SECUR
 ## License
 
 - The core library (everything outside `wordpress/`) is MIT licensed; see [LICENSE](LICENSE).
-- The WordPress plugin in `wordpress/askai-button/` is GPL-2.0-or-later; see its [LICENSE](wordpress/askai-button/LICENSE).
+- The WordPress plugin in `wordpress/elephancube-ask-ai-button/` is GPL-2.0-or-later; see its [LICENSE](wordpress/elephancube-ask-ai-button/LICENSE).
 
 Copyright (c) 2026 Elephancube Inc. Free and open source; there is no paid version. Support is best effort.
 

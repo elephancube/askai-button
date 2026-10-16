@@ -2,8 +2,8 @@
 //
 //   node scripts/i18n.mjs
 //
-// 1. Collects the translatable strings from the PHP sources and writes languages/askai-button.pot.
-// 2. Rewrites every languages/askai-button-<locale>.po in the order of the template, keeping its translations.
+// 1. Collects the translatable strings from the PHP sources and writes languages/elephancube-ask-ai-button.pot.
+// 2. Rewrites every languages/elephancube-ask-ai-button-<locale>.po in the order of the template, keeping its translations.
 // 3. Compiles each .po into the .mo file WordPress loads.
 //
 // Exits with an error if a .po file lacks a translation, has one that is no longer used,
@@ -12,8 +12,8 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const DOMAIN = 'askai-button';
-const pluginDir = fileURLToPath(new URL('../wordpress/askai-button/', import.meta.url));
+const DOMAIN = 'elephancube-ask-ai-button';
+const pluginDir = fileURLToPath(new URL('../wordpress/elephancube-ask-ai-button/', import.meta.url));
 const langDir = join(pluginDir, 'languages');
 const FUNCTIONS = ['__', '_e', 'esc_html__', 'esc_html_e', 'esc_attr__', 'esc_attr_e'];
 
@@ -109,7 +109,7 @@ function parsePo(source) {
 
 function header(locale) {
   const lines = [
-    'Project-Id-Version: AskAI Button',
+    'Project-Id-Version: Elephancube Ask AI Button',
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=UTF-8',
     'Content-Transfer-Encoding: 8bit',

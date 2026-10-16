@@ -22,8 +22,16 @@ function askai_button_uninstall_site() {
 	delete_post_meta_by_key( '_askai_disabled' );
 	delete_post_meta_by_key( '_askai_presets' );
 
-	// The usage counts: one option per month and counter, named `askai_count_<YYYY-MM>_<counter>`.
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- The options API cannot list options by the start of their name. Each one is then removed with delete_option().
+	/*
+	 * The usage counts: one option per month and counter, named
+	 * `askai_count_<YYYY-MM>_open` or `askai_count_<YYYY-MM>_send_<id of an AI service>`.
+	 * The query only narrows the list by prefix; an option is deleted only if
+	 * its whole name has exactly that form, so options of other plugins that
+	 * happen to share the prefix stay. The pattern is the one of
+	 * Askai_Button_Counter::OPTION_PATTERN, which is not loaded here.
+	 */
+	$askai_pattern = '/^askai_count_([0-9]{4}-(?:0[1-9]|1[0-2]))_(open|send_[A-Za-z0-9_-]{1,40})$/D';
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- The options API cannot list options by the start of their name. Each matching one is then removed with delete_option().
 	$askai_names = $wpdb->get_col(
 		$wpdb->prepare(
 			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
@@ -31,7 +39,9 @@ function askai_button_uninstall_site() {
 		)
 	);
 	foreach ( is_array( $askai_names ) ? $askai_names : array() as $askai_name ) {
-		delete_option( $askai_name );
+		if ( is_string( $askai_name ) && 1 === preg_match( $askai_pattern, $askai_name ) ) {
+			delete_option( $askai_name );
+		}
 	}
 }
 

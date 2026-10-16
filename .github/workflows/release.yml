@@ -9,7 +9,7 @@ name: Release
 # The npm package has a scope, so its name (the "name" of packages/core/package.json) is not the
 # name of this repository. Nothing below spells the name out: it is read from that file, and the
 # packed file is renamed to npm-package.tgz so that no step depends on how npm names it. The other
-# files of a release keep their own names (askai-button.min.js, askai-button-<version>.zip, ...).
+# files of a release keep their own names (askai-button.min.js, elephancube-ask-ai-button-<version>.zip, ...).
 #
 # npm authentication: trusted publishing (OpenID Connect). No token is stored in this repository.
 # On npmjs.com, the package (its Settings page, "Trusted Publisher") needs these exact values:
@@ -153,7 +153,7 @@ jobs:
             exit 1
           fi
           cp packages/core/dist/askai-button.min.js packages/core/dist/askai-button.esm.js release/
-          cp "dist-plugin/askai-button-$VERSION.zip" release/
+          cp "dist-plugin/elephancube-ask-ai-button-$VERSION.zip" release/
           # The script attached to the release must be the one inside the npm package.
           tar -xzOf release/npm-package.tgz package/dist/askai-button.min.js | cmp - release/askai-button.min.js
           tar -xzOf release/npm-package.tgz package/dist/askai-button.esm.js | cmp - release/askai-button.esm.js

@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const source = fileURLToPath(new URL('../packages/core/dist/askai-button.min.js', import.meta.url));
-const target = fileURLToPath(new URL('../wordpress/askai-button/assets/askai-button.min.js', import.meta.url));
+const target = fileURLToPath(new URL('../wordpress/elephancube-ask-ai-button/assets/askai-button.min.js', import.meta.url));
 
 if (!existsSync(source)) {
   console.error(`copy-dist: ${source} does not exist. Build the core package first (npm run build).`);

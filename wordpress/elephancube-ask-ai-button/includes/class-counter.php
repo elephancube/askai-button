@@ -30,7 +30,7 @@ final class Askai_Button_Counter {
 	/**
 	 * Namespace and route of the REST endpoint.
 	 */
-	const REST_NAMESPACE = 'askai-button/v1';
+	const REST_NAMESPACE = 'elephancube-ask-ai-button/v1';
 	const REST_ROUTE     = '/count';
 
 	/**
@@ -42,6 +42,16 @@ final class Askai_Button_Counter {
 	 * Start of the option names: `askai_count_<YYYY-MM>_<counter>`.
 	 */
 	const OPTION_PREFIX = 'askai_count_';
+
+	/**
+	 * The complete form of the name of an option of this class. Only options
+	 * whose name matches it are ever read, exported or deleted; another
+	 * option that merely starts with the same prefix is left alone.
+	 *
+	 * uninstall.php, which cannot load this class, repeats it; a test checks
+	 * that the two are the same.
+	 */
+	const OPTION_PATTERN = '/^askai_count_([0-9]{4}-(?:0[1-9]|1[0-2]))_(open|send_[A-Za-z0-9_-]{1,40})$/D';
 
 	/**
 	 * Counter of the launcher button. The others are `send_<id of the AI service>`.
@@ -238,16 +248,16 @@ final class Askai_Button_Counter {
 	 */
 	public static function handle( $request ) {
 		if ( self::is_cross_site( $request->get_header( 'sec_fetch_site' ) ) ) {
-			return new WP_Error( 'askai_cross_site', __( 'Invalid request.', 'askai-button' ), array( 'status' => 403 ) );
+			return new WP_Error( 'askai_cross_site', __( 'Invalid request.', 'elephancube-ask-ai-button' ), array( 'status' => 403 ) );
 		}
 		if ( strlen( (string) $request->get_body() ) > self::MAX_BODY ) {
-			return new WP_Error( 'askai_too_large', __( 'Invalid request.', 'askai-button' ), array( 'status' => 413 ) );
+			return new WP_Error( 'askai_too_large', __( 'Invalid request.', 'elephancube-ask-ai-button' ), array( 'status' => 413 ) );
 		}
 
 		$allowed = Askai_Button_Frontend::provider_ids( Askai_Button_Frontend::filtered_providers( Askai_Button_Settings::get() ) );
 		$key     = self::counter_key( $request->get_param( 'event' ), $request->get_param( 'provider' ), $allowed );
 		if ( null === $key ) {
-			return new WP_Error( 'askai_invalid', __( 'Invalid request.', 'askai-button' ), array( 'status' => 400 ) );
+			return new WP_Error( 'askai_invalid', __( 'Invalid request.', 'elephancube-ask-ai-button' ), array( 'status' => 400 ) );
 		}
 
 		self::increment( self::current_month(), $key );
@@ -331,16 +341,50 @@ final class Askai_Button_Counter {
 	 * @return string[]|null Month and counter, or null if the name is not one of this class.
 	 */
 	public static function parse_option_name( $name ) {
-		$length = strlen( self::OPTION_PREFIX );
-		if ( ! is_string( $name ) || 0 !== strpos( $name, self::OPTION_PREFIX ) || '_' !== substr( $name, $length + 7, 1 ) ) {
+		if ( ! is_string( $name ) || 1 !== preg_match( self::OPTION_PATTERN, $name, $match ) ) {
 			return null;
 		}
-		$month = substr( $name, $length, 7 );
-		$key   = substr( $name, $length + 8 );
-		if ( ! self::is_month( $month ) || ! self::is_counter_key( $key ) ) {
-			return null;
+		return array( $match[1], $match[2] );
+	}
+
+	/**
+	 * The names in a list that are options of this class, each once.
+	 *
+	 * Pure: depends only on its argument.
+	 *
+	 * @param mixed $names Option names.
+	 * @return string[]
+	 */
+	public static function own_option_names( $names ) {
+		$out = array();
+		foreach ( is_array( $names ) ? $names : array() as $name ) {
+			if ( null !== self::parse_option_name( $name ) && ! in_array( $name, $out, true ) ) {
+				$out[] = $name;
+			}
 		}
-		return array( $month, $key );
+		return $out;
+	}
+
+	/**
+	 * Rows of the options table whose name starts with the prefix of this class.
+	 *
+	 * The prefix only narrows the query: every caller keeps just the rows
+	 * whose name matches OPTION_PATTERN.
+	 *
+	 * @return array[] Rows with `option_name` and `option_value`.
+	 */
+	private static function query_rows() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- The options API cannot list options by the start of their name. Used on the settings screen, for the download and for the reset only, and always from the database, so that the numbers are current.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$wpdb->esc_like( self::OPTION_PREFIX ) . '%'
+			),
+			ARRAY_A
+		);
+		return is_array( $rows ) ? $rows : array();
 	}
 
 	/**
@@ -383,18 +427,7 @@ final class Askai_Button_Counter {
 	 * @return array Month => counter => number.
 	 */
 	public static function read() {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- The options API cannot list options by the start of their name. Read on the settings screen and for the download only, and always from the database, so that the numbers are current.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
-				$wpdb->esc_like( self::OPTION_PREFIX ) . '%'
-			),
-			ARRAY_A
-		);
-
-		return self::collect( is_array( $rows ) ? $rows : array() );
+		return self::collect( self::query_rows() );
 	}
 
 	/**
@@ -434,19 +467,10 @@ final class Askai_Button_Counter {
 	 * @return int Number of rows removed.
 	 */
 	public static function reset() {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- The options API cannot list options by the start of their name. Each one is then removed with delete_option().
-		$names = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
-				$wpdb->esc_like( self::OPTION_PREFIX ) . '%'
-			)
-		);
-
+		$names   = self::own_option_names( wp_list_pluck( self::query_rows(), 'option_name' ) );
 		$removed = 0;
-		foreach ( is_array( $names ) ? $names : array() as $name ) {
-			if ( null !== self::parse_option_name( $name ) && delete_option( $name ) ) {
+		foreach ( $names as $name ) {
+			if ( delete_option( $name ) ) {
 				++$removed;
 			}
 		}

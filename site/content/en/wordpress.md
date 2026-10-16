@@ -1,10 +1,10 @@
 ---
 title: WordPress plugin
-description: About "AskAI Button", the WordPress plugin of askai-button - its requirements, the settings screen, the per-post settings, where the button is never shown, the filters for developers, how it behaves with Polylang and WPML, and what is removed on uninstall.
+description: About "Elephancube Ask AI Button", the WordPress plugin of askai-button - its requirements, the settings screen, the per-post settings, where the button is never shown, the filters for developers, how it behaves with Polylang and WPML, and what is removed on uninstall.
 nav: WordPress
 ---
 
-The plugin "AskAI Button" adds the "Ask AI" button to a WordPress site and lets you set it up in the admin area. The button itself is the JavaScript library (askai-button); the plugin only passes the settings to it.
+The plugin "Elephancube Ask AI Button" adds the "Ask AI" button to a WordPress site and lets you set it up in the admin area. The button itself is the JavaScript library (askai-button); the plugin only passes the settings to it.
 
 For the installation steps, see "[Install]({{page:install}}#wordpress)".
 
@@ -94,7 +94,7 @@ A service added with the `askai_providers` filter is counted under its id and ge
 
 **What is stored.** One whole number per month and counter, in the database of your own site (the options table; the rows are not loaded on ordinary page views). Nothing else is stored: not the question, not the address of the page, no IP address, no browser information, no cookie, no account, and no time finer than the month.
 
-**How a click is reported.** While counting is on, pages that show the button also load a small script, `counter.js`. For each of these clicks it sends one request to your own site (`POST /wp-json/askai-button/v1/count`) that names the kind of click (`open` or `send`) and, for a question, the id of the service. Nothing is sent to anyone else, and the JavaScript library of the button still makes no request by itself. The request does not delay the opening of the AI service, and a request that fails is dropped.
+**How a click is reported.** While counting is on, pages that show the button also load a small script, `counter.js`. For each of these clicks it sends one request to your own site (`POST /wp-json/elephancube-ask-ai-button/v1/count`) that names the kind of click (`open` or `send`) and, for a question, the id of the service. Nothing is sent to anyone else, and the JavaScript library of the button still makes no request by itself. The request does not delay the opening of the AI service, and a request that fails is dropped.
 
 **The numbers are approximate.** Bots and repeated clicks are counted. Clicks of logged-in users who can edit posts (authors, editors, administrators) are not counted: the script is not loaded for them. A page cache does not get in the way, because the page contains nothing that belongs to a single visitor. The endpoint accepts only the two kinds of click and the services the button offers at the moment, and refuses requests that a browser marks as coming from another site.
 
@@ -210,7 +210,7 @@ With the built-in wording, nothing needs to be set up: every page shows the butt
 Texts that you type yourself (the five texts, the preset questions of the site and the query template) can be translated when Polylang, or WPML with its String Translation add-on, is active.
 
 1. Type the texts in the main language of the site under "Settings > Ask AI" and save.
-2. Open the string translation screen of the multilingual plugin (in Polylang: "Languages > Translations") and look for the group "AskAI Button". The strings are named `button_label`, `panel_title`, `panel_subtitle`, `placeholder`, `note`, `preset_1` to `preset_6` and `query_template`.
+2. Open the string translation screen of the multilingual plugin (in Polylang: "Languages > Translations") and look for the group "Elephancube Ask AI Button". The strings are named `button_label`, `panel_title`, `panel_subtitle`, `placeholder`, `note`, `preset_1` to `preset_6` and `query_template`.
 3. Enter the translations. A page shows the translation for its language, and the text you typed where there is none.
 
 Good to know:

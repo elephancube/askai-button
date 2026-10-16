@@ -39,7 +39,7 @@ final class Askai_Button_Multilingual {
 	/**
 	 * Group (Polylang) or context (WPML) under which the strings are listed.
 	 */
-	const GROUP = 'AskAI Button';
+	const GROUP = 'Elephancube Ask AI Button';
 
 	/**
 	 * Hooks into WordPress.

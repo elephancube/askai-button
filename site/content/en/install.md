@@ -179,18 +179,30 @@ The options are listed in the "[Reference]({{page:reference}}#options)".
 
 The plugin needs WordPress 6.4 or later and PHP 7.4 or later.
 
-1. Download the zip file of the plugin (`askai-button-{{version}}.zip`) from the [releases page on GitHub]({{repo}}/releases).
+1. Download the plugin zip attached to the [latest release on GitHub]({{repo}}/releases/latest).
 2. In the WordPress admin area, open "Plugins > Add New Plugin > Upload Plugin", choose the zip file and install it.
-3. Activate "AskAI Button" in the list of plugins.
+3. Activate "Elephancube Ask AI Button" in the list of plugins. (The zip of release 0.1.0 still carries the earlier name, "AskAI Button", in the folder `askai-button`.)
 4. Open the site: the button is at the bottom right of the public pages. The settings are under "Settings > Ask AI".
 
 Activating the plugin is enough to start with the default settings. The settings screen is described on the "[WordPress]({{page:wordpress}})" page.
 
 The plugin is distributed on GitHub. It is not listed in the WordPress.org plugin directory.
 
+### Moving from the 0.1.0 zip {#wordpress-earlier-copy}
+
+Release 0.1.0 installed the plugin in the folder `askai-button`. Later versions use the folder `elephancube-ask-ai-button`, so WordPress treats them as two different plugins. Both use the same settings, the same values per post and the same usage counts. Only one of them can run at a time: the new one stays inactive and says so while the old one is active.
+
+Deleting the old copy on the Plugins screen runs its clean-up, which removes those settings and counts, also for the new copy. To keep them:
+
+1. Deactivate the old copy ("AskAI Button") on the Plugins screen. Do not delete it there.
+2. Install and activate the new plugin. It finds the settings as they were.
+3. Remove the folder `wp-content/plugins/askai-button` with FTP or the file manager of your host.
+
+If you do not need the old settings, you can instead delete the old copy on the Plugins screen first and then install the new plugin and set it up again.
+
 ### Building the zip from source
 
-Clone the repository and run the following commands. They write `dist-plugin/askai-button-{{version}}.zip`. Node.js is required.
+Clone the repository and run the following commands. They write `dist-plugin/elephancube-ask-ai-button-{{version}}.zip`. Node.js is required.
 
 ```sh
 git clone {{repo}}.git

@@ -1,16 +1,7 @@
 <?php
 /**
- * Plugin Name:       AskAI Button
- * Plugin URI:        https://github.com/elephancube/askai-button
- * Description:       Adds a floating "Ask AI" button. The visitor's question and your site URL are handed to ChatGPT, Claude or Google AI Mode in a new tab. No API key, no external requests by the plugin, and the question is never stored.
- * Version:           0.1.0
- * Requires at least: 6.4
- * Requires PHP:      7.4
- * Author:            Elephancube Inc.
- * License:           GPL-2.0-or-later
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       askai-button
- * Domain Path:       /languages
+ * Loads the plugin. Included by the main file once it is clear that no other
+ * copy of the plugin is loaded.
  *
  * @package Askai_Button
  */
@@ -18,11 +9,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-define( 'ASKAI_BUTTON_VERSION', '0.1.0' );
-define( 'ASKAI_BUTTON_FILE', __FILE__ );
-define( 'ASKAI_BUTTON_DIR', plugin_dir_path( __FILE__ ) );
-define( 'ASKAI_BUTTON_URL', plugin_dir_url( __FILE__ ) );
 
 require_once ASKAI_BUTTON_DIR . 'includes/class-settings.php';
 require_once ASKAI_BUTTON_DIR . 'includes/class-multilingual.php';
@@ -62,6 +48,6 @@ function askai_button_load_textdomain() {
 		return;
 	}
 	// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Reached on WordPress 6.4 to 6.7 only, which do not load the bundled translations by themselves.
-	load_plugin_textdomain( 'askai-button', false, dirname( plugin_basename( ASKAI_BUTTON_FILE ) ) . '/languages' );
+	load_plugin_textdomain( 'elephancube-ask-ai-button', false, dirname( plugin_basename( ASKAI_BUTTON_FILE ) ) . '/languages' );
 }
 add_action( 'init', 'askai_button_load_textdomain' );
