@@ -38,6 +38,10 @@ on:
         description: Tag of the version to deploy, e.g. v1.2.3
         type: string
         required: true
+      ref:
+        description: Commit or branch to build, when it is not the tag itself (the version must still match the tag)
+        type: string
+        required: false
       dry_run:
         description: Dry run - prepare and compare, commit nothing
         type: boolean
@@ -74,7 +78,7 @@ jobs:
       - uses: actions/checkout@v7
         if: steps.guard.outputs.ready == 'true'
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && (inputs.ref || inputs.tag) || github.event.release.tag_name }}
           persist-credentials: false
 
       - uses: actions/setup-node@v7
