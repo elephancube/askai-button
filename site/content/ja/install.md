@@ -179,14 +179,15 @@ export function AskAI() {
 
 必要な環境は、WordPress 6.4 以上、PHP 7.4 以上です。
 
-1. [GitHub の最新のリリース]({{repo}}/releases/latest)に添付されているプラグインの zip ファイルをダウンロードします。
-2. WordPress の管理画面で「プラグイン > 新規プラグインを追加 > プラグインのアップロード」を開き、zip ファイルを選んでインストールします。
-3. 「プラグイン」の一覧で「Elephancube Ask AI Button」を有効化します（リリース 0.1.0 の zip では、以前の名前「AskAI Button」、フォルダー `askai-button` のままです）。
-4. サイトを開くと、公開ページの右下にボタンが表示されます。設定は「設定 > AIに質問」で変更できます。
+プラグインは、WordPress.org のプラグインディレクトリに「[Elephancube Ask AI Button](https://wordpress.org/plugins/elephancube-ask-ai-button/)」として登録されています。
+
+1. WordPress の管理画面で「プラグイン > 新規プラグインを追加」を開き、「Elephancube Ask AI Button」で検索します。
+2. 「今すぐインストール」を押し、続けて「有効化」を押します。
+3. サイトを開くと、公開ページの右下にボタンが表示されます。設定は「設定 > AIに質問」で変更できます。
 
 有効化するだけで、標準の設定のまま使い始められます。設定画面の内容は「[WordPress]({{page:wordpress}})」のページで説明しています。
 
-プラグインは GitHub で配布しています。WordPress.org のプラグインディレクトリには登録していません。
+同じプラグインを、[GitHub のリリース]({{repo}}/releases/latest)にも zip で添付しています。zip をアップロードして入れる場合（「プラグイン > 新規プラグインを追加 > プラグインのアップロード」）に使ってください。リリース 0.1.0 にはプラグインの zip が2つあります。`elephancube-ask-ai-button-0.1.0.zip` を使ってください。`askai-button-0.1.0.zip` は、同じバージョンを以前の名前「AskAI Button」で作ったものです。
 
 ### 0.1.0 の zip から移行する {#wordpress-earlier-copy}
 

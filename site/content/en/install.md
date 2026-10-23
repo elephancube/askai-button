@@ -179,14 +179,15 @@ The options are listed in the "[Reference]({{page:reference}}#options)".
 
 The plugin needs WordPress 6.4 or later and PHP 7.4 or later.
 
-1. Download the plugin zip attached to the [latest release on GitHub]({{repo}}/releases/latest).
-2. In the WordPress admin area, open "Plugins > Add New Plugin > Upload Plugin", choose the zip file and install it.
-3. Activate "Elephancube Ask AI Button" in the list of plugins. (The zip of release 0.1.0 still carries the earlier name, "AskAI Button", in the folder `askai-button`.)
-4. Open the site: the button is at the bottom right of the public pages. The settings are under "Settings > Ask AI".
+The plugin is listed in the WordPress.org plugin directory as [Elephancube Ask AI Button](https://wordpress.org/plugins/elephancube-ask-ai-button/).
+
+1. In the WordPress admin area, open "Plugins > Add New Plugin" and search for "Elephancube Ask AI Button".
+2. Click "Install Now", then "Activate".
+3. Open the site: the button is at the bottom right of the public pages. The settings are under "Settings > Ask AI".
 
 Activating the plugin is enough to start with the default settings. The settings screen is described on the "[WordPress]({{page:wordpress}})" page.
 
-The plugin is distributed on GitHub. It is not listed in the WordPress.org plugin directory.
+The same plugin is also attached as a zip to the [releases on GitHub]({{repo}}/releases/latest), for sites that install plugins by upload ("Plugins > Add New Plugin > Upload Plugin"). Release 0.1.0 has two plugin zips: use `elephancube-ask-ai-button-0.1.0.zip`; `askai-button-0.1.0.zip` is the same version under the earlier name, "AskAI Button".
 
 ### Moving from the 0.1.0 zip {#wordpress-earlier-copy}
 
