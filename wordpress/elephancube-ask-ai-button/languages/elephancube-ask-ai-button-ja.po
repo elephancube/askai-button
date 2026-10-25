@@ -12,16 +12,16 @@ msgstr ""
 
 #: elephancube-ask-ai-button.php:35
 msgid "Elephancube Ask AI Button is not running: an earlier copy of this plugin, in the folder askai-button, is active. Deactivate that copy on the Plugins screen. Do not delete it there: deleting it also deletes the settings and usage counts that this plugin uses."
-msgstr "Elephancube Ask AI Button は動作していません。このプラグインの以前のコピー（フォルダー askai-button）が有効になっています。「プラグイン」の画面で、そのコピーを無効化してください。そこで削除はしないでください。削除すると、このプラグインが使う設定と利用回数も削除されます。"
+msgstr "Elephancube Ask AI Button は動作していません。このプラグインの以前のコピー (フォルダー askai-button) が有効になっています。「プラグイン」の画面で、そのコピーを無効化してください。そこで削除はしないでください。削除すると、このプラグインが使う設定と利用回数も削除されます。"
 
 #. Description of the plugin
 #: elephancube-ask-ai-button.php
 msgid "Adds a floating \"Ask AI\" button. The visitor's question and your site URL are handed to ChatGPT, Claude or Google AI Mode in a new tab. No API key, no external requests by the plugin, and the question is never stored."
-msgstr "「AIに質問」ボタンを画面の隅に表示します。訪問者の質問とサイトのURLを、ChatGPT・Claude・Google AIモードに別タブで渡します。APIキーは不要で、プラグインが外部と通信することはなく、質問は保存しません。"
+msgstr "「AI に質問」ボタンを画面の隅に表示します。訪問者の質問とサイトの URL を、ChatGPT、Claude、Google AI モードのいずれかに別タブで渡します。API キーは不要で、プラグインが外部と通信することはなく、質問は保存しません。"
 
 #: includes/class-admin.php:88 includes/class-admin.php:89 includes/class-admin.php:1002 includes/class-admin.php:1193
 msgid "Ask AI"
-msgstr "AIに質問"
+msgstr "AI に質問"
 
 #: includes/class-admin.php:113
 msgid "An earlier copy of Elephancube Ask AI Button is still installed, in the folder askai-button. It uses the same settings and usage counts. Deleting it on this screen also deletes them. To keep them, remove the folder wp-content/plugins/askai-button with FTP or the file manager of your host instead."
@@ -69,7 +69,7 @@ msgstr "ボタンのプレビュー"
 #. translators: %s: name of the setting, such as "Launcher colour".
 #: includes/class-admin.php:177
 msgid "No URL: the question is empty or too long."
-msgstr "URLなし（質問が空か、長すぎます）"
+msgstr "URL なし: 質問が空か、長すぎます。"
 
 #: includes/class-admin.php:228
 msgid "Settings saved, but some values were not accepted as typed:"
@@ -77,7 +77,7 @@ msgstr "設定を保存しましたが、入力どおりに保存できなかっ
 
 #: includes/class-admin.php:451
 msgid "Google AI Mode"
-msgstr "Google AIモード"
+msgstr "Google AI モード"
 
 #: includes/class-admin.php:462
 msgid "Button label"
@@ -117,7 +117,7 @@ msgstr "%s: #1a73e8 のような色の指定ではなかったため、標準の
 #. translators: 1: name of the setting, 2: largest number of characters.
 #: includes/class-admin.php:486
 msgid "%1$s: HTML tags and control characters are not allowed, and the text can have up to %2$d characters. It was saved as plain text."
-msgstr "%1$s: HTMLタグと制御文字は使えません。文字数は%2$d文字までです。プレーンテキストとして保存しました。"
+msgstr "%1$s: HTML タグと制御文字は使えません。文字数は%2$d文字までです。プレーンテキストとして保存しました。"
 
 #: includes/class-admin.php:491 includes/class-admin.php:660
 msgid "Distance from the edges"
@@ -125,7 +125,7 @@ msgstr "画面端からの余白"
 
 #: includes/class-admin.php:493 includes/class-admin.php:667
 msgid "Stacking order (z-index)"
-msgstr "重なり順（z-index）"
+msgstr "重なり順 (z-index)"
 
 #: includes/class-admin.php:495 includes/class-admin.php:955
 msgid "Maximum question length"
@@ -164,7 +164,7 @@ msgstr "質問: 保存できるのは%d件までです。超えた分は保存�
 #. translators: %s: name of the AI service. Do not translate https:// and {query}.
 #: includes/class-admin.php:519
 msgid "URL template of %s: not accepted. It must start with https:// and contain {query}. The built-in URL is used."
-msgstr "%s のURLテンプレート: 保存できませんでした。https:// で始まり、{query} を含む必要があります。標準のURLを使います。"
+msgstr "%s の URL テンプレート: 保存できませんでした。https:// で始まり、{query} を含む必要があります。標準の URL を使います。"
 
 #. translators: %s: name of the AI service.
 #: includes/class-admin.php:523
@@ -179,7 +179,7 @@ msgstr "%s への質問の渡し方"
 #. translators: %s: name of a post type.
 #: includes/class-admin.php:612
 msgid "%s (not registered at the moment)"
-msgstr "%s（現在は登録されていません）"
+msgstr "%s (現在は登録されていません)"
 
 #: includes/class-admin.php:616
 msgid "Display"
@@ -223,15 +223,15 @@ msgstr "#1a73e8 のように指定します。空欄にすると標準の色を�
 
 #: includes/class-admin.php:682
 msgid "Site URL passed to the AI"
-msgstr "AIに渡すサイトのURL"
+msgstr "AI に渡すサイトの URL"
 
 #: includes/class-admin.php:687
 msgid "On multilingual sites, pass the front page of the language being viewed"
-msgstr "多言語サイトでは、表示中の言語のトップページのURLを渡す"
+msgstr "多言語サイトでは、表示中の言語のトップページの URL を渡す"
 
 #: includes/class-admin.php:689
 msgid "Unticked, the top URL of the site (the front page of the default language) is passed on every page, whatever its language. Ticked, each page passes the front page of its own language: an English page passes, for example, https://example.com/en/. The preview on this screen always shows the top URL of the site."
-msgstr "チェックを外すと、どの言語のページでも、サイトのトップのURL（既定の言語のトップページ）を渡します。チェックを入れると、各ページがその言語のトップページのURLを渡します。たとえば英語のページは https://example.com/en/ を渡します。この画面のプレビューには、常にサイトのトップのURLが表示されます。"
+msgstr "チェックを外すと、どの言語のページでも、サイトのトップの URL (既定の言語のトップページ) を渡します。チェックを入れると、各ページがその言語のトップページの URL を渡します。たとえば英語のページは https://example.com/en/ を渡します。この画面のプレビューには、常にサイトのトップの URL を表示します。"
 
 #: includes/class-admin.php:728
 msgid "Texts"
@@ -243,12 +243,12 @@ msgstr "空欄にすると標準の文言を使います。標準の文言は、
 
 #: includes/class-admin.php:738
 msgid "Shown under the list of AI services. {provider} is replaced by the name of the selected service."
-msgstr "AIサービスの一覧の下に表示します。{provider} は、選択中のサービス名に置き換わります。"
+msgstr "AI サービスの一覧の下に表示します。{provider} は、選択中のサービス名に置き換わります。"
 
 #. translators: 1: name of a multilingual plugin, such as Polylang, 2: name of the group of strings.
 #: includes/class-admin.php:761
 msgid "Type these texts in the main language of the site. After saving, the ones you filled in can be translated into the other languages on the string translation screen of %1$s, in the group \"%2$s\"."
-msgstr "ここにはサイトの主言語で入力してください。保存すると、入力した文言を %1$s の文字列翻訳画面（グループ「%2$s」）でほかの言語に翻訳できます。"
+msgstr "ここにはサイトの主言語で入力してください。保存すると、入力した文言を %1$s の文字列翻訳画面 (グループ「%2$s」) でほかの言語に翻訳できます。"
 
 #: includes/class-admin.php:764
 msgid "Open the string translations"
@@ -273,7 +273,7 @@ msgstr "質問欄に入力する"
 
 #: includes/class-admin.php:807
 msgid "Open the AI service at once"
-msgstr "すぐにAIサービスを開く"
+msgstr "すぐに AI サービスを開く"
 
 #. translators: %d: number of the question.
 #: includes/class-admin.php:847
@@ -301,15 +301,15 @@ msgstr "質問を追加"
 
 #: includes/class-admin.php:875
 msgid "AI services"
-msgstr "AIサービス"
+msgstr "AI サービス"
 
 #: includes/class-admin.php:876
 msgid "The services are offered in the order shown here. If the service selected by default is switched off, the first one in the list is selected. With every service switched off, the button is not shown."
-msgstr "AIサービスは、ここに並んでいる順に表示します。最初に選択しておくサービスが無効の場合は、一覧の先頭のサービスを選択します。すべてのサービスを無効にすると、ボタンは表示されません。"
+msgstr "AI サービスは、ここに並んでいる順に表示します。最初に選択しておくサービスが無効の場合は、一覧の先頭のサービスを選択します。すべてのサービスを無効にすると、ボタンを表示しません。"
 
 #: includes/class-admin.php:877
 msgid "URL templates: the URL formats used to hand over a question are not documented by the services and can change at any time. A template must start with https:// and contain {query}, which is replaced by the text handed to the service. Leave the field empty to use the built-in URL."
-msgstr "URLテンプレートについて: 質問を渡すためのURLの形式は、各サービスが公式に公開しているものではなく、予告なく変わることがあります。テンプレートは https:// で始まり、サービスに渡す文面に置き換わる {query} を含む必要があります。空欄にすると標準のURLを使います。"
+msgstr "URL テンプレートについて: 質問を渡すための URL の形式は、各サービスが公式に公開しているものではなく、予告なく変わることがあります。テンプレートは https:// で始まり、サービスに渡す文面に置き換わる {query} を含む必要があります。空欄にすると標準の URL を使います。"
 
 #. translators: %s: name of the AI service.
 #: includes/class-admin.php:891
@@ -331,7 +331,7 @@ msgstr "このサービスを表示する"
 
 #: includes/class-admin.php:911
 msgid "URL template"
-msgstr "URLテンプレート"
+msgstr "URL テンプレート"
 
 #: includes/class-admin.php:915
 msgid "How the question is handed over"
@@ -339,7 +339,7 @@ msgstr "質問の渡し方"
 
 #: includes/class-admin.php:917
 msgid "In the URL"
-msgstr "URLに含めて渡す"
+msgstr "URL に含めて渡す"
 
 #: includes/class-admin.php:918
 msgid "Copied to the clipboard, then the service is opened"
@@ -359,7 +359,7 @@ msgstr "クエリ"
 
 #: includes/class-admin.php:949
 msgid "The text handed to the AI service. Leave empty to use the built-in template, which follows the language of the page. Variables:"
-msgstr "AIサービスに渡す文面です。空欄にすると標準のテンプレートを使います。標準のテンプレートは、ページの言語に合わせて切り替わります。使える変数:"
+msgstr "AI サービスに渡す文面です。空欄にすると標準のテンプレートを使います。標準のテンプレートは、ページの言語に合わせて切り替わります。使える変数:"
 
 #: includes/class-admin.php:958
 msgid "characters"
@@ -375,11 +375,11 @@ msgstr "記録"
 
 #: includes/class-admin.php:981
 msgid "Count how often the button and each AI service are used"
-msgstr "ボタンと各AIサービスが押された回数を記録する"
+msgstr "ボタンと各 AI サービスの利用回数を記録する"
 
 #: includes/class-admin.php:983
 msgid "Only monthly totals are stored, in the database of this site: how often the button opened the panel, and how often a question was sent to each AI service. Nothing is sent anywhere else. The question, the page, and anything about the visitor (IP address, browser, cookies, account) are never stored. The numbers are approximate: bots and repeated clicks are counted, and clicks of logged-in users who can edit posts are not."
-msgstr "保存するのは月ごとの合計だけで、保存先はこのサイトのデータベースです。ボタンでパネルが開かれた回数と、各AIサービスへ質問が送られた回数を数えます。ほかの場所へは何も送りません。質問の内容、ページ、訪問者に関する情報（IPアドレス、ブラウザ、Cookie、アカウント）は保存しません。回数はおおよその値です。ボットや繰り返しのクリックも数えます。投稿を編集できるログイン中のユーザーのクリックは数えません。"
+msgstr "保存するのは月ごとの合計だけで、保存先はこのサイトのデータベースです。ボタンでパネルを開いた回数と、各 AI サービスへ質問を送った回数を数えます。ほかの場所へは何も送りません。質問の内容、ページ、訪問者に関する情報 (IP アドレス、ブラウザー、Cookie、アカウント) は一切保存しません。回数はおおよその値です。ボットや繰り返しのクリックも数えます。投稿を編集できるログイン中のユーザーのクリックは数えません。"
 
 #: includes/class-admin.php:1020
 msgid "Usage"
@@ -387,7 +387,7 @@ msgstr "利用回数"
 
 #: includes/class-admin.php:1022
 msgid "Nothing is counted at the moment. To start, tick \"Count how often the button and each AI service are used\" under \"Usage counts\" and save."
-msgstr "現在、回数は記録していません。記録を始めるには、「利用回数の記録」の「ボタンと各AIサービスが押された回数を記録する」にチェックを入れて保存してください。"
+msgstr "現在、回数は記録していません。記録を始めるには、「利用回数の記録」の「ボタンと各 AI サービスの利用回数を記録する」にチェックを入れて保存してください。"
 
 #: includes/class-admin.php:1025
 msgid "Counting is switched off at the moment. The counts below are kept."
@@ -395,7 +395,7 @@ msgstr "現在、回数の記録はオフです。これまでの回数は下の
 
 #: includes/class-admin.php:1027
 msgid "Monthly totals: how often the button opened the panel, and how often a question was sent to each AI service. The numbers are approximate."
-msgstr "月ごとの合計です。ボタンでパネルが開かれた回数と、各AIサービスへ質問が送られた回数を表示します。回数はおおよその値です。"
+msgstr "月ごとの合計です。ボタンでパネルを開いた回数と、各 AI サービスへ質問を送った回数を表示します。回数はおおよその値です。"
 
 #: includes/class-admin.php:1030
 msgid "Usage by month"
@@ -411,7 +411,7 @@ msgstr "合計"
 
 #: includes/class-admin.php:1061
 msgid "Download CSV"
-msgstr "CSVをダウンロード"
+msgstr "CSV をダウンロード"
 
 #: includes/class-admin.php:1068
 msgid "Delete all counts of every month. This cannot be undone."
@@ -451,15 +451,15 @@ msgstr "サンプルの質問"
 
 #: includes/class-admin.php:1168
 msgid "What services do you offer?"
-msgstr "どのようなサービスがありますか？"
+msgstr "どのようなサービスがありますか ?"
 
 #: includes/class-admin.php:1170
 msgid "URL that would be opened"
-msgstr "開かれるURL"
+msgstr "開かれる URL"
 
 #: includes/class-admin.php:1172
 msgid "The URL is the one of the send button in the preview, for the service selected there. That button is real: pressing it opens the service in a new tab. Texts are cleaned when the settings are saved, so a saved text can differ slightly from the preview."
-msgstr "プレビューの送信ボタンに設定されているURLを、そこで選択中のサービスについて表示しています。送信ボタンは実際に動作し、押すとサービスが別タブで開きます。文言は保存時に整形されるため、保存後の文言がプレビューとわずかに異なる場合があります。"
+msgstr "プレビューの送信ボタンに設定されている URL を、そこで選択中のサービスについて表示しています。送信ボタンは実際に動作し、押すとサービスが別タブで開きます。保存時に文言を整形するため、保存後の文言がプレビューとわずかに異なる場合があります。"
 
 #: includes/class-admin.php:1219
 msgid "Do not show the button on this page"
